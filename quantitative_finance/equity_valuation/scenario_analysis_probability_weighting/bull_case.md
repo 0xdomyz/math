@@ -1,0 +1,3 @@
+# Bull Case
+
+Status: stub.

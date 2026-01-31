@@ -1,0 +1,3 @@
+# Asset Impairment
+
+Status: stub.

@@ -1,0 +1,3 @@
+# Tax Rate
+
+Status: stub.

@@ -1,0 +1,3 @@
+# Dividend Yield
+
+Status: stub.

@@ -1,0 +1,3 @@
+# Precedent Transactions
+
+Status: stub.

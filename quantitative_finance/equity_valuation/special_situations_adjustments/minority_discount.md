@@ -1,0 +1,3 @@
+# Minority Discount
+
+Status: stub.
