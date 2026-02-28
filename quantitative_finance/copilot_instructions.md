@@ -1,80 +1,61 @@
-# Copilot Instructions: Stochastic Process Topics Expansion
+# Copilot Instructions: Make study notes
 
 ## Task
-From the topics guide in the same folder, generate **category folders** and **topic subfolders** that mirror the Ito example structure.
+Make structured notes folder.
 
 ## Inputs
-- Topics guide file: `00_stochastic_process_topics_guide.md`
-- Ito example pattern: `advanced_topics/ito_calculus/ito_calculus.md` and `ito_calculus.py`
+- Topics name and short description.
 
-## Output Location
-Create the instruction-driven outputs under:
-`quantitative_finance/stochastic_process/`
+## Output Format
+- Folder of markdown and python files per topic.
+- Example pattern: `credit_risk_modelling/scorecard_models/scorecard_models.md` and `scorecard_models.py`
 
-## Folder Rules
-1. **Category folder** per guide section (e.g., "I. Stochastic Process Fundamentals").
-2. **Topic folder** per topic row in the section table.
-3. **Folder slug** rules:
-   - lowercase
-   - replace `&` with `and`
-   - remove punctuation
-   - replace spaces with `_`
-   - collapse multiple `_`
+### Markdown Template
 
-**Examples:**
-- "Stochastic Process Fundamentals" → `stochastic_process_fundamentals`
-- "Poisson & Renewal Processes" → `poisson_and_renewal_processes`
-- "Ito Calculus" → `ito_calculus`
-
-## File Rules (per topic folder)
-Create two files with the same slug:
-- `<topic_slug>.md`
-- `<topic_slug>.py`
-
-### Markdown Template (match Ito example style)
 Include these sections **in order**:
+
 1. **Title** (`# Topic Name`)
+
 2. **Concept Skeleton**
-   - Definition
-   - Purpose
-   - Prerequisites
-3. **Comparative Framing** (table with 2–4 rows)
+   - **Definition** (1-2 sentences, technically precise but accessible; clear value proposition)
+   - **Purpose** (2-3 practical use cases; explain why this matters in quantitative finance)
+   - **Prerequisites** (required knowledge, dependencies, related topics to cross-reference)
+
+3. **Comparative Framing** (comparative table with 3–5 rows)
+   - Compare against 3–5 similar methods or alternative approaches
+   - Use concrete metrics and characteristics (e.g., "O(n²)", "high interpretability", "real-time processing")
+   - Include 4-6 columns: Method, Complexity, Interpretability, Speed, Accuracy, Use Case
+   - Ground comparisons in actual performance or trade-offs
+
 4. **Examples + Counterexamples**
-   - Simple example
-   - Failure case
-   - Edge case
-5. **Layer Breakdown** (ASCII tree)
-6. **Mini-Project** (short runnable code block if meaningful)
-7. **Challenge Round** (3 common pitfalls)
-8. **Key References** (use the Source column link from guide, plus 1–2 credible extras)
-9. **Status** line: `---` then `**Status:** ... | **Complements:** ...`
+   - **Simple Example**: Clear walkthrough with actual numbers; show inputs, outputs, and key insights
+   - **Realistic Failure Case**: When and why the method breaks; document assumptions violated
+   - **Edge Case**: Boundary conditions, extreme parameter values, or data corner cases
+   - **Technical Counterexample**: Address a common misconception or typical implementation mistake
 
-### Python File Rules
-- Title comment: `# Auto-generated from markdown code blocks`
-- Extract **only** fenced Python code blocks from the markdown.
-- Prefix each block with `# Block N`.
-- If no code blocks exist, create a file with:
-  - the title comment
-  - `# No executable examples.`
+5. **Layer Breakdown** (detailed ASCII tree with 15–30 nodes)
+   - Show hierarchical structure, architectural layers, and interconnections
+   - Include key formulas using KaTeX-style math (e.g., $PD = 1/(1+e^{-z})$)
+   - Span mathematical foundations, implementation steps, validation components, and data requirements
+   - Make dependencies and data flow explicit
 
-## Content Rules
-- Keep explanations concise and technical.
-- Use KaTeX-style math where relevant.
-- Do not introduce new topics not in the guide.
-- Ensure references are accurate and relevant.
-- Keep each topic self-contained.
+6. **Challenge Round** (3–5 common pitfalls)
+   - Real-world obstacles and failure modes
+   - Typical implementation mistakes and when to avoid them
+   - Boundary conditions where the method doesn't apply or degrades
+   - Edge cases tied to actual datasets or workflows
 
-## Mapping Requirement
-Use the guide’s table rows as the **source of truth** for topic names.
-Do not skip topics even if the File column says `N/A`.
+7. **Key References** (5–8 authoritative sources)
+   - Prioritize academic papers, industry standards, and textbooks
+   - Include titles and brief relevance notes (1–2 sentences explaining why)
+   - Verify accuracy and currency; note publication dates where relevant
+   - Cross-reference related topics in other markdown files
 
-## Example Path (Ito)
-`advanced_topics/ito_calculus/ito_calculus.md`
-`advanced_topics/ito_calculus/ito_calculus.py`
+**Content Rules (Applied Throughout)**: Target 2000–3000 words per markdown file. Be technically precise but accessible. Use concrete, realistic examples with actual numbers. Support all claims with concrete examples, metrics, or citations. Use KaTeX math notation. Avoid introducing topics outside the study guide. Keep each topic self-contained but explicitly cross-reference related topics. Ensure references are accurate and verifiable.
 
-## Completion Criteria
-All topics in the guide have:
-- a category folder
-- a topic folder
-- a markdown file in the template above
-- a python file containing code blocks (or a placeholder)
+### Python Template
+
+1. vscode interactive Python file.
+2. End to End Mini-project with generated or public data. 
+3. Have clear sections with markdown cells explaining each step of the process.
+4. Include data generation, model implementation, evaluation, and visualization, where applicable.
