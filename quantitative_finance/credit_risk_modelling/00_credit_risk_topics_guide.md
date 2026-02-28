@@ -18,11 +18,11 @@
 ## II. Credit Risk Modelling Approaches
 | Topic | Description | Source |
 |-------|-------------|--------|
-| **Scorecard Models** | Logistic regression for default prediction | [Moody's Analytics](https://www.moodysanalytics.com/risk-perspectives-magazine/managing-credit-risk/scorecard-models) |
+| **Scorecard Models** | Logistic regression for default prediction | [Moody's Credit Risk](https://www.moodys.com/web/en/us/capabilities/credit-risk.html) |
 | **Structural Models** | Default as firm value falls below threshold (Merton model) | [Wikipedia](https://en.wikipedia.org/wiki/Merton_model) |
 | **Reduced-Form Models** | Default as random process (intensity-based) | [Wikipedia](https://en.wikipedia.org/wiki/Reduced_form_model) |
 | **Transition Matrices** | Credit rating migration probabilities | [BIS](https://www.bis.org/publ/bcbs_wp16.pdf) |
-| **Machine Learning Models** | Tree-based, SVM, neural networks for credit scoring | [Nature ML Credit Risk](https://www.nature.com/articles/s41599-019-0308-7) |
+| **Machine Learning Models** | Tree-based, SVM, neural networks for credit scoring | [arXiv: ML Credit Risk](https://arxiv.org/abs/1809.08690) |
 
 ---
 
@@ -53,7 +53,7 @@
 |--------|-----|----------|
 | **BIS Basel Framework** | https://www.bis.org/basel_framework/ | Regulatory standards, definitions, methodologies |
 | **Investopedia Credit Risk** | https://www.investopedia.com/terms/c/creditrisk.asp | General concepts, examples |
-| **Moody's Analytics** | https://www.moodysanalytics.com | Industry practice, scorecard models |
+| **Moody's Credit Risk** | https://www.moodys.com/web/en/us/capabilities/credit-risk.html | Credit risk modeling, scorecards, analytics |
 | **Wikipedia Credit Risk** | https://en.wikipedia.org/wiki/Credit_risk | Overview, model types |
 
 ---

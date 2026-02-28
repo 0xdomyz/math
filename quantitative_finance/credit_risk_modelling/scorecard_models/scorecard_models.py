@@ -120,7 +120,9 @@ test_data = pd.DataFrame({"score": score_test, "default": y_test.values})
 test_data["bucket"] = pd.cut(test_data["score"], bins=score_bins, labels=bin_labels)
 
 calibration = (
-    test_data.groupby("bucket").agg({"default": ["count", "sum", "mean"]}).round(3)
+    test_data.groupby("bucket", observed=False)
+    .agg({"default": ["count", "sum", "mean"]})
+    .round(3)
 )
 calibration.columns = ["Count", "Defaults", "Actual_Default_Rate"]
 calibration["Bucket_PD"] = calibration["Defaults"] / calibration["Count"]
