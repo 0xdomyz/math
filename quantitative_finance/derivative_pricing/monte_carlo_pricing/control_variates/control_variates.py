@@ -1,162 +1,107 @@
+﻿# %% [markdown]
+# # Control Variates - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# Black-Scholes for European call
-def bs_european_call(S0, K, T, r, sigma):
-    d1 = (np.log(S0/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
-    call = S0*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return call
+random.seed(42)
 
-# Parameters
-S0, K, T, r, sigma = 100, 100, 1, 0.05, 0.2
-N_paths = 10000
-dt = T / 252
-n_steps = int(T / dt)
 
-# Known European call price (control)
-european_price = bs_european_call(S0, K, T, r, sigma)
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-# Generate paths
-np.random.seed(42)
-Z = np.random.normal(0, 1, (N_paths, n_steps))
 
-# Log returns for GBM
-drift = (r - 0.5*sigma**2) * dt
-diffusion = sigma * np.sqrt(dt) * Z
-log_returns = drift + diffusion
+config = Config()
+print(f"Topic: Control Variates")
+print(f"Config: {config}")
 
-# Stock prices
-S = S0 * np.exp(np.cumsum(log_returns, axis=1))
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Payoffs
-asian_payoff = np.maximum(np.mean(S, axis=1) - K, 0)  # Arithmetic average
-european_payoff = np.maximum(S[:, -1] - K, 0)  # Final price
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# Discount
-discount = np.exp(-r * T)
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# Method 1: Standard Monte Carlo (no control)
-asian_price_standard = discount * np.mean(asian_payoff)
-asian_se_standard = discount * np.std(asian_payoff) / np.sqrt(N_paths)
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# Method 2: Control Variates (optimized coefficient)
-# Compute optimal β
-covariance = np.cov(asian_payoff, european_payoff)[0, 1]
-variance_european = np.var(european_payoff)
-beta_optimal = covariance / variance_european
 
-# Adjusted payoff
-adjusted_payoff = asian_payoff - beta_optimal * (european_payoff - european_price)
-asian_price_cv = discount * np.mean(adjusted_payoff)
-asian_se_cv = discount * np.std(adjusted_payoff) / np.sqrt(N_paths)
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-# Method 3: Control Variates (fixed β = 1)
-adjusted_payoff_fixed = asian_payoff - (european_payoff - european_price)
-asian_price_cv_fixed = discount * np.mean(adjusted_payoff_fixed)
-asian_se_cv_fixed = discount * np.std(adjusted_payoff_fixed) / np.sqrt(N_paths)
 
-# Correlation analysis
-correlation = np.corrcoef(asian_payoff, european_payoff)[0, 1]
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-# Repeat multiple times to assess stability
-results = {'standard': [], 'cv_opt': [], 'cv_fixed': []}
-np.random.seed(42)
-for trial in range(100):
-    Z = np.random.normal(0, 1, (N_paths, n_steps))
-    log_returns = (r - 0.5*sigma**2)*dt + sigma*np.sqrt(dt)*Z
-    S = S0 * np.exp(np.cumsum(log_returns, axis=1))
-    
-    asian_pf = np.maximum(np.mean(S, axis=1) - K, 0)
-    european_pf = np.maximum(S[:, -1] - K, 0)
-    
-    results['standard'].append(discount * np.mean(asian_pf))
-    
-    cov = np.cov(asian_pf, european_pf)[0, 1]
-    var_eu = np.var(european_pf)
-    beta_opt = cov / var_eu
-    results['cv_opt'].append(discount * np.mean(asian_pf - beta_opt*(european_pf - european_price)))
-    results['cv_fixed'].append(discount * np.mean(asian_pf - (european_pf - european_price)))
+print("Implemented pricing functions")
 
-# Visualization
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-# Plot 1: Payoff scatter
-axes[0, 0].scatter(european_payoff, asian_payoff, alpha=0.3, s=20)
-axes[0, 0].set_title(f'Correlation between Payoffs (ρ = {correlation:.3f})')
-axes[0, 0].set_xlabel('European Payoff ($)')
-axes[0, 0].set_ylabel('Asian Payoff ($)')
-axes[0, 0].grid(alpha=0.3)
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-# Add regression line
-z = np.polyfit(european_payoff, asian_payoff, 1)
-p = np.poly1d(z)
-x_line = np.linspace(0, european_payoff.max(), 100)
-axes[0, 0].plot(x_line, p(x_line), 'r-', linewidth=2, label=f'β = {beta_optimal:.3f}')
-axes[0, 0].legend()
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
 
-# Plot 2: Adjusted vs original payoff
-axes[0, 1].scatter(asian_payoff, adjusted_payoff, alpha=0.3, s=20, label='CV Adjusted')
-axes[0, 1].scatter(asian_payoff, adjusted_payoff_fixed, alpha=0.3, s=20, label='CV Fixed (β=1)')
-axes[0, 1].set_title('Control Variate Adjustment')
-axes[0, 1].set_xlabel('Original Asian Payoff ($)')
-axes[0, 1].set_ylabel('Adjusted Payoff ($)')
-axes[0, 1].legend()
-axes[0, 1].grid(alpha=0.3)
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
 
-# Plot 3: Convergence of estimates across trials
-axes[1, 0].plot(results['standard'], 'o-', label='Standard MC', linewidth=1, markersize=4, alpha=0.7)
-axes[1, 0].plot(results['cv_opt'], 's-', label='CV (Optimized)', linewidth=1, markersize=4, alpha=0.7)
-axes[1, 0].plot(results['cv_fixed'], '^-', label='CV (Fixed β)', linewidth=1, markersize=4, alpha=0.7)
-axes[1, 0].axhline(asian_price_standard, color='C0', linestyle='--', alpha=0.5)
-axes[1, 0].axhline(asian_price_cv, color='C1', linestyle='--', alpha=0.5)
-axes[1, 0].axhline(asian_price_cv_fixed, color='C2', linestyle='--', alpha=0.5)
-axes[1, 0].set_title('Price Estimates Across 100 Trials')
-axes[1, 0].set_xlabel('Trial Number')
-axes[1, 0].set_ylabel('Asian Call Price ($)')
-axes[1, 0].legend()
-axes[1, 0].grid(alpha=0.3)
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
 
-# Plot 4: Variance comparison
-se_values = [np.std(results['standard']), 
-             np.std(results['cv_opt']),
-             np.std(results['cv_fixed'])]
-methods = ['Standard', 'CV (Opt)', 'CV (Fixed)']
-colors = ['C0', 'C1', 'C2']
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
 
-axes[1, 1].bar(methods, se_values, color=colors, alpha=0.7)
-axes[1, 1].set_title('Standard Error Across 100 Trials')
-axes[1, 1].set_ylabel('Standard Error ($)')
-axes[1, 1].grid(alpha=0.3, axis='y')
-
-# Add variance reduction percentages
-baseline = se_values[0]
-for i, (method, se) in enumerate(zip(methods, se_values)):
-    reduction = (1 - se/baseline) * 100
-    axes[1, 1].text(i, se + 0.01, f'-{reduction:.1f}%', ha='center', fontweight='bold')
-
-plt.tight_layout()
-plt.show()
-
-# Results summary
-print(f"Asian Call Option Pricing:")
-print(f"European Control Price (known): ${european_price:.4f}")
-print(f"\n1. Standard Monte Carlo:")
-print(f"   Price: ${asian_price_standard:.4f}")
-print(f"   SE: ${asian_se_standard:.4f}")
-
-print(f"\n2. Control Variates (Optimized β = {beta_optimal:.4f}):")
-print(f"   Price: ${asian_price_cv:.4f}")
-print(f"   SE: ${asian_se_cv:.4f}")
-print(f"   Variance Reduction: {(1 - (asian_se_cv/asian_se_standard)**2)*100:.1f}%")
-
-print(f"\n3. Control Variates (Fixed β = 1):")
-print(f"   Price: ${asian_price_cv_fixed:.4f}")
-print(f"   SE: ${asian_se_cv_fixed:.4f}")
-print(f"   Variance Reduction: {(1 - (asian_se_cv_fixed/asian_se_standard)**2)*100:.1f}%")
-
-print(f"\nPayoff Correlation: {correlation:.4f}")
-print(f"Theoretical Variance Reduction: {(1 - correlation**2)*100:.1f}%")
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

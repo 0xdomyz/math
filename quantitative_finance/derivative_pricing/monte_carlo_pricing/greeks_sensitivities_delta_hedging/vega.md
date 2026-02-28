@@ -1,12 +1,11 @@
-# Vega
+﻿# Vega
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** The first derivative of option price with respect to volatility (ν = ∂C/∂σ), measuring price sensitivity to changes in asset price volatility and representing exposure to volatility risk.  
 **Purpose:** Quantify volatility exposure, manage volatility trading strategies, calibrate hedging to vol changes, profit from volatility mispricings (implied vs realized), assess portfolio sensitivity to market regime changes  
 **Prerequisites:** Implied volatility, volatility smile, option pricing, stochastic volatility, vol surface dynamics
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Long Option (Call/Put) | Short Option | Volatility Seller (Short Vega) | Volatility Buyer (Long Vega) |
 |--------|------------------------|--------------|--------------------------------|------------------------------|
 | **Vega** | ν > 0 (positive) | ν < 0 (negative) | ν < 0 | ν > 0 |
@@ -17,8 +16,7 @@
 | **Time to Expiry Effect** | Vega increases with T | Vega increases with T | Longer dated = higher risk | Longer dated = more expensive |
 | **Trading Motivation** | Bet on vol > implied | Bet on vol < implied | Collect vol premium | Speculate vol spike |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Long Call Vega**  
 Long call: K=100, T=1yr, current σ=20%, vega ≈ $0.20. If vol increases to 25% (+5%): call value rises ~$0.20×5 = $1. Conversely, if vol drops to 15% (-5%): call value drops ~$1. Same holds for long put (vega > 0 for both). Key insight: vol rise helps option buyers regardless of direction (both call & put).
 
@@ -28,8 +26,7 @@ Sell straddle (short vega ≈ -$1 per 1% vol): collect premium in calm markets. 
 **Edge Case: Deep OTM Options**  
 Deep OTM call (S=50, K=100): vega very low (option nearly worthless regardless of vol). Deep ITM call (S=200, K=100): vega also very low (option is like stock; vol doesn't matter much). Vega peaks ATM (highest uncertainty). Example: ATM call vega ≈ $0.20, while 20% OTM vega ≈ $0.02 (10× smaller). Implication: volatility trading concentrated in ATM strikes.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Vega Framework:
 ├─ Definition & Interpretation:
@@ -112,8 +109,7 @@ Vega Framework:
 
 **Interaction:** Vega highest ATM and longer-dated; delta-hedged portfolio isolates vega risk; vega P&L depends on IV vs realized vol.
 
-## 5. Mini-Project
-
+## Challenge Round
 Analyze vega exposure; simulate volatility trading P&L; study vol surface impact:
 
 ```python
@@ -358,8 +354,7 @@ print("\nPlot saved: vega_analysis.png")
 - **P&L Scenarios:** Theta gain overcomes gamma loss only if realized vol < implied vol
 - **IV Dynamics:** Vol surface changes (IV up) cause vega losses independent of stock moves
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Both calls and puts have positive vega. How can a trader profit from decreasing volatility?**  
 A: A trader profits from decreasing volatility by selling options (short vega). Short call + short put (short straddle) = short vega ≈ -$0.40. If vol drops 5%, short straddle gains = -(-$0.40) × 5 = +$2 per share. Conversely, buying options (long vega) profits from increasing volatility. Strategy: if trader believes market vol will be lower than implied vol premium suggests, sell vol; buy vol if believing spike coming.
 
@@ -378,8 +373,7 @@ A: Short straddle vega ≈ -$0.40 × 2 contracts = -$0.80 per 1% vol. IV drops -
 **Q6: Why do volatility traders use implied volatility surfaces rather than a single vol number for pricing?**  
 A: Real markets exhibit volatility smile/skew: different strikes have different implied vols. Using single σ across all strikes violates no-arbitrage (can extract arbitrage by comparing OTM put IV to ATM IV). Full surface: σ(K, T) preserves arbitrage-free pricing. Portfolio vega becomes matrix (strike × tenor) rather than scalar. Risk management: monitor vega by strike bucket and tenor. Trading: exploit mispricings along curve (sell expensive skew, buy cheap skew). Advanced models (local vol, Heston) fit surface and generate consistent Greeks across strikes.
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Vega (Finance)](https://en.wikipedia.org/wiki/Vega_(finance)) — Definition, volatility sensitivity
 - [Wikipedia: Implied Volatility](https://en.wikipedia.org/wiki/Implied_volatility) — Inverse BS, market expectations
 - [Wikipedia: Volatility Smile](https://en.wikipedia.org/wiki/Volatility_smile) — Surface structure, skew patterns

@@ -1,4 +1,4 @@
-# Basel II Framework
+﻿# Basel II Framework
 
 ## 1. Concept Skeleton
 **Definition:** International regulatory framework establishing minimum capital standards for banks; introduces three pillars (minimum capital requirements, supervisory review, market discipline) with risk-sensitive approach  
@@ -20,16 +20,16 @@
 ## 3. Examples + Counterexamples
 
 **Simple Capital Calc (Basel II Standardized):**  
-Bank holds $100M AAA corporate bond. Basel I: 8% × $100M = $8M capital required. Basel II Standardized: Risk weight = 20% (vs 20% Basel I), so 8% × 20% × $100M = $1.6M capital. More risk-sensitive.
+Bank holds $100M AAA corporate bond. Basel I: 8% Ã— $100M = $8M capital required. Basel II Standardized: Risk weight = 20% (vs 20% Basel I), so 8% Ã— 20% Ã— $100M = $1.6M capital. More risk-sensitive.
 
 **High-Grade vs Low-Grade:**  
-$100M portfolio: 50% AAA (RW=20%) + 50% BBB (RW=100%). Basel I: Flat 8% × $100M = $8M. Basel II Standardized: [0.5 × 20% + 0.5 × 100%] × 8% × $100M = $4.8M. Still simpler than IRB.
+$100M portfolio: 50% AAA (RW=20%) + 50% BBB (RW=100%). Basel I: Flat 8% Ã— $100M = $8M. Basel II Standardized: [0.5 Ã— 20% + 0.5 Ã— 100%] Ã— 8% Ã— $100M = $4.8M. Still simpler than IRB.
 
 **Internal Ratings-Based (IRB):**  
-Bank's proprietary model: PD=2%, LGD=40%, EAD=$50M. Basel II IRB: Calculate risk weight via formula using PD/LGD → say RW=80%. Capital = 8% × 80% × $50M = $3.2M. Bank's own risk estimates replace regulatory assumptions.
+Bank's proprietary model: PD=2%, LGD=40%, EAD=$50M. Basel II IRB: Calculate risk weight via formula using PD/LGD â†’ say RW=80%. Capital = 8% Ã— 80% Ã— $50M = $3.2M. Bank's own risk estimates replace regulatory assumptions.
 
 **Problem: Pro-Cyclicality:**  
-Boom time: Credit spreads tight, PD estimates low. IRB capital requirements low → banks lend more → boom amplified. Bust time: Spreads widen, PD spikes. Capital required spikes → forced deleveraging → bust amplified. Basel II's risk-sensitivity created feedback loop.
+Boom time: Credit spreads tight, PD estimates low. IRB capital requirements low â†’ banks lend more â†’ boom amplified. Bust time: Spreads widen, PD spikes. Capital required spikes â†’ forced deleveraging â†’ bust amplified. Basel II's risk-sensitivity created feedback loop.
 
 **Mortgage Portfolio:**  
 Prime mortgages: 35% LTV, RW=35%. Capital = 1.6%. Alt-A mortgages: 85% LTV, RW=100%. Capital = 4%. Seemed risk-appropriate pre-2008. But correlated collapse: Alt-A + Prime both defaulted when housing fell. Diversification within portfolio failed.
@@ -41,290 +41,173 @@ Before: Capital only for credit/market risk. Basel II: Added charge for operatio
 ```
 Basel II Framework Architecture:
 
-├─ Three Pillars:
-│  ├─ Pillar I: Minimum Capital Requirements
-│  │   ├─ Credit Risk:
-│  │   │   ├─ Standardized Approach: Regulatory risk weights
-│  │   │   ├─ Foundation IRB: Bank provides PD, regulator sets LGD/EAD
-│  │   │   └─ Advanced IRB: Bank provides all (PD/LGD/EAD)
-│  │   ├─ Market Risk:
-│  │   │   ├─ Standard method: Fixed percentages by asset class
-│  │   │   └─ Internal Models: Bank's VaR calculation
-│  │   └─ Operational Risk:
-│  │       ├─ Basic Indicator: 15% of gross income
-│  │       ├─ Standardized: 12-18% of gross income by business line
-│  │       └─ Advanced Measurement (AMA): Bank's loss data model
-│  ├─ Pillar II: Supervisory Review
-│  │   ├─ Bank's Internal Capital Adequacy Assessment Process (ICAAP)
-│  │   ├─ Regulator evaluates adequacy beyond Pillar I minimum
-│  │   ├─ Stress testing, concentration risk, interest rate risk
-│  │   └─ Pillar II Guidance (P2G) may require higher capital
-│  └─ Pillar III: Market Discipline
-│      ├─ Public disclosure of capital position
-│      ├─ Risk exposures (credit, market, operational)
-│      ├─ Risk management framework
-│      └─ Transparency enables market monitoring
-├─ Credit Risk: Standardized Approach
-│  ├─ Risk Weights by Asset Class & Counterparty Rating:
-│  │   ├─ Sovereign risk: 0% (AAA-AA), 20% (A-BBB), 50% (BB-B), 100% (Below B)
-│  │   ├─ Bank/Corporate: 20% (AAA-AA), 50% (A), 100% (BBB-unrated), 150% (Below BBB)
-│  │   ├─ Retail mortgages: 35%
-│  │   ├─ Retail other: 75%
-│  │   └─ Unrated: 100% default (conservative)
-│  ├─ Adjustment Factors:
-│  │   ├─ Collateral: Reduce RW if secured
-│  │   ├─ Guarantees: Risk weight of guarantor
-│  │   ├─ Credit derivatives: Protection provider's RW
-│  │   └─ Supervisory haircuts: Volatility-based adjustments
-│  └─ Formula:
-│      Capital (Pillar I) = 8% × Σ(RW_i × Exposure_i)
-├─ Credit Risk: Internal Ratings-Based (IRB)
-│  ├─ Foundation IRB:
-│  │   ├─ Bank estimates: PD only
-│  │   ├─ Regulator provides: LGD, EAD, correlation parameters
-│  │   ├─ Risk Weight Formula: Function of PD, LGD, EAD, correlation
-│  │   └─ Capital = 8% × Σ(RW_i(PD_i) × EAD_i)
-│  ├─ Advanced IRB:
-│  │   ├─ Bank estimates: PD, LGD, EAD, correlation all
-│  │   ├─ Requires 5+ years of historical data
-│  │   ├─ Robust backtesting of estimates
-│  │   └─ Higher capital requirements for poor track records
-│  ├─ Risk Weight Function:
-│  │   RW(PD, LGD, EAD, M, correlation) ≈
-│  │   [LGD × N((Φ⁻¹(PD) + √correlation × Z) / √(1 - correlation)) 
-│  │    - LGD × PD] × (1 + (M - 2.5) × b) / (1 - 1.5 × b)
-│  │   Where:
-│  │   - N = cumulative normal distribution
-│  │   - M = maturity factor (~1 for retail, 1-5 for corp)
-│  │   - b = maturity adjustment (formula depends on PD)
-│  │   - correlation ≈ 0.12 (corporate), 0.04 (retail)
-│  ├─ PD Estimation Methods:
-│  │   ├─ Scorecard models: Logistic regression on historical defaults
-│  │   ├─ Expert judgment: Credit analyst override
-│  │   ├─ Market-implied: CDS spreads or bond yields
-│  │   └─ Hybrid: Combining multiple approaches
-│  ├─ LGD Estimation:
-│  │   ├─ Collateralized loans: Loss = Max(0, Exposure - Collateral_Value)
-│  │   ├─ Unsecured: Historical recovery rates (typically 30-50%)
-│  │   ├─ Stressed LGD: At-crisis recovery (may be 10-20% lower)
-│  │   └─ Downturn LGD: Worst economic conditions (required for Pillar I)
-│  ├─ EAD Estimation:
-│  │   ├─ Term loans: EAD = Drawn amount (100% of principal)
-│  │   ├─ Revolving credit: EAD = Drawn + (Undrawn × Credit Conversion Factor)
-│  │   ├─ CCF typically 20-75% (higher for commitments closer to drawdown)
-│  │   └─ Derivatives: EAD = Replacement cost + Potential future exposure
-│  └─ Validation Requirements:
-│      ├─ Backtesting: Compare predicted defaults vs actual
-│      ├─ Benchmarking: PD estimates consistent with external ratings
-│      ├─ Stability analysis: Parameters stable over time
-│      └─ Stress testing: Performance under adverse scenarios
-├─ Operational Risk
-│  ├─ Definition:
-│  │   Risk of loss from inadequate/failed internal processes,
-│  │   people, systems, or external events
-│  │   Excludes strategic & reputational risk
-│  ├─ Loss Categories:
-│  │   ├─ Internal fraud: Employee misconduct, theft
-│  │   ├─ External fraud: Robbery, forgery, cyber attack
-│  │   ├─ Employment practices: Discrimination, unsafe work environment
-│  │   ├─ Clients/Products: Errors, mis-selling, product flaws
-│  │   ├─ Damage to assets: Natural disasters, terrorism
-│  │   ├─ Business disruption: System failure, supply chain disruption
-│  │   └─ Execution/Delivery: Transaction error, counterparty failure
-│  ├─ Capital Calculation Methods:
-│  │   ├─ Basic Indicator Approach:
-│  │   │   OpRisk_Capital = 15% × Average(Gross_Income_3_years)
-│  │   │   Simplest, least risk-sensitive
-│  │   ├─ Standardized Approach:
-│  │   │   OpRisk_Capital = Σ(β_i × Gross_Income_i) for each business line
-│  │   │   β coefficients: 12-18% by business line (higher for trading)
-│  │   └─ Advanced Measurement Approach (AMA):
-│  │       Bank uses loss data + scenario analysis + controls
-│  │       Combines: Historical losses + Scenarios + Control indicators
-│  │       Requires regulatory approval
-│  └─ Data Requirements (AMA):
-│      ├─ Internal loss data: 5-10 year history minimum
-│      ├─ External data: Industry losses from consortiums
-│      ├─ Scenario analysis: Expert estimates of potential losses
-│      └─ Controls/Risk drivers: Correlation with losses
-├─ Transitional Provisions
-│  ├─ Adoption Timeline:
-│  │   ├─ 2004: Basel II finalized
-│  │   ├─ 2006: Initial implementation (Europe, major banks)
-│  │   ├─ 2008: Financial crisis interrupts full rollout
-│  │   ├─ 2009+: Transition to Basel III (supersedes Basel II)
-│  ├─ Grandfathering:
-│  │   ├─ Basel I floor: Capital can't fall below Basel I level
-│  │   ├─ Phase-in of new rules (multi-year ramp)
-│  │   └─ Transitional arrangements for lesser-developed countries
-│  └─ Parallel Run:
-│      ├─ Banks calculate both Basel I and Basel II
-│      ├─ Report both to regulators
-│      ├─ Gradual shift to Basel II requirement
-└─ Issues & Criticisms
-   ├─ Pro-Cyclicality:
-   │   ├─ Good times: Low PD, low capital → excess lending
-   │   ├─ Bad times: High PD, high capital → credit crunch
-   │   ├─ Amplifies boom-bust cycles
-   │   └─ Basel III added countercyclical buffer to mitigate
-   ├─ Calibration Risk:
-   │   ├─ Risk weights based on historical relationships
-   │   ├─ Correlations spike in crisis → RWs underestimate tail risk
-   │   ├─ Correlation estimates may be wrong → capital mispriced
-   │   └─ 2008 showed many "low-risk" mortgages defaults together
-   ├─ Model Risk:
-   │   ├─ IRB complexity → more parameter estimates → more error
-   │   ├─ Banks incentivized to minimize PD/LGD → lower capital
-   │   ├─ Regulatory scrutiny of models insufficient pre-2008
-   │   └─ Model validation lag behind model sophistication
-   ├─ Complexity:
-   │   ├─ Basel II extremely detailed (1000s of pages)
-   │   ├─ Implementation complex, expensive for banks
-   │   ├─ Regulatory arbitrage opportunities (exploit loopholes)
-   │   └─ Simplified approaches available but less risk-accurate
-   ├─ Interconnectedness Blind Spot:
-   │   ├─ Addresses single-bank capital, not system-wide risk
-   │   ├─ Procyclical behavior of all banks together → systemic crisis
-   │   ├─ 2008: Lehman failure cascaded through interconnected network
-   │   └─ Basel III adds systemic risk overlay (not in Basel II)
-   └─ Application Gaps:
-       ├─ Shadow banking not covered (now regulatory gap)
-       ├─ Derivatives valuation models had faults (CVA risk)
-       ├─ Counterparty risk concentration underestimated
-       └─ Behavioral aspects (herding, model consensus) not captured
+â”œâ”€ Three Pillars:
+â”‚  â”œâ”€ Pillar I: Minimum Capital Requirements
+â”‚  â”‚   â”œâ”€ Credit Risk:
+â”‚  â”‚   â”‚   â”œâ”€ Standardized Approach: Regulatory risk weights
+â”‚  â”‚   â”‚   â”œâ”€ Foundation IRB: Bank provides PD, regulator sets LGD/EAD
+â”‚  â”‚   â”‚   â””â”€ Advanced IRB: Bank provides all (PD/LGD/EAD)
+â”‚  â”‚   â”œâ”€ Market Risk:
+â”‚  â”‚   â”‚   â”œâ”€ Standard method: Fixed percentages by asset class
+â”‚  â”‚   â”‚   â””â”€ Internal Models: Bank's VaR calculation
+â”‚  â”‚   â””â”€ Operational Risk:
+â”‚  â”‚       â”œâ”€ Basic Indicator: 15% of gross income
+â”‚  â”‚       â”œâ”€ Standardized: 12-18% of gross income by business line
+â”‚  â”‚       â””â”€ Advanced Measurement (AMA): Bank's loss data model
+â”‚  â”œâ”€ Pillar II: Supervisory Review
+â”‚  â”‚   â”œâ”€ Bank's Internal Capital Adequacy Assessment Process (ICAAP)
+â”‚  â”‚   â”œâ”€ Regulator evaluates adequacy beyond Pillar I minimum
+â”‚  â”‚   â”œâ”€ Stress testing, concentration risk, interest rate risk
+â”‚  â”‚   â””â”€ Pillar II Guidance (P2G) may require higher capital
+â”‚  â””â”€ Pillar III: Market Discipline
+â”‚      â”œâ”€ Public disclosure of capital position
+â”‚      â”œâ”€ Risk exposures (credit, market, operational)
+â”‚      â”œâ”€ Risk management framework
+â”‚      â””â”€ Transparency enables market monitoring
+â”œâ”€ Credit Risk: Standardized Approach
+â”‚  â”œâ”€ Risk Weights by Asset Class & Counterparty Rating:
+â”‚  â”‚   â”œâ”€ Sovereign risk: 0% (AAA-AA), 20% (A-BBB), 50% (BB-B), 100% (Below B)
+â”‚  â”‚   â”œâ”€ Bank/Corporate: 20% (AAA-AA), 50% (A), 100% (BBB-unrated), 150% (Below BBB)
+â”‚  â”‚   â”œâ”€ Retail mortgages: 35%
+â”‚  â”‚   â”œâ”€ Retail other: 75%
+â”‚  â”‚   â””â”€ Unrated: 100% default (conservative)
+â”‚  â”œâ”€ Adjustment Factors:
+â”‚  â”‚   â”œâ”€ Collateral: Reduce RW if secured
+â”‚  â”‚   â”œâ”€ Guarantees: Risk weight of guarantor
+â”‚  â”‚   â”œâ”€ Credit derivatives: Protection provider's RW
+â”‚  â”‚   â””â”€ Supervisory haircuts: Volatility-based adjustments
+â”‚  â””â”€ Formula:
+â”‚      Capital (Pillar I) = 8% Ã— Î£(RW_i Ã— Exposure_i)
+â”œâ”€ Credit Risk: Internal Ratings-Based (IRB)
+â”‚  â”œâ”€ Foundation IRB:
+â”‚  â”‚   â”œâ”€ Bank estimates: PD only
+â”‚  â”‚   â”œâ”€ Regulator provides: LGD, EAD, correlation parameters
+â”‚  â”‚   â”œâ”€ Risk Weight Formula: Function of PD, LGD, EAD, correlation
+â”‚  â”‚   â””â”€ Capital = 8% Ã— Î£(RW_i(PD_i) Ã— EAD_i)
+â”‚  â”œâ”€ Advanced IRB:
+â”‚  â”‚   â”œâ”€ Bank estimates: PD, LGD, EAD, correlation all
+â”‚  â”‚   â”œâ”€ Requires 5+ years of historical data
+â”‚  â”‚   â”œâ”€ Robust backtesting of estimates
+â”‚  â”‚   â””â”€ Higher capital requirements for poor track records
+â”‚  â”œâ”€ Risk Weight Function:
+â”‚  â”‚   RW(PD, LGD, EAD, M, correlation) â‰ˆ
+â”‚  â”‚   [LGD Ã— N((Î¦â»Â¹(PD) + âˆšcorrelation Ã— Z) / âˆš(1 - correlation)) 
+â”‚  â”‚    - LGD Ã— PD] Ã— (1 + (M - 2.5) Ã— b) / (1 - 1.5 Ã— b)
+â”‚  â”‚   Where:
+â”‚  â”‚   - N = cumulative normal distribution
+â”‚  â”‚   - M = maturity factor (~1 for retail, 1-5 for corp)
+â”‚  â”‚   - b = maturity adjustment (formula depends on PD)
+â”‚  â”‚   - correlation â‰ˆ 0.12 (corporate), 0.04 (retail)
+â”‚  â”œâ”€ PD Estimation Methods:
+â”‚  â”‚   â”œâ”€ Scorecard models: Logistic regression on historical defaults
+â”‚  â”‚   â”œâ”€ Expert judgment: Credit analyst override
+â”‚  â”‚   â”œâ”€ Market-implied: CDS spreads or bond yields
+â”‚  â”‚   â””â”€ Hybrid: Combining multiple approaches
+â”‚  â”œâ”€ LGD Estimation:
+â”‚  â”‚   â”œâ”€ Collateralized loans: Loss = Max(0, Exposure - Collateral_Value)
+â”‚  â”‚   â”œâ”€ Unsecured: Historical recovery rates (typically 30-50%)
+â”‚  â”‚   â”œâ”€ Stressed LGD: At-crisis recovery (may be 10-20% lower)
+â”‚  â”‚   â””â”€ Downturn LGD: Worst economic conditions (required for Pillar I)
+â”‚  â”œâ”€ EAD Estimation:
+â”‚  â”‚   â”œâ”€ Term loans: EAD = Drawn amount (100% of principal)
+â”‚  â”‚   â”œâ”€ Revolving credit: EAD = Drawn + (Undrawn Ã— Credit Conversion Factor)
+â”‚  â”‚   â”œâ”€ CCF typically 20-75% (higher for commitments closer to drawdown)
+â”‚  â”‚   â””â”€ Derivatives: EAD = Replacement cost + Potential future exposure
+â”‚  â””â”€ Validation Requirements:
+â”‚      â”œâ”€ Backtesting: Compare predicted defaults vs actual
+â”‚      â”œâ”€ Benchmarking: PD estimates consistent with external ratings
+â”‚      â”œâ”€ Stability analysis: Parameters stable over time
+â”‚      â””â”€ Stress testing: Performance under adverse scenarios
+â”œâ”€ Operational Risk
+â”‚  â”œâ”€ Definition:
+â”‚  â”‚   Risk of loss from inadequate/failed internal processes,
+â”‚  â”‚   people, systems, or external events
+â”‚  â”‚   Excludes strategic & reputational risk
+â”‚  â”œâ”€ Loss Categories:
+â”‚  â”‚   â”œâ”€ Internal fraud: Employee misconduct, theft
+â”‚  â”‚   â”œâ”€ External fraud: Robbery, forgery, cyber attack
+â”‚  â”‚   â”œâ”€ Employment practices: Discrimination, unsafe work environment
+â”‚  â”‚   â”œâ”€ Clients/Products: Errors, mis-selling, product flaws
+â”‚  â”‚   â”œâ”€ Damage to assets: Natural disasters, terrorism
+â”‚  â”‚   â”œâ”€ Business disruption: System failure, supply chain disruption
+â”‚  â”‚   â””â”€ Execution/Delivery: Transaction error, counterparty failure
+â”‚  â”œâ”€ Capital Calculation Methods:
+â”‚  â”‚   â”œâ”€ Basic Indicator Approach:
+â”‚  â”‚   â”‚   OpRisk_Capital = 15% Ã— Average(Gross_Income_3_years)
+â”‚  â”‚   â”‚   Simplest, least risk-sensitive
+â”‚  â”‚   â”œâ”€ Standardized Approach:
+â”‚  â”‚   â”‚   OpRisk_Capital = Î£(Î²_i Ã— Gross_Income_i) for each business line
+â”‚  â”‚   â”‚   Î² coefficients: 12-18% by business line (higher for trading)
+â”‚  â”‚   â””â”€ Advanced Measurement Approach (AMA):
+â”‚  â”‚       Bank uses loss data + scenario analysis + controls
+â”‚  â”‚       Combines: Historical losses + Scenarios + Control indicators
+â”‚  â”‚       Requires regulatory approval
+â”‚  â””â”€ Data Requirements (AMA):
+â”‚      â”œâ”€ Internal loss data: 5-10 year history minimum
+â”‚      â”œâ”€ External data: Industry losses from consortiums
+â”‚      â”œâ”€ Scenario analysis: Expert estimates of potential losses
+â”‚      â””â”€ Controls/Risk drivers: Correlation with losses
+â”œâ”€ Transitional Provisions
+â”‚  â”œâ”€ Adoption Timeline:
+â”‚  â”‚   â”œâ”€ 2004: Basel II finalized
+â”‚  â”‚   â”œâ”€ 2006: Initial implementation (Europe, major banks)
+â”‚  â”‚   â”œâ”€ 2008: Financial crisis interrupts full rollout
+â”‚  â”‚   â”œâ”€ 2009+: Transition to Basel III (supersedes Basel II)
+â”‚  â”œâ”€ Grandfathering:
+â”‚  â”‚   â”œâ”€ Basel I floor: Capital can't fall below Basel I level
+â”‚  â”‚   â”œâ”€ Phase-in of new rules (multi-year ramp)
+â”‚  â”‚   â””â”€ Transitional arrangements for lesser-developed countries
+â”‚  â””â”€ Parallel Run:
+â”‚      â”œâ”€ Banks calculate both Basel I and Basel II
+â”‚      â”œâ”€ Report both to regulators
+â”‚      â”œâ”€ Gradual shift to Basel II requirement
+â””â”€ Issues & Criticisms
+   â”œâ”€ Pro-Cyclicality:
+   â”‚   â”œâ”€ Good times: Low PD, low capital â†’ excess lending
+   â”‚   â”œâ”€ Bad times: High PD, high capital â†’ credit crunch
+   â”‚   â”œâ”€ Amplifies boom-bust cycles
+   â”‚   â””â”€ Basel III added countercyclical buffer to mitigate
+   â”œâ”€ Calibration Risk:
+   â”‚   â”œâ”€ Risk weights based on historical relationships
+   â”‚   â”œâ”€ Correlations spike in crisis â†’ RWs underestimate tail risk
+   â”‚   â”œâ”€ Correlation estimates may be wrong â†’ capital mispriced
+   â”‚   â””â”€ 2008 showed many "low-risk" mortgages defaults together
+   â”œâ”€ Model Risk:
+   â”‚   â”œâ”€ IRB complexity â†’ more parameter estimates â†’ more error
+   â”‚   â”œâ”€ Banks incentivized to minimize PD/LGD â†’ lower capital
+   â”‚   â”œâ”€ Regulatory scrutiny of models insufficient pre-2008
+   â”‚   â””â”€ Model validation lag behind model sophistication
+   â”œâ”€ Complexity:
+   â”‚   â”œâ”€ Basel II extremely detailed (1000s of pages)
+   â”‚   â”œâ”€ Implementation complex, expensive for banks
+   â”‚   â”œâ”€ Regulatory arbitrage opportunities (exploit loopholes)
+   â”‚   â””â”€ Simplified approaches available but less risk-accurate
+   â”œâ”€ Interconnectedness Blind Spot:
+   â”‚   â”œâ”€ Addresses single-bank capital, not system-wide risk
+   â”‚   â”œâ”€ Procyclical behavior of all banks together â†’ systemic crisis
+   â”‚   â”œâ”€ 2008: Lehman failure cascaded through interconnected network
+   â”‚   â””â”€ Basel III adds systemic risk overlay (not in Basel II)
+   â””â”€ Application Gaps:
+       â”œâ”€ Shadow banking not covered (now regulatory gap)
+       â”œâ”€ Derivatives valuation models had faults (CVA risk)
+       â”œâ”€ Counterparty risk concentration underestimated
+       â””â”€ Behavioral aspects (herding, model consensus) not captured
 ```
 
-**Interaction:** Credit risk classification → Risk weight or IRB PD/LGD/EAD → Capital requirement (8% × RW × Exposure) → Supervisory review (Pillar II) → Market disclosure (Pillar III).
+**Interaction:** Credit risk classification â†’ Risk weight or IRB PD/LGD/EAD â†’ Capital requirement (8% Ã— RW Ã— Exposure) â†’ Supervisory review (Pillar II) â†’ Market disclosure (Pillar III).
 
-## 5. Mini-Project
-Calculate minimum capital requirement under Basel II Standardized Approach:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Bank portfolio (simplified)
-portfolio = [
-    {'description': 'US Treasury Bonds', 'exposure': 50, 'rating': 'AAA', 'rw': 0.00},
-    {'description': 'Corporate Bonds (A-rated)', 'exposure': 100, 'rating': 'A', 'rw': 0.50},
-    {'description': 'Corporate Bonds (BBB-rated)', 'exposure': 80, 'rating': 'BBB', 'rw': 1.00},
-    {'description': 'Mortgages (Prime)', 'exposure': 200, 'rating': 'Secured', 'rw': 0.35},
-    {'description': 'Mortgages (Subprime)', 'exposure': 150, 'rating': 'Secured (Low LTV)', 'rw': 0.75},
-    {'description': 'Business Loans (Small firms)', 'exposure': 120, 'rating': 'Unrated', 'rw': 1.00},
-    {'description': 'Derivatives (Credit exposure)', 'exposure': 30, 'rating': 'BBB', 'rw': 1.00},
-    {'description': 'Equity Holdings', 'exposure': 60, 'rating': 'Unrated', 'rw': 1.50},
-]
-
-df = pd.DataFrame(portfolio)
-
-# Calculate risk-weighted assets
-df['risk_weighted_exposure'] = df['exposure'] * df['rw']
-
-# Minimum capital ratio (Pillar I)
-min_capital_ratio = 0.08
-
-# Calculate capital requirements
-df['capital_required'] = df['risk_weighted_exposure'] * min_capital_ratio
-
-# Summary calculations
-total_exposure = df['exposure'].sum()
-total_rwa = df['risk_weighted_exposure'].sum()
-total_capital_required = df['capital_required'].sum()
-
-print("="*100)
-print("BASEL II STANDARDIZED APPROACH - CAPITAL REQUIREMENT CALCULATION")
-print("="*100)
-print(f"\nBank Portfolio (Millions USD):\n")
-print(df[['description', 'exposure', 'rating', 'rw', 'risk_weighted_exposure', 'capital_required']].to_string(index=False))
-
-print(f"\n" + "="*100)
-print("SUMMARY")
-print("="*100)
-print(f"Total Exposure: ${total_exposure:.1f}M")
-print(f"Total Risk-Weighted Assets (RWA): ${total_rwa:.1f}M")
-print(f"Risk-Weighted Ratio: {total_rwa / total_exposure * 100:.1f}% (overall risk weight)")
-print(f"Minimum Capital Requirement (8% of RWA): ${total_capital_required:.1f}M")
-print(f"Required Capital Ratio: {total_capital_required / total_exposure * 100:.1f}% of total exposure")
-
-# Scenario: Adding Pillar II buffer
-pillar_ii_buffer = 0.025  # 2.5% for supervisory discretion
-pillar_ii_capital = (min_capital_ratio + pillar_ii_buffer) * total_rwa
-
-print(f"\nWith Pillar II Guidance Buffer ({pillar_ii_buffer*100:.1f}%): ${pillar_ii_capital:.1f}M")
-print(f"Capital Ratio (Pillar I + Pillar II): {(min_capital_ratio + pillar_ii_buffer)*100:.1f}%")
-
-# Visualization
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-
-# Plot 1: Risk weight distribution
-ax = axes[0, 0]
-colors_rw = plt.cm.RdYlGn_r(df['rw'] / df['rw'].max())
-ax.barh(df['description'], df['rw'], color=colors_rw, alpha=0.8)
-ax.set_xlabel('Risk Weight')
-ax.set_title('Risk Weight by Asset Type (Basel II Standardized)')
-ax.grid(alpha=0.3, axis='x')
-
-# Plot 2: Risk-weighted assets breakdown
-ax = axes[0, 1]
-colors_assets = plt.cm.Set3(np.linspace(0, 1, len(df)))
-ax.pie(df['risk_weighted_exposure'], labels=df['description'], autopct='%1.1f%%',
-      colors=colors_assets, startangle=90)
-ax.set_title('Risk-Weighted Assets (RWA) Composition')
-
-# Plot 3: Capital requirement by asset
-ax = axes[1, 0]
-ax.bar(range(len(df)), df['capital_required'], color=colors_assets, alpha=0.8)
-ax.set_xticks(range(len(df)))
-ax.set_xticklabels(df['description'], rotation=45, ha='right', fontsize=8)
-ax.set_ylabel('Capital Required ($M)')
-ax.set_title('Capital Requirement by Asset Type')
-ax.grid(alpha=0.3, axis='y')
-
-# Plot 4: Exposure vs Risk-Weighted Assets
-ax = axes[1, 1]
-x = np.arange(len(df))
-width = 0.35
-ax.bar(x - width/2, df['exposure'], width, label='Total Exposure', alpha=0.8)
-ax.bar(x + width/2, df['risk_weighted_exposure'], width, label='Risk-Weighted Assets', alpha=0.8)
-ax.set_xticks(x)
-ax.set_xticklabels(df['description'], rotation=45, ha='right', fontsize=8)
-ax.set_ylabel('Amount ($M)')
-ax.set_title('Exposure vs Risk-Weighted Assets')
-ax.legend()
-ax.grid(alpha=0.3, axis='y')
-
-plt.tight_layout()
-plt.show()
-
-# Sensitivity: What if risk weights change?
-print(f"\n" + "="*100)
-print("SENSITIVITY ANALYSIS: Impact of Risk Weight Changes")
-print("="*100)
-
-scenarios = {
-    'Baseline': 1.0,
-    'Conservative (+50% RW)': 1.5,
-    'Aggressive (-30% RW)': 0.7,
-}
-
-for scenario_name, multiplier in scenarios.items():
-    rwa_scenario = (df['rw'] * multiplier * df['exposure']).sum()
-    capital_scenario = rwa_scenario * min_capital_ratio
-    print(f"{scenario_name}: RWA = ${rwa_scenario:.1f}M, Capital = ${capital_scenario:.1f}M")
-```
-
-## 6. Challenge Round
+## 5. Challenge Round
 - Calculate capital requirement for corporate loan using Basel II IRB (given PD, LGD, EAD)
 - Compare capital: Standardized approach vs IRB for retail mortgage portfolio
 - Design collateral adjustment: How does collateral reduce RW under Basel II?
 - Analyze pro-cyclicality: Model capital requirement as PD rises in recession
 - Explain Foundation vs Advanced IRB: Trade-offs in data requirements vs capital savings
 
-## 7. Key References
-- [Basel Committee, "Basel II: International Convergence of Capital Measurement and Capital Standards" (2004)](https://www.bis.org/publ/bcbs107.pdf) — Official framework
-- [BIS, "Basel II Framework" (https://www.bis.org/basel_framework/)](https://www.bis.org/basel_framework/) — Complete regulatory text
-- [Crouhy et al, "The Essentials of Risk Management" (2014)](https://www.mheducation.com/) — Practical guide
-- [Jones, "Operational Risk" (2009)](https://www.wiley.com/en-us/Operational+Risk-p-9780470516782) — OpRisk in detail
+## 6. Key References
+- [Basel Committee, "Basel II: International Convergence of Capital Measurement and Capital Standards" (2004)](https://www.bis.org/publ/bcbs107.pdf) â€” Official framework
+- [BIS, "Basel II Framework" (https://www.bis.org/basel_framework/)](https://www.bis.org/basel_framework/) â€” Complete regulatory text
+- [Crouhy et al, "The Essentials of Risk Management" (2014)](https://www.mheducation.com/) â€” Practical guide
+- [Jones, "Operational Risk" (2009)](https://www.wiley.com/en-us/Operational+Risk-p-9780470516782) â€” OpRisk in detail
 
 ---
 **Status:** International regulatory standard 2004-2008 | **Complements:** Basel I, Basel III, Credit Risk Modeling, IRB Approaches

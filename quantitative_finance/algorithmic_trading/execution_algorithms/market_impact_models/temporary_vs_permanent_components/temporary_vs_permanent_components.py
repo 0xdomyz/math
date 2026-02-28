@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # temporary vs permanent components
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: temporary vs permanent components")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -84,15 +119,15 @@ print(f"Impact statistics:\n{df[['trade_size_pct', 'total_impact']].describe()}\
 price_1min = df['price_change_1min']
 price_30min = df['price_change_30min']
 
-# Regression: price_1min = α + β*size
+# Regression: price_1min = Î± + Î²*size
 slope_1min, intercept_1min, r2_1min, _, _ = linregress(df['trade_size_pct'], price_1min)
 
-# Regression: price_30min = γ + δ*size
+# Regression: price_30min = Î³ + Î´*size
 slope_30min, intercept_30min, r2_30min, _, _ = linregress(df['trade_size_pct'], price_30min)
 
 print("ESTIMATION: Temporary vs Permanent (Regression on Size):")
-print(f"1-min price change: Intercept={intercept_1min:.3f}, Slope={slope_1min:.3f}, R²={r2_1min:.3f}")
-print(f"30-min price change: Intercept={intercept_30min:.3f}, Slope={slope_30min:.3f}, R²={r2_30min:.3f}")
+print(f"1-min price change: Intercept={intercept_1min:.3f}, Slope={slope_1min:.3f}, RÂ²={r2_1min:.3f}")
+print(f"30-min price change: Intercept={intercept_30min:.3f}, Slope={slope_30min:.3f}, RÂ²={r2_30min:.3f}")
 
 # Estimate components (rough approximation)
 est_temp_baseline = intercept_1min - intercept_30min  # What reverts in 1-30 min
@@ -181,4 +216,37 @@ temp_fraction = df['est_temp'].mean() / df['est_total'].mean()
 perm_fraction = 1 - temp_fraction
 print(f"Temporary (recoverable via patience): {temp_fraction*100:.0f}%")
 print(f"Permanent (unavoidable): {perm_fraction*100:.0f}%")
-print(f"⟹ Optimal strategy: Reduce temporary via patient execution; accept permanent as cost")
+print(f"âŸ¹ Optimal strategy: Reduce temporary via patient execution; accept permanent as cost")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='temporary vs permanent components - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

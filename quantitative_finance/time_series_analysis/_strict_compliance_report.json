@@ -1,0 +1,93 @@
+﻿[
+    {
+        "Topic":  "advanced_time_series_models",
+        "Word":  2021,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "arima_and_box_jenkins_framework",
+        "Word":  2023,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "classical_decomposition_and_filtering",
+        "Word":  2021,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "forecasting_and_evaluation",
+        "Word":  2019,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "frequency_domain_and_spectral_analysis",
+        "Word":  2023,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "fundamentals_and_characteristics",
+        "Word":  2019,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "meta_topics_and_foundations",
+        "Word":  2021,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "nonlinear_and_machine_learning_approaches",
+        "Word":  2023,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "practical_applications_and_domain_specifics",
+        "Word":  2023,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "relationships_and_integration",
+        "Word":  2019,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "stationarity_testing_and_transformations",
+        "Word":  2021,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "univariate_conditional_heteroscedasticity",
+        "Word":  2019,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    },
+    {
+        "Topic":  "vector_autoregression_and_multivariate",
+        "Word":  2021,
+        "Refs":  6,
+        "MdFail":  false,
+        "PyFail":  false
+    }
+]

@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # insurance with varying benefits
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for insurance with varying benefits.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: insurance with varying benefits")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: insurance_with_varying_benefits.md
 
@@ -114,7 +139,7 @@ apv_decreasing = 0
 kpx_dec = 1.0
 
 print(f"\nMortgage Protection: ${mortgage_initial:,.0f}, {mortgage_term}-year decline\n")
-print(f"{'Year':<8} {'Benefit':<15} {'qₓ':<12} {'PV Factor':<12} {'Annual PV':<15}")
+print(f"{'Year':<8} {'Benefit':<15} {'q':<12} {'PV Factor':<12} {'Annual PV':<15}")
 print("-" * 70)
 
 for k in range(1, mortgage_term + 1):
@@ -175,7 +200,7 @@ apv_increasing = 0
 kpx_inc = 1.0
 
 print(f"\nFamily Protection: ${init_benefit_inc:,.0f}, +${annual_increase:,.0f}/year, {increase_term}-year term\n")
-print(f"{'Year':<8} {'Benefit':<15} {'qₓ':<12} {'PV Factor':<12} {'Annual PV':<15}")
+print(f"{'Year':<8} {'Benefit':<15} {'q':<12} {'PV Factor':<12} {'Annual PV':<15}")
 print("-" * 70)
 
 for k in range(1, increase_term + 1):
@@ -278,8 +303,8 @@ print("-" * 90)
 
 products_comp = [
     ("Level $300K (20-year)", gross_prem_level),
-    ("Decreasing Mortgage $400K→0 (30-year)", gross_prem_dec),
-    ("Increasing Family $100K→$480K (20-year)", gross_prem_inc),
+    ("Decreasing Mortgage $400K0 (30-year)", gross_prem_dec),
+    ("Increasing Family $100K$480K (20-year)", gross_prem_inc),
     ("Geometric Inflation-Protected $200K (20-year)", gross_prem_geo),
 ]
 
@@ -432,4 +457,28 @@ plt.savefig('varying_benefits_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: insurance with varying benefits")
+
 

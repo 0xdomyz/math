@@ -1,12 +1,11 @@
-# Gamma
+﻿# Gamma
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** The second derivative of option price with respect to asset price (Γ = ∂²C/∂S² = ∂Δ/∂S), measuring the rate of delta change and the convexity of the option value function.  
 **Purpose:** Quantify curvature risk, identify rehedging frequency requirements, measure trading profitability from volatility, assess option buyer vs seller advantage in turbulent markets  
 **Prerequisites:** Delta, option pricing, convexity, second-order Taylor expansion, volatility dynamics
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Long Option (Buyer) | Short Option (Seller) | Long Straddle | Long Strangle |
 |--------|---------------------|----------------------|---------------|---------------|
 | **Gamma Sign** | Γ > 0 (positive) | Γ < 0 (negative) | Γ > 0 | Γ > 0 |
@@ -17,8 +16,7 @@
 | **Rehedging Losses** | Gain when rehedging | Lose when rehedging | Gain from rehedges | Gain from rehedges |
 | **Peak Gamma** | ATM (strike nearest) | ATM | ATM | Between strikes |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Long Call Gamma**  
 Long call: S=100, K=100, Γ=0.02. If S → 101 (move +1): delta changes from 0.50 to ~0.60 (gains +0.10 due to gamma). Profit from rehedge: buy low/sell high. If S → 99 (move -1): delta changes from 0.50 to ~0.40 (loses -0.10). But profit still realized on first move (if happens first). Over full period: realized volatility determines outcome.
 
@@ -28,8 +26,7 @@ Sell ATM straddle (sell call + put), collect theta. Market calm: theta decay pro
 **Edge Case: Deep ITM/OTM Options**  
 Deep ITM call (S=200, K=100): Γ ≈ 0 (delta ≈ 1, nearly constant). Stock move $5 → delta unchanged, gamma P&L ≈ 0. Deep OTM call (S=50, K=100): Γ ≈ 0 (delta ≈ 0, stays 0). Gamma peaks ATM: small move causes large delta swings → maximum rehedging benefit/cost.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Gamma Framework:
 ├─ Definition & Interpretation:
@@ -97,8 +94,7 @@ Gamma Framework:
 
 **Interaction:** Gamma drives rehedging P&L; theta (time decay) partially offset by gamma losses in delta hedge; net P&L depends on realized vol vs implied vol.
 
-## 5. Mini-Project
-
+## Challenge Round
 Measure gamma P&L; compare long straddle vs short straddle under different volatility scenarios:
 
 ```python
@@ -354,8 +350,7 @@ print("\nPlot saved: gamma_analysis.png")
 - **P&L Distribution:** Long straddle profits on volatility; short straddle loses on big moves
 - **Gamma vs Theta:** Tradeoff for short options; theta gain offset by gamma loss in volatile markets
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Gamma is always positive for both calls and puts. Why? What does this tell us about option value convexity?**  
 A: Option payoff is convex in spot price: call max(S-K, 0) has slope 0 then 1 (convex kink), put max(K-S, 0) has slope -1 then 0 (also convex). Since Γ = ∂²C/∂S² and convex functions have positive second derivatives, Γ > 0 always. Implication: option holders have "convexity advantage"— they profit from uncertainty (large moves in either direction) whereas linear instruments (stock, forward) are indifferent. This is why buying options in calm markets (low premium) can be profitable; realized vol might exceed implied.
 
@@ -374,8 +369,7 @@ A: Gamma P&L = 0.5 × Γ × (ΔS)². Setting this equal to 1000: 0.5 × 0.01 × 
 **Q6: A bank sells 100,000 ATM calls expiring in 7 days. Why is this position extraordinarily risky despite being delta-hedged?**  
 A: 7 days to expiry: gamma is extremely high (Γ ∝ 1/√T → huge). ATM: Γ at peak. Small stock move → delta swings dramatically → hedge stale immediately → forced to rebalance at market prices with widened spreads (end-of-week liquidity low). Notional huge (100k calls). Scenario: stock gaps up 2% overnight → delta jumps 0.50→0.90 → must buy 40k shares, each bid-ask widens on EOD → slippage ≈ 0.10/share → loss = $4M (just on rehedge, before underlying move). Classic: short-dated, ATM, large notional = maximum gamma risk. Banks manage this with strict gamma limits by desk/trader; gamma risk committee monitors daily.
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Gamma (Finance)](https://en.wikipedia.org/wiki/Gamma_(finance)) — Definition, convexity, ATM peak
 - [Wikipedia: Greeks (Finance)](https://en.wikipedia.org/wiki/Greeks_(finance)) — Gamma in context of other Greeks
 - Hull: *Options, Futures & Derivatives* (Chapter 19) — Gamma dynamics, hedging P&L decomposition

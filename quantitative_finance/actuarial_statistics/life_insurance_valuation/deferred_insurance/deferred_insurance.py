@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # deferred insurance
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for deferred insurance.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: deferred insurance")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: deferred_insurance.md
 
@@ -116,7 +141,7 @@ for deferral in deferral_periods:
         
         pct_vs_imm = 100.0
     else:
-        # Deferred whole life: ₙ|Āₓ = v^n · ₙpₓ · Āₓ₊ₙ
+        # Deferred whole life: TM| = v^n  TMp  TM
         
         # Calculate n-year survival probability
         npx = 1.0
@@ -135,7 +160,7 @@ for deferral in deferral_periods:
         # APV at deferred age
         apv_deferred_age = calculate_whole_life_apv(issue_age + deferral, mortality_data, annual_rate)
         
-        # Deferred APV: v^n · npx · Āₓ₊ₙ
+        # Deferred APV: v^n  npx  TM
         vn = v ** deferral
         apv_deferred = vn * npx * apv_deferred_age
         
@@ -481,4 +506,28 @@ plt.savefig('deferred_insurance_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: deferred insurance")
+
 

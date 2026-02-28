@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # annuity due
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for annuity due.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: annuity due")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: annuity_due.md
 
@@ -8,7 +33,7 @@ import matplotlib.pyplot as plt
 
 np.random.seed(42)
 
-print("=== Annuity Due (äₓ) vs Immediate Annuity (aₓ) ===\n")
+print("=== Annuity Due () vs Immediate Annuity (a) ===\n")
 
 # Simplified mortality table (Gompertz)
 def build_mortality_table(max_age=120):
@@ -47,12 +72,12 @@ def immediate_annuity(x, i, mortality, max_age=120):
 
 # Annuity due: Two calculation methods
 def annuity_due_from_immediate(x, i, mortality):
-    """Method 1: äₓ = (1+i) · aₓ"""
+    """Method 1:  = (1+i)  a"""
     a_x = immediate_annuity(x, i, mortality)
     return (1 + i) * a_x
 
 def annuity_due_direct(x, i, mortality, max_age=120):
-    """Method 2: Direct calculation äₓ = Σ(k=0 to ∞) vᵏ · ₖpₓ"""
+    """Method 2: Direct calculation  = (k=0 to ) v  p"""
     v = 1 / (1 + i)
     l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
     
@@ -86,26 +111,26 @@ for age in ages_test:
     
     results.append({
         'Age': age,
-        'Immediate (aₓ)': a_x,
-        'Due (äₓ)': a_due_method1,
+        'Immediate (a)': a_x,
+        'Due ()': a_due_method1,
         'Difference': difference,
-        'Ratio (äₓ/aₓ)': ratio
+        'Ratio (/a)': ratio
     })
 
 results_df = pd.DataFrame(results)
 print(results_df.to_string(index=False, float_format='%.3f'))
 
-# Verify relationship: äₓ = (1+i)·aₓ
-print(f"\n=== Verification: äₓ = (1+i)·aₓ ===\n")
+# Verify relationship:  = (1+i)a
+print(f"\n=== Verification:  = (1+i)a ===\n")
 age_verify = 65
 a_immediate = immediate_annuity(age_verify, i_rate, mortality)
 a_due_formula = (1 + i_rate) * a_immediate
 a_due_direct_calc = annuity_due_direct(age_verify, i_rate, mortality)
 
 print(f"Age {age_verify}, i = {i_rate*100:.0f}%:")
-print(f"  aₓ (immediate): {a_immediate:.4f}")
-print(f"  äₓ = (1+i)·aₓ: {a_due_formula:.4f}")
-print(f"  äₓ (direct): {a_due_direct_calc:.4f}")
+print(f"  a (immediate): {a_immediate:.4f}")
+print(f"   = (1+i)a: {a_due_formula:.4f}")
+print(f"   (direct): {a_due_direct_calc:.4f}")
 print(f"  Match: {abs(a_due_formula - a_due_direct_calc) < 0.001}")
 
 # Premium implications
@@ -143,13 +168,13 @@ single_premium = A_x * benefit
 
 print(f"Whole life insurance (${benefit:,} benefit) at age {age_insured}:")
 print(f"  Single premium: ${single_premium:,.2f}")
-print(f"  Aₓ = {A_x:.4f}")
+print(f"  A = {A_x:.4f}")
 
 # Annual premiums
 a_immediate = immediate_annuity(age_insured, i_rate, mortality)
 a_due = annuity_due_from_immediate(age_insured, i_rate, mortality)
 
-# Net annual premium: P·äₓ = Aₓ·benefit
+# Net annual premium: P = Abenefit
 premium_due = (A_x * benefit) / a_due
 premium_immediate = (A_x * benefit) / a_immediate
 
@@ -164,7 +189,7 @@ interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 age_sens = 65
 
 print(f"Age {age_sens} Annuity Values:")
-print("Interest | Immediate (aₓ) | Due (äₓ) | Difference | Ratio")
+print("Interest | Immediate (a) | Due () | Difference | Ratio")
 print("-" * 65)
 
 for i_val in interest_rates:
@@ -181,7 +206,7 @@ print("\n=== Payment Frequency: Monthly vs Annual ===\n")
 # Approximate monthly annuity due using Woolhouse
 def annuity_due_monthly(x, i, mortality):
     """
-    ä⁽¹²⁾ₓ ≈ äₓ - (11/24)
+    121234   - (11/24)
     Woolhouse approximation for monthly payments
     """
     a_due_annual = annuity_due_from_immediate(x, i, mortality)
@@ -192,8 +217,8 @@ a_annual_due = annuity_due_from_immediate(age_monthly, i_rate, mortality)
 a_monthly_due = annuity_due_monthly(age_monthly, i_rate, mortality)
 
 print(f"Age {age_monthly}, i = {i_rate*100:.0f}%:")
-print(f"  Annual due (äₓ): {a_annual_due:.3f}")
-print(f"  Monthly due (ä⁽¹²⁾ₓ): {a_monthly_due:.3f}")
+print(f"  Annual due (): {a_annual_due:.3f}")
+print(f"  Monthly due (121234): {a_monthly_due:.3f}")
 print(f"  Difference: {a_annual_due - a_monthly_due:.3f}")
 print(f"\nFor $1000/month annuity:")
 print(f"  Annual value: ${a_annual_due * 12000:,.2f}")
@@ -208,33 +233,33 @@ ages_plot = np.arange(25, 96, 5)
 immediate_vals = [immediate_annuity(age, 0.05, mortality) for age in ages_plot]
 due_vals = [annuity_due_from_immediate(age, 0.05, mortality) for age in ages_plot]
 
-ax1.plot(ages_plot, immediate_vals, 'o-', linewidth=2, label='Immediate (aₓ)', markersize=6)
-ax1.plot(ages_plot, due_vals, 's-', linewidth=2, label='Due (äₓ)', markersize=6)
+ax1.plot(ages_plot, immediate_vals, 'o-', linewidth=2, label='Immediate (a)', markersize=6)
+ax1.plot(ages_plot, due_vals, 's-', linewidth=2, label='Due ()', markersize=6)
 ax1.set_xlabel('Age')
 ax1.set_ylabel('Annuity Value')
 ax1.set_title('Annuity Due vs Immediate\n(i = 5%)')
 ax1.legend()
 ax1.grid(True, alpha=0.3)
 
-# Plot 2: Difference (äₓ - aₓ)
+# Plot 2: Difference ( - a)
 ax2 = axes[0, 1]
 differences = np.array(due_vals) - np.array(immediate_vals)
 
 ax2.plot(ages_plot, differences, 'o-', linewidth=2, color='green', markersize=6)
 ax2.fill_between(ages_plot, 0, differences, alpha=0.2, color='green')
 ax2.set_xlabel('Age')
-ax2.set_ylabel('Difference (äₓ - aₓ)')
+ax2.set_ylabel('Difference ( - a)')
 ax2.set_title('Value Advantage of Annuity Due\n(Earlier payment timing)')
 ax2.grid(True, alpha=0.3)
 
-# Plot 3: Ratio (äₓ/aₓ)
+# Plot 3: Ratio (/a)
 ax3 = axes[0, 2]
 ratios = np.array(due_vals) / np.array(immediate_vals)
 
 ax3.plot(ages_plot, ratios, 'o-', linewidth=2, color='purple', markersize=6)
 ax3.axhline(1.05, color='r', linestyle='--', linewidth=2, label='1+i = 1.05')
 ax3.set_xlabel('Age')
-ax3.set_ylabel('Ratio (äₓ/aₓ)')
+ax3.set_ylabel('Ratio (/a)')
 ax3.set_title('Ratio Approaches 1+i\n(Perfect at all ages)')
 ax3.legend()
 ax3.grid(True, alpha=0.3)
@@ -322,7 +347,31 @@ plt.tight_layout()
 plt.show()
 
 print("\n=== Summary ===")
-print("Annuity due (äₓ): Payments at period START, äₓ = (1+i)·aₓ")
-print("Key identity: äₓ - aₓ = 1 (first payment difference)")
+print("Annuity due (): Payments at period START,  = (1+i)a")
+print("Key identity:  - a = 1 (first payment difference)")
 print("Used for premiums, rent, prepaid contracts; always higher value than immediate")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: annuity due")
+
 

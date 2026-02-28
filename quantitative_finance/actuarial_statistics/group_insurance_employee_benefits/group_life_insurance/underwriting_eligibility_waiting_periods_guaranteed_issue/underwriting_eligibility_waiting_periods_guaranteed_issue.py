@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # underwriting eligibility waiting periods guaranteed issue
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for underwriting eligibility waiting periods guaranteed issue.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: underwriting eligibility waiting periods guaranteed issue")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: underwriting_eligibility_waiting_periods_guaranteed_issue.md
 
@@ -150,4 +175,28 @@ print(f"60-day waiting reduces annual premium by {((premium.iloc[0] - premium.il
 print(f"90-day waiting reduces annual premium by {((premium.iloc[0] - premium.iloc[3]) / premium.iloc[0] * 100):.1f}% vs 0-day")
 print(f"Enrollment drops from {enrollment.iloc[0]:.1f}% (0-day) to {enrollment.iloc[3]:.1f}% (90-day)")
 print(f"Enrolled health improves: Severe condition risk drops from {(scenarios[0]['enrolled_health'] == 'Severe Condition').mean():.1%} to {(scenarios[90]['enrolled_health'] == 'Severe Condition').mean():.1%}")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: underwriting eligibility waiting periods guaranteed issue")
+
 

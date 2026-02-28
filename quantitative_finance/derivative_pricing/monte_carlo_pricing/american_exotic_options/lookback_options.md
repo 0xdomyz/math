@@ -1,12 +1,11 @@
-# Lookback Options
+﻿# Lookback Options
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Path-dependent options with payoff based on maximum (floating strike call, fixed strike put) or minimum (floating strike put, fixed strike call) price over entire option life, offering guaranteed optimal execution but higher premium.  
 **Purpose:** Capture best/worst price retrospectively; eliminate timing risk; hedging hindsight regret; synthetic stop-loss; guaranteed optimal exit; structured product features.  
 **Prerequisites:** European option pricing, path simulation, running max/min tracking, order statistics, extreme value distributions
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Floating Strike Call | Fixed Strike Lookback Call | European Call | Asian Call |
 |--------|---------------------|----------------------------|---------------|------------|
 | **Payoff** | S_T - min(S_t) | max(S_t) - K | S_T - K | Ā - K |
@@ -17,8 +16,7 @@
 | **Volatility Sensitivity** | Very high (more vol → wider range) | Very high | High | Low (averaging) |
 | **Use Cases** | Guaranteed best entry | Guaranteed best exit | Standard hedging | Cost-effective hedging |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Floating Strike Lookback Call**  
 Stock path over 1 year: $100→$110→$95→$105→$120→$115. Minimum price: min(S_t) = $95. Terminal price: S_T = $115. Payoff: S_T - min = $115 - $95 = $20. Interpretation: Bought at lowest point ($95), sold at final ($115). European call (K=$100): payoff = $115-$100 = $15. Lookback advantage: $20 vs $15 (+33%). Premium: ~$25 (250% of European ~$10). Trade-off: Guaranteed optimal entry vs 2.5× cost.
 
@@ -28,8 +26,7 @@ Floating strike lookback call, stock stays flat $100-$102 entire year. Minimum: 
 **Edge Case: Extreme Swing Then Reversal**  
 Fixed strike lookback call: K=$100, stock path $100→$150→$90→$100. Maximum price: max(S_t) = $150. Payoff: max-K = $150-$100 = $50. Terminal: S_T=$100 (back at start). European call: payoff = $0 (ATM at expiry). Lookback: captures $150 peak even though ended flat. This "hindsight perfection" why premium 2-3× European. Investor guaranteed sold at absolute peak regardless of timing.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Lookback Option Framework:
 ├─ Payoff Types (4 Main Variants):
@@ -155,8 +152,7 @@ Lookback Option Framework:
 
 **Interaction:** Path generation → Running max/min tracking → Payoff from extremes → Discounting → Lookback value
 
-## 5. Mini-Project
-
+## Challenge Round
 Price floating and fixed strike lookback options; compare to European:
 
 ```python
@@ -484,8 +480,7 @@ print("="*80)
 - **Fixed lookback:** 1.6-2.0× European premium (guaranteed optimal execution)
 - **Partial lookback (λ=0.5):** 50% cost reduction vs full lookback, still captures half hindsight benefit
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Floating strike lookback call costs $25; European call (K=$100) costs $10. Why 2.5× premium?**  
 A: Floating strike = min(S_t) ex-post → always buys at lowest price. European fixed strike K=$100. Expected advantage: E[S_T - min] > E[S_T - K] for fixed K. Example: Path min=$85, terminal S_T=$115 → Floating payoff=$30, European payoff=$15 (2× payoff). But not all paths achieve 2× → average ~1.5× payoff. Premium 2.5× reflects: 1.5× higher expected payoff + convexity (optionality on min) + vol sensitivity (higher vega). Intuition: Guaranteed perfect timing worth 150% premium.
 
@@ -504,8 +499,7 @@ A: Floating more expensive (always ITM). Floating payoff: max-S_T ≥ 0 always (
 **Q6: Discrete monitoring (daily) vs continuous monitoring for lookback. Impact on price?**  
 A: Discrete monitoring misses intraday extremes → lower max, higher min → smaller payoff → cheaper option. Example: Intraday spike $100→$130→$105 (close). Daily monitoring: max=$105. Continuous: max=$130. Floating call payoff (continuous) = S_T-min includes intraday extremes → higher value. Difference: 5-10% typically (daily ≈ 92-95% of continuous value). Real markets: Options specified with discrete monitoring (daily close) → practical implementation matches contracts. MC: Discrete monitoring default (252 daily observations standard).
 
-## 7. Key References
-
+## Key References
 - Goldman, Sosin, Gatto (1979): "Path Dependent Options" — Closed-form floating lookback formulas
 - Conze & Viswanathan (1991): "Path Dependent Options: Buy at Low, Sell at High" — Fixed strike lookback pricing
 - [Wikipedia: Lookback Option](https://en.wikipedia.org/wiki/Lookback_option) — Floating/fixed types, hindsight mechanics

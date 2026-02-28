@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # risk management
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: risk management")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
@@ -80,14 +115,47 @@ stress_positions = positions * (1 + stress_return)
 stress_loss = positions.sum() - stress_positions.sum()
 stress_loss_pct = stress_loss / portfolio_value
 
-print(f"Scenario: Market drops 40%, vol triples, correlation → 0.95")
+print(f"Scenario: Market drops 40%, vol triples, correlation â†’ 0.95")
 print(f"Portfolio Loss:               ${stress_loss:>12,.0f}")
 print(f"Portfolio Loss %:             {stress_loss_pct:>11.2%}")
 print()
 
 if stress_loss_pct > 0.50:
-    print("⚠️  WARNING: Portfolio at risk of >50% drawdown in crisis!")
+    print("âš ï¸  WARNING: Portfolio at risk of >50% drawdown in crisis!")
     print("   Recommendation: Reduce leverage or add tail hedges.")
 else:
-    print("✓ Portfolio survives stress test with manageable drawdown.")
+    print("âœ“ Portfolio survives stress test with manageable drawdown.")
 print("=" * 60)
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='risk management - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

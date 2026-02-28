@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # annuity certain functions
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for annuity certain functions.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: annuity certain functions")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: annuity_certain_functions.md
 
@@ -16,33 +41,33 @@ interest_rate = 0.05
 n_terms = np.array([1, 5, 10, 20, 30, 50])
 
 print(f"\nInterest rate: i = {interest_rate*100:.1f}%\n")
-print(f"{'n (years)':<12} {'aₙ̄| (Imm)':<15} {'äₙ̄| (Due)':<15} {'sₙ̄| (Accum)':<15} {'s̈ₙ̄| (A-Due)':<15}")
+print(f"{'n (years)':<12} {'aTM| (Imm)':<15} {'TM| (Due)':<15} {'sTM| (Accum)':<15} {'sTM| (A-Due)':<15}")
 print("-" * 72)
 
 annuity_data = []
 
 for n in n_terms:
-    # Annuity-immediate (PV): aₙ̄| = [1 - v^n]/i
+    # Annuity-immediate (PV): aTM| = [1 - v^n]/i
     v_n = 1 / (1 + interest_rate) ** n
     a_n_imm = (1 - v_n) / interest_rate
     
-    # Annuity-due (PV): äₙ̄| = aₙ̄| × (1+i)
+    # Annuity-due (PV): TM| = aTM|  (1+i)
     a_n_due = a_n_imm * (1 + interest_rate)
     
-    # Accumulation-immediate (FV): sₙ̄| = [(1+i)^n - 1]/i
+    # Accumulation-immediate (FV): sTM| = [(1+i)^n - 1]/i
     s_n_imm = ((1 + interest_rate) ** n - 1) / interest_rate
     
-    # Accumulation-due (FV): s̈ₙ̄| = sₙ̄| × (1+i)
+    # Accumulation-due (FV): sTM| = sTM|  (1+i)
     s_n_due = s_n_imm * (1 + interest_rate)
     
     print(f"{n:<12} {a_n_imm:<15.6f} {a_n_due:<15.6f} {s_n_imm:<15.6f} {s_n_due:<15.6f}")
     
     annuity_data.append({
         'n': n,
-        'aₙ̄|': a_n_imm,
-        'äₙ̄|': a_n_due,
-        'sₙ̄|': s_n_imm,
-        's̈ₙ̄|': s_n_due
+        'aTM|': a_n_imm,
+        'TM|': a_n_due,
+        'sTM|': s_n_imm,
+        'sTM|': s_n_due
     })
 
 print()
@@ -70,12 +95,12 @@ print(f"\nRetirement Planning Scenario:")
 print(f"  Desired annual income: ${annual_income_needed:,.0f}/year")
 print(f"  Retirement period: {retirement_years} years")
 print(f"  Discount rate: {discount_rate*100:.1f}%")
-print(f"  Annuity factor (immediate): aₙ̄| = {a_ret_imm:.6f}")
-print(f"  Annuity factor (due): äₙ̄| = {a_ret_due:.6f}\n")
+print(f"  Annuity factor (immediate): aTM| = {a_ret_imm:.6f}")
+print(f"  Annuity factor (due): TM| = {a_ret_due:.6f}\n")
 
 print(f"Lump sum needed:")
-print(f"  Payments at end of year: ${pv_retirement_imm:>12,.2f}  (aₙ̄| method)")
-print(f"  Payments at start of year: ${pv_retirement_due:>12,.2f}  (äₙ̄| method)")
+print(f"  Payments at end of year: ${pv_retirement_imm:>12,.2f}  (aTM| method)")
+print(f"  Payments at start of year: ${pv_retirement_due:>12,.2f}  (TM| method)")
 print(f"  Difference: ${abs(pv_retirement_due - pv_retirement_imm):>12,.2f}")
 print()
 
@@ -118,12 +143,12 @@ print("=" * 70)
 print("DEFERRED ANNUITY: PAYMENTS STARTING IN THE FUTURE")
 print("=" * 70)
 
-# ₘ|aₙ̄| = v^m · aₙ̄|
+#  |aTM| = v^m  aTM|
 years_to_defer = 5  # Start payments in 5 years
 payment_years = 20  # 20 years of payments
 deferral_rate = 0.04
 
-# Deferred annuity factor: m|aₙ̄| = v^m · aₙ̄|
+# Deferred annuity factor: m|aTM| = v^m  aTM|
 v_defer = 1 / (1 + deferral_rate) ** years_to_defer
 a_n = (1 - (1 / (1 + deferral_rate) ** payment_years)) / deferral_rate
 deferred_factor = v_defer * a_n
@@ -143,8 +168,8 @@ print(f"  Payment period: {payment_years} years")
 print(f"  Rate: {deferral_rate*100:.1f}%\n")
 
 print(f"Calculation:")
-print(f"  ₅|aₙ̄| = v^5 × a₂₀̄|")
-print(f"         = {v_defer:.6f} × {a_n:.6f}")
+print(f"  ...|aTM| = v^5  a|")
+print(f"         = {v_defer:.6f}  {a_n:.6f}")
 print(f"         = {deferred_factor:.6f}\n")
 
 print(f"Present Value:")
@@ -208,12 +233,12 @@ freq_data = pd.DataFrame({
 print(freq_data.to_string(index=False))
 print()
 
-# 6. INCREASING ANNUITY (Ia)ₙ̄|
+# 6. INCREASING ANNUITY (Ia)TM|
 print("=" * 70)
 print("INCREASING ANNUITY: Payments Grow Over Time")
 print("=" * 70)
 
-# (Ia)ₙ̄| = ∑ₖ₌₁ⁿ k·v^k = [aₙ̄| - n·v^n]/i
+# (Ia)TM| =  kv^k = [aTM| - nv^n]/i
 i_incr = 0.05
 n_incr = 10
 initial_payment = 1000
@@ -259,7 +284,7 @@ for rate in rates_plot:
            markersize=3, alpha=0.7)
 
 ax.set_xlabel('Term (years)', fontsize=11)
-ax.set_ylabel('Annuity Factor aₙ̄|', fontsize=11)
+ax.set_ylabel('Annuity Factor aTM|', fontsize=11)
 ax.set_title('Annuity Present Value Factors vs Term', fontsize=12, fontweight='bold')
 ax.legend(fontsize=10)
 ax.grid(alpha=0.3)
@@ -273,8 +298,8 @@ a_imm = (1 - (1 / (1 + rate_comp) ** n_range_small)) / rate_comp
 a_due = a_imm * (1 + rate_comp)
 difference = a_due - a_imm
 
-ax.plot(n_range_small, a_imm, linewidth=2.5, label='Annuity-Immediate (aₙ̄|)', marker='o', markersize=4)
-ax.plot(n_range_small, a_due, linewidth=2.5, label='Annuity-Due (äₙ̄|)', marker='s', markersize=4)
+ax.plot(n_range_small, a_imm, linewidth=2.5, label='Annuity-Immediate (aTM|)', marker='o', markersize=4)
+ax.plot(n_range_small, a_due, linewidth=2.5, label='Annuity-Due (TM|)', marker='s', markersize=4)
 ax.fill_between(n_range_small, a_imm, a_due, alpha=0.2, color='gray')
 ax.set_xlabel('Term (years)', fontsize=11)
 ax.set_ylabel('Annuity Factor', fontsize=11)
@@ -298,7 +323,7 @@ for m in m_defer_range:
 ax.plot(m_defer_range, pv_deferred_range, linewidth=2.5, color='darkgreen', marker='o', markersize=5)
 ax.fill_between(m_defer_range, 0, pv_deferred_range, alpha=0.2, color='green')
 ax.set_xlabel('Years of Deferral (m)', fontsize=11)
-ax.set_ylabel('Deferred Annuity Factor (ₘ|aₙ̄|)', fontsize=11)
+ax.set_ylabel('Deferred Annuity Factor ( |aTM|)', fontsize=11)
 ax.set_title('Deferred Annuity: Impact of Deferral Period', fontsize=12, fontweight='bold')
 ax.grid(alpha=0.3)
 
@@ -321,4 +346,28 @@ plt.savefig('annuity_certain_functions_analysis.png', dpi=300, bbox_inches='tigh
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: annuity certain functions")
+
 

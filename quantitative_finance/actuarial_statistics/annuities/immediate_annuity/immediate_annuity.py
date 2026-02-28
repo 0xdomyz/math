@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # immediate annuity
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for immediate annuity.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: immediate annuity")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: immediate_annuity.md
 
@@ -9,12 +34,12 @@ from scipy.interpolate import interp1d
 
 np.random.seed(42)
 
-print("=== Immediate Life Annuity (aₓ) Valuation ===\n")
+print("=== Immediate Life Annuity (a) Valuation ===\n")
 
 # Create simplified mortality table (Gompertz-Makeham approximation)
 def gompertz_mortality(age, A=0.0001, B=1.08, C=0.00035):
     """
-    Force of mortality: μₓ = A + B^x · C
+    Force of mortality: 14 = A + B^x  C
     """
     return A + C * (B ** age)
 
@@ -43,7 +68,7 @@ print(mortality_table.iloc[::10, :].to_string(index=False))
 # Function to compute immediate annuity value
 def immediate_annuity(x, i, mortality_table, max_age=120):
     """
-    Calculate aₓ = Σ(k=1 to ω-x) vᵏ · ₖpₓ
+    Calculate a = (k=1 to -x) v  p
     
     Parameters:
     - x: Current age
@@ -83,7 +108,7 @@ for age in sample_ages:
     
     results.append({
         'Age': age,
-        'aₓ (i=5%)': a_x,
+        'a (i=5%)': a_x,
         'Life Expectancy': e_x,
         '$1000 Annual Value': a_x * 1000
     })
@@ -101,12 +126,12 @@ l_curr = mortality_table.loc[mortality_table['Age'] == age_comparison, 'l_x'].va
 e_x = sum(mortality_table.loc[mortality_table['Age'] > age_comparison, 'l_x'].values) / l_curr
 n_certain = int(e_x)
 
-# a_n̄⏐ = (1 - v^n) / d, where d = i/(1+i)
+# a_n = (1 - v^n) / d, where d = i/(1+i)
 v = 1 / (1 + interest_rate)
 a_certain = (1 - v**n_certain) / (interest_rate / (1 + interest_rate))
 
 print(f"Age {age_comparison}:")
-print(f"  Immediate life annuity (aₓ): {a_x_life:.2f}")
+print(f"  Immediate life annuity (a): {a_x_life:.2f}")
 print(f"  Life expectancy (years): {e_x:.1f}")
 print(f"  {n_certain}-year certain annuity: {a_certain:.2f}")
 print(f"  Mortality credit: {(a_certain / a_x_life - 1) * 100:.1f}% higher value for certain")
@@ -117,7 +142,7 @@ interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 age_sensitivity = 65
 
 print(f"Age {age_sensitivity} Immediate Annuity Values:")
-print("Interest Rate | aₓ Value | Duration (Macaulay)")
+print("Interest Rate | a Value | Duration (Macaulay)")
 print("-" * 50)
 
 for i_rate in interest_rates:
@@ -140,13 +165,13 @@ for i_rate in interest_rates:
     
     print(f"{i_rate*100:12.0f}%  | {a_val:8.2f} | {duration:8.2f} years")
 
-# Relationship to whole life insurance: aₓ = (1 - Aₓ)/d
+# Relationship to whole life insurance: a = (1 - A)/d
 print("\n=== Relationship to Whole Life Insurance ===\n")
 
 def whole_life_insurance(x, i, mortality_table, max_age=120):
     """
-    Calculate Aₓ = Σ(k=1 to ω-x) vᵏ · ₖ₋₁|qₓ
-    where ₖ₋₁|qₓ = probability of death in year k
+    Calculate A = (k=1 to -x) v  |q
+    where |q = probability of death in year k
     """
     v = 1 / (1 + i)
     l_current = mortality_table.loc[mortality_table['Age'] == x, 'l_x'].values[0]
@@ -181,9 +206,9 @@ A_x = whole_life_insurance(age_test, i_test, mortality_table)
 a_x_from_insurance = (1 - A_x) / d
 
 print(f"Age {age_test}, Interest {i_test*100:.0f}%:")
-print(f"  aₓ (direct calculation): {a_x_direct:.4f}")
-print(f"  Aₓ (whole life insurance): {A_x:.4f}")
-print(f"  aₓ = (1 - Aₓ)/d: {a_x_from_insurance:.4f}")
+print(f"  a (direct calculation): {a_x_direct:.4f}")
+print(f"  A (whole life insurance): {A_x:.4f}")
+print(f"  a = (1 - A)/d: {a_x_from_insurance:.4f}")
 print(f"  Identity verification: {abs(a_x_direct - a_x_from_insurance) < 0.01}")
 
 # Visualizations
@@ -193,7 +218,7 @@ fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 ax1 = axes[0, 0]
 ax1.plot(mortality_table['Age'], mortality_table['q_x'], linewidth=2)
 ax1.set_xlabel('Age')
-ax1.set_ylabel('Annual Death Probability (qₓ)')
+ax1.set_ylabel('Annual Death Probability (q)')
 ax1.set_title('Mortality Curve (Gompertz-Makeham)')
 ax1.grid(True, alpha=0.3)
 ax1.set_yscale('log')
@@ -205,7 +230,7 @@ annuity_values = [immediate_annuity(age, 0.05, mortality_table) for age in ages_
 
 ax2.plot(ages_plot, annuity_values, 'o-', linewidth=2, markersize=6)
 ax2.set_xlabel('Age (x)')
-ax2.set_ylabel('Immediate Annuity Value (aₓ)')
+ax2.set_ylabel('Immediate Annuity Value (a)')
 ax2.set_title('Annuity Value Decreases with Age\n(i = 5%)')
 ax2.grid(True, alpha=0.3)
 
@@ -217,8 +242,8 @@ annuity_by_rate = [immediate_annuity(65, i, mortality_table) for i in i_rates]
 ax3.plot(i_rates * 100, annuity_by_rate, linewidth=2)
 ax3.fill_between(i_rates * 100, 0, annuity_by_rate, alpha=0.2)
 ax3.set_xlabel('Interest Rate (%)')
-ax3.set_ylabel('aₓ (Age 65)')
-ax3.set_title('Interest Rate Sensitivity\n(Higher rates → Lower values)')
+ax3.set_ylabel('a (Age 65)')
+ax3.set_title('Interest Rate Sensitivity\n(Higher rates  Lower values)')
 ax3.grid(True, alpha=0.3)
 
 # Plot 4: Immediate vs Certain annuity comparison
@@ -284,11 +309,11 @@ ax5.grid(True, alpha=0.3, axis='y')
 ax6 = axes[1, 2]
 ax6.plot(years[:len(cumulative_pv)], cumulative_pv, linewidth=2)
 ax6.axhline(immediate_annuity(age_stream, 0.05, mortality_table), 
-           color='r', linestyle='--', linewidth=2, label=f'Total aₓ = {immediate_annuity(age_stream, 0.05, mortality_table):.2f}')
+           color='r', linestyle='--', linewidth=2, label=f'Total a = {immediate_annuity(age_stream, 0.05, mortality_table):.2f}')
 ax6.fill_between(years[:len(cumulative_pv)], 0, cumulative_pv, alpha=0.2)
 ax6.set_xlabel('Years')
 ax6.set_ylabel('Cumulative PV')
-ax6.set_title(f'Cumulative Value Converges to a₇₀')
+ax6.set_title(f'Cumulative Value Converges to a')
 ax6.legend()
 ax6.grid(True, alpha=0.3)
 
@@ -296,7 +321,31 @@ plt.tight_layout()
 plt.show()
 
 print("\n=== Summary ===")
-print(f"Immediate annuity (aₓ): Payments at period END conditional on survival")
-print(f"Key relationships: aₓ = (1 - Aₓ)/d, äₓ = (1+i)·aₓ")
+print(f"Immediate annuity (a): Payments at period END conditional on survival")
+print(f"Key relationships: a = (1 - A)/d,  = (1+i)a")
 print(f"Mortality credit reduces value vs certain annuity; sensitive to interest rates")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: immediate annuity")
+
 

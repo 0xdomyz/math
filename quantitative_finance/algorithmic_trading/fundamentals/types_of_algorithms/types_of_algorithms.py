@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # types of algorithms
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: types of algorithms")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -257,14 +292,14 @@ for sim in range(n_simulations):
 print("\n1. EXECUTION ALGORITHM (VWAP):")
 print(f"   Primary Metric: Slippage (minimize transaction cost)")
 vwap_slippages = [r['slippage_bps'] for r in vwap_results]
-print(f"   Avg Slippage: {np.mean(vwap_slippages):.2f} ± {np.std(vwap_slippages):.2f} bps")
+print(f"   Avg Slippage: {np.mean(vwap_slippages):.2f} Â± {np.std(vwap_slippages):.2f} bps")
 print(f"   Objective: Track benchmark, minimal deviation")
 
 print("\n2. ALPHA ALGORITHM (Momentum):")
 print(f"   Primary Metric: Return (maximize P&L)")
 if len(momentum_results) > 0:
     momentum_returns = [r['return_pct'] for r in momentum_results]
-    print(f"   Avg Return: {np.mean(momentum_returns):.2f}% ± {np.std(momentum_returns):.2f}%")
+    print(f"   Avg Return: {np.mean(momentum_returns):.2f}% Â± {np.std(momentum_returns):.2f}%")
     print(f"   Sharpe Ratio: {np.mean(momentum_returns) / np.std(momentum_returns) if np.std(momentum_returns) > 0 else 0:.2f}")
 else:
     print(f"   No trades executed")
@@ -274,7 +309,7 @@ print("\n3. MARKET MAKING:")
 print(f"   Primary Metric: P&L from spread capture")
 mm_pnls = [r['pnl'] for r in mm_results]
 mm_trades = [r['trades'] for r in mm_results]
-print(f"   Avg P&L: ${np.mean(mm_pnls):.2f} ± ${np.std(mm_pnls):.2f}")
+print(f"   Avg P&L: ${np.mean(mm_pnls):.2f} Â± ${np.std(mm_pnls):.2f}")
 print(f"   Avg Trades: {np.mean(mm_trades):.1f}")
 print(f"   Objective: Provide liquidity, earn bid-ask spread")
 
@@ -346,5 +381,38 @@ for i, (bar, obj) in enumerate(zip(bars, objectives)):
 plt.tight_layout()
 plt.savefig('algorithm_types_comparison.png', dpi=100, bbox_inches='tight')
 print("\n" + "="*70)
-print("✓ Visualization saved: algorithm_types_comparison.png")
+print("âœ“ Visualization saved: algorithm_types_comparison.png")
 plt.show()
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='types of algorithms - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

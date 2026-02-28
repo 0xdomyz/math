@@ -1,11 +1,11 @@
-# Exotic Options: Overview & Classification
+﻿# Exotic Options: Overview & Classification
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Non-standard options with payoff structures or exercise features departing from vanilla calls/puts; includes barriers, lookbacks, Asians, baskets, and exotics with path-dependency  
 **Purpose:** Provide customized risk exposure; reduce hedging costs vs vanilla replication; enable structured products; match specific market views  
 **Prerequisites:** Vanilla option pricing, Monte Carlo methods, PDE solvers, path-dependent payoffs, risk-neutral valuation
 
-## 2. Comparative Framing
+## Comparative Framing
 | Category | Type | Payoff | Path-Dependent | Pricing |
 |----------|------|--------|----------------|---------|
 | **Barrier** | Down-and-out call | Standard if S>L | Yes | Lattice/MC |
@@ -17,8 +17,7 @@
 | **Cliquet** | Reset coupon | ∑max(S_i/S_{i-1}-K,0) | Reset dates | Closed-form each |
 | **Variance Swap** | Realized variance | (σ_realized - σ_fixed)² | Yes | Model-dependent |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Barrier Example:**  
 Down-and-out call: S=$110, K=$100, r=5%, σ=20%, T=1yr, barrier L=$95. As long as S>$95, acts like vanilla. If S touches $95, option worthless. Premium less than vanilla (protection removed).
 
@@ -34,7 +33,7 @@ Two stocks, each σ=25%. Uncorrelated (ρ=0): Basket call moderate volatility. P
 **Quanto Forex Timing:**  
 Japanese stock, USD investor. If JPY weakens, even if Nikkei rises, investor returns reduced. Quanto call guarantees FX rate, removes currency risk.
 
-## 4. Layer Breakdown
+## Layer Breakdown
 ```
 Exotic Options Classification & Framework:
 
@@ -179,106 +178,14 @@ Exotic Options Classification & Framework:
 
 **Interaction:** Exotic payoff structure → path-dependent valuation → numerical method choice → Greeks & Greeks of Greeks → risk management.
 
-## 5. Mini-Project
-Classify and compare exotic option structures:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Define exotic types and characteristics
-exotics_data = {
-    'Option': [
-        'Down-and-Out Call', 'Up-and-Out Put', 'Down-and-In Call',
-        'Asian Arithmetic Call', 'Asian Geometric Call', 'Lookback Call',
-        'Basket Call (2 assets)', 'Chooser Option', 'Cliquet Call',
-        'Quanto Call', 'Swing Option', 'Binary One-Touch'
-    ],
-    'Path-Dependent': [
-        'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes',
-        'Weakly', 'No', 'Weakly', 'Weakly', 'Yes', 'Yes'
-    ],
-    'Pricing Difficulty': [
-        'Medium', 'Medium', 'Medium', 'High', 'Medium', 'High',
-        'High', 'Low', 'Low', 'Low', 'High', 'Medium'
-    ],
-    'Best Method': [
-        'Lattice', 'Lattice', 'Lattice', 'MC/FD', 'Closed-form', 'MC',
-        'MC', 'Closed-form', 'Closed-form', 'Closed-form', 'MC/FD', 'Lattice'
-    ],
-    'Primary Use': [
-        'Cost reduction', 'Cost reduction', 'Leverage', 'Averaging hedge',
-        'Averaging (math)', 'Best-price capture', 'Multi-asset exposure',
-        'Optionality timing', 'Periodic coupons', 'Currency hedging',
-        'Energy trading', 'Digital payoff'
-    ]
-}
-
-df = pd.DataFrame(exotics_data)
-
-print("\n" + "="*100)
-print("EXOTIC OPTIONS: CLASSIFICATION & CHARACTERISTICS")
-print("="*100)
-print(df.to_string(index=False))
-
-# Complexity matrix
-fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-
-pricing_map = {'Low': 1, 'Medium': 2, 'High': 3}
-df['Pricing_Score'] = df['Pricing Difficulty'].map(pricing_map)
-path_dep_map = {'No': 0, 'Weakly': 1, 'Yes': 2}
-df['Path_Score'] = df['Path-Dependent'].map(path_dep_map)
-
-colors = {'Lattice': 'blue', 'MC': 'red', 'MC/FD': 'purple', 
-          'Closed-form': 'green', 'Lattice/MC': 'orange', 'FD': 'brown'}
-color_list = [colors.get(m, 'gray') for m in df['Best Method']]
-
-scatter = ax.scatter(df['Path_Score'], df['Pricing_Score'], s=300, 
-                     c=color_list, alpha=0.6, edgecolors='black', linewidth=1.5)
-
-for idx, row in df.iterrows():
-    ax.annotate(row['Option'], 
-               (row['Path_Score'], row['Pricing_Score']),
-               fontsize=8, ha='center', va='center', fontweight='bold')
-
-ax.set_xlabel('Path Dependence (0=None, 1=Weak, 2=Strong)', fontsize=11, fontweight='bold')
-ax.set_ylabel('Pricing Difficulty (1=Low, 2=Med, 3=High)', fontsize=11, fontweight='bold')
-ax.set_title('Exotic Options: Complexity & Valuation Method', fontsize=13, fontweight='bold')
-ax.set_xlim(-0.3, 2.3)
-ax.set_ylim(0.7, 3.3)
-ax.grid(alpha=0.3)
-ax.set_xticks([0, 1, 2])
-ax.set_yticks([1, 2, 3])
-
-# Legend for colors
-from matplotlib.patches import Patch
-legend_elements = [Patch(facecolor=color, edgecolor='black', label=method) 
-                  for method, color in colors.items()]
-ax.legend(handles=legend_elements, loc='upper right', fontsize=9)
-
-plt.tight_layout()
-plt.show()
-
-# Summary statistics
-print("\n" + "="*50)
-print("COMPLEXITY DISTRIBUTION:")
-print("="*50)
-print("\nBy Pricing Difficulty:")
-print(df['Pricing Difficulty'].value_counts().to_string())
-print("\nBy Path Dependence:")
-print(df['Path-Dependent'].value_counts().to_string())
-print("\nBy Recommended Method:")
-print(df['Best Method'].value_counts().to_string())
-```
-
-## 6. Challenge Round
+## Challenge Round
 - Why are Asian options cheaper than vanilla options?
 - Explain reflection principle for barrier options (boundary condition)
 - How does correlation affect basket option pricing?
 - Design a structured product combining barrier + cliquet
 - Compare variance swap pricing vs volatility swap
 
-## 7. Key References
+## Key References
 - [Zhang, P. G. "Exotic Options" (2nd ed., 1998)](https://www.wiley.com/en-us/Exotic+Options%2C+2nd+Edition-p-9780471975946) — Comprehensive exotic reference
 - [Haug, E. G. "Complete Guide to Option Pricing Formulas"](https://www.wiley.com/en-us/Complete+Guide+to+Option+Pricing+Formulas%2C+2nd+Edition-p-9780071389976) — Formulas & examples
 - [Wilmott, P. "On Quant Finance" (Volume 2)](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119287742) — Theory & implementation

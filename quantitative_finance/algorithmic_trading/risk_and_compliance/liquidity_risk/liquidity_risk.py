@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # liquidity risk
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: liquidity risk")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -16,7 +51,7 @@ normal_depth = 10000  # shares per price level
 normal_resilience = 0.90  # 90% of liquidity replenishes each period
 
 # Scenario 2: Stressed liquidity
-stressed_spread = 0.20  # 20 cents (10× wider)
+stressed_spread = 0.20  # 20 cents (10Ã— wider)
 stressed_depth = 1000  # shares (90% reduction)
 stressed_resilience = 0.50  # 50% replenishment (slower recovery)
 
@@ -88,7 +123,7 @@ print()
 
 print("SCENARIO 2: STRESSED LIQUIDITY (Crisis)")
 print("-" * 80)
-print(f"  Bid-Ask Spread:           ${stressed_spread:.2f}  ({stressed_spread/initial_price*10000:.0f} bps)  [10× wider]")
+print(f"  Bid-Ask Spread:           ${stressed_spread:.2f}  ({stressed_spread/initial_price*10000:.0f} bps)  [10Ã— wider]")
 print(f"  Order Book Depth:         {stressed_depth:,} shares per level  [90% reduction]")
 print(f"  Liquidity Resilience:     {stressed_resilience:.0%} replenishment  [slower recovery]")
 print(f"\n  Average Execution Price:  ${avg_price_stressed:.4f}")
@@ -98,7 +133,7 @@ print()
 
 print("COMPARISON")
 print("-" * 80)
-print(f"  Slippage Increase:        {slippage_stressed / slippage_normal:.1f}× higher in crisis")
+print(f"  Slippage Increase:        {slippage_stressed / slippage_normal:.1f}Ã— higher in crisis")
 print(f"  Additional Cost:          ${(avg_price_normal - avg_price_stressed) * order_size:,.0f}")
 print("=" * 80)
 
@@ -143,3 +178,36 @@ print(f"{'Normal (5-day VWAP)':<25} {slippage_normal:<20.1f} ${(initial_price - 
 print(f"{'Stressed (Urgent)':<25} {slippage_stressed:<20.1f} ${(initial_price - avg_price_stressed) * order_size:<19,.0f} {'1 day (forced)':<20}")
 print(f"{'Crisis (Firesale)':<25} {slippage_stressed * 2:<20.1f} ${(initial_price - avg_price_stressed) * order_size * 2:<19,.0f} {'Immediate (minutes)':<20}")
 print("=" * 80)
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='liquidity risk - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

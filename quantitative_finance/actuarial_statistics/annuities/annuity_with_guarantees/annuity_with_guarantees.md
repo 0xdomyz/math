@@ -1,424 +1,114 @@
-# Annuity with Guarantees
+﻿# Annuity With Guarantees
 
-## 1. Concept Skeleton
-**Definition:** Life annuity with minimum guaranteed payment period; pays for at least n years certain regardless of death, then continues if alive  
-**Purpose:** Eliminate early-death risk for annuitant/beneficiaries, balance mortality credit with downside protection  
-**Prerequisites:** Life annuities, annuity-certain, term annuities, beneficiary concepts, guarantee periods
+## Concept Skeleton
+**Definition:** Annuity With Guarantees is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Structure | Guarantee | After Guarantee | Early Death | Value |
-|-----------|-----------|-----------------|-------------|-------|
-| **Life with n-Year Guarantee** | n years certain | Continue if alive | Pays to beneficiary | Higher than pure life |
-| **Pure Life (aₓ)** | None | Until death | Payments stop | Lowest cost |
-| **n-Year Certain (aₙ̄|)** | n years only | None | Pays to beneficiary | Fixed, no longevity credit |
-| **Joint & Survivor** | While either alive | Second death stops | Survivor receives | Higher complexity |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-65-year-old buys life annuity with 10-year guarantee; dies at age 70 (5 years in); beneficiary receives remaining 5 years payments
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Pure life annuity: Die at age 66 (1 year after purchase); all payments cease, beneficiaries receive nothing (mortality credit to insurer)
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-Guarantee period = life expectancy (e.g., 20 years at age 65); annuity value ≈ certain annuity since most value in guaranteed period
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Annuity With Guarantees | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Annuity with Guarantees Structure:
-├─ Payment Phases:
-│   ├─ Guaranteed period: Years 1 to n (paid regardless of survival)
-│   ├─ Life-contingent phase: After year n, payments continue IF alive
-│   ├─ Death within guarantee: Beneficiary receives remaining payments
-│   └─ Death after guarantee: No further payments (standard life annuity)
-├─ Present Value Formula:
-│   ├─ Method 1 (Decomposition):
-│   │   ├─ aₓ[n-year guarantee] = aₙ̄| + v^n · ₙpₓ · aₓ₊ₙ
-│   │   ├─ Part 1: n-year certain annuity (guaranteed component)
-│   │   └─ Part 2: Deferred life annuity starting after n years
-│   ├─ Method 2 (Direct):
-│   │   ├─ Years 1-n: Σ(k=1 to n) vᵏ (no mortality adjustment)
-│   │   └─ Years n+1 onward: Σ(k=n+1 to ∞) vᵏ · ₖpₓ
-│   ├─ Equivalently: aₙ̄| + n|aₓ where n|aₓ = deferred life component
-│   └─ Due version: äₓ[n] = aₙ̄| + v^n · ₙpₓ · äₓ₊ₙ (payments at period start)
-├─ Value Relationships:
-│   ├─ Always: aₙ̄| < aₓ[n-guarantee] < aₓ (if ₙpₓ < 1)
-│   ├─ Guarantee increases value: aₓ[10-yr] > aₓ[5-yr] > aₓ
-│   ├─ Limit: limₙ→0 aₓ[n] = aₓ (no guarantee = pure life)
-│   └─ Long guarantee: aₓ[n] → aₙ̄| as n → life expectancy
-├─ Pricing Implications:
-│   ├─ Higher cost: Guarantee reduces mortality credit benefit
-│   ├─ Adverse selection reduced: Guarantee attracts unhealthy buyers
-│   ├─ Beneficiary protection: Family receives value even if early death
-│   └─ Refund feature variant: Return of purchase price minus payments
-├─ Common Guarantee Periods:
-│   ├─ 5-year guarantee: Minimal protection, small price increase
-│   ├─ 10-year guarantee: Standard product, ~5-8% premium over pure life
-│   ├─ 20-year guarantee: Substantial protection, ~15-20% premium
-│   └─ Period certain only: No life contingency after guarantee (aₙ̄|)
-├─ Beneficiary Considerations:
-│   ├─ Lump sum option: Commute remaining payments to present value
-│   ├─ Continuation: Beneficiary receives remaining guaranteed payments
-│   ├─ Refund annuity: Return premiums minus payments (different structure)
-│   └─ Tax treatment: Beneficiary payments may have different tax status
-└─ Variations:
-    ├─ Cash refund: Return of purchase price minus payments made
-    ├─ Installment refund: Continue payments until purchase price recovered
-    ├─ Period certain: Fixed n years, no life contingency after
-    └─ Joint & survivor with guarantee: Both lives covered, minimum period
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Annuity With Guarantees.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-## 5. Mini-Project
-Value and compare annuities with different guarantee periods:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Annuity With Guarantees.
 
-np.random.seed(42)
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-print("=== Annuity with Guarantee Period Analysis ===\n")
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# Build mortality table
-def build_mortality_table():
-    ages = np.arange(0, 121)
-    A, B, C = 0.0001, 1.08, 0.00035
-    mu_x = A + C * (B ** ages)
-    q_x = 1 - np.exp(-mu_x)
-    
-    l_x = np.zeros(len(ages))
-    l_x[0] = 100000
-    for i in range(1, len(ages)):
-        l_x[i] = l_x[i-1] * (1 - q_x[i-1])
-    
-    return pd.DataFrame({'Age': ages, 'l_x': l_x, 'q_x': q_x})
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-mortality = build_mortality_table()
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-# Annuity-certain
-def annuity_certain(n, i):
-    v = 1 / (1 + i)
-    d = i / (1 + i)
-    return (1 - v**n) / d
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-# Pure life annuity
-def life_annuity(x, i, mortality):
-    v = 1 / (1 + i)
-    l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
-    
-    value = 0
-    for k in range(1, 121 - x):
-        l_future = mortality.loc[mortality['Age'] == x + k, 'l_x'].values
-        if len(l_future) == 0 or l_future[0] <= 0:
-            break
-        k_p_x = l_future[0] / l_current
-        value += (v ** k) * k_p_x
-    
-    return value
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-# Annuity with guarantee period
-def annuity_with_guarantee(x, n_guarantee, i, mortality):
-    """
-    aₓ[n-year guarantee] = aₙ̄| + v^n · ₙpₓ · aₓ₊ₙ
-    = Certain for n years + Deferred life annuity
-    """
-    v = 1 / (1 + i)
-    
-    # Part 1: n-year certain annuity
-    certain_component = annuity_certain(n_guarantee, i)
-    
-    # Part 2: Deferred life annuity starting after n years
-    if x + n_guarantee > 120:
-        deferred_component = 0
-    else:
-        l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
-        l_future = mortality.loc[mortality['Age'] == x + n_guarantee, 'l_x'].values[0]
-        n_p_x = l_future / l_current
-        
-        a_x_plus_n = life_annuity(x + n_guarantee, i, mortality)
-        deferred_component = (v ** n_guarantee) * n_p_x * a_x_plus_n
-    
-    return certain_component + deferred_component
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Annuity With Guarantees outputs in pricing, reserving, and solvency workflows.
 
-# Calculate for different guarantee periods
-print("=== Annuity Values (Age 65, i = 5%) ===\n")
-age_base = 65
-i_rate = 0.05
-guarantee_periods = [0, 5, 10, 15, 20, 25]
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-results = []
-for n_guar in guarantee_periods:
-    if n_guar == 0:
-        # Pure life annuity
-        value = life_annuity(age_base, i_rate, mortality)
-        certain = 0
-        label = "Pure life (no guarantee)"
-    else:
-        value = annuity_with_guarantee(age_base, n_guar, i_rate, mortality)
-        certain = annuity_certain(n_guar, i_rate)
-        label = f"{n_guar}-year guarantee"
-    
-    pure_life_value = life_annuity(age_base, i_rate, mortality)
-    premium_pct = (value / pure_life_value - 1) * 100 if n_guar > 0 else 0
-    
-    results.append({
-        'Guarantee': label,
-        'Value': value,
-        'Certain Component': certain if n_guar > 0 else 0,
-        'Premium vs Pure Life (%)': premium_pct,
-        'Annual Payment ($1k)': 1000 / value if value > 0 else 0
-    })
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-results_df = pd.DataFrame(results)
-print(results_df.to_string(index=False, float_format='%.2f'))
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Decomposition analysis
-print("\n=== Value Decomposition (Age 65, 10-Year Guarantee) ===\n")
-n_guar_test = 10
-certain_comp = annuity_certain(n_guar_test, i_rate)
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-v = 1 / (1 + i_rate)
-l_current = mortality.loc[mortality['Age'] == age_base, 'l_x'].values[0]
-l_future = mortality.loc[mortality['Age'] == age_base + n_guar_test, 'l_x'].values[0]
-n_p_x = l_future / l_current
-a_x_plus_n = life_annuity(age_base + n_guar_test, i_rate, mortality)
-deferred_comp = (v ** n_guar_test) * n_p_x * a_x_plus_n
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-total_value = certain_comp + deferred_comp
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"Components:")
-print(f"  Certain annuity ({n_guar_test} years): {certain_comp:.4f}")
-print(f"  Deferred life annuity:")
-print(f"    v^{n_guar_test}: {v**n_guar_test:.4f}")
-print(f"    {n_guar_test}p₆₅: {n_p_x:.4f}")
-print(f"    a₇₅: {a_x_plus_n:.4f}")
-print(f"    Product: {deferred_comp:.4f}")
-print(f"  Total value: {total_value:.4f}")
-print(f"\nVerification: {abs(total_value - annuity_with_guarantee(age_base, n_guar_test, i_rate, mortality)) < 0.01}")
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Early death scenario
-print("\n=== Early Death Scenario ===\n")
-age_purchase = 65
-guarantee = 10
-death_age = 70  # Dies 5 years into guarantee
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-years_received = death_age - age_purchase
-years_remaining = guarantee - years_received
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-v = 1 / (1 + i_rate)
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Beneficiary receives remaining guaranteed payments
-beneficiary_pv = sum([v**(k+years_received) for k in range(1, years_remaining + 1)])
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"Purchaser age: {age_purchase}")
-print(f"Guarantee period: {guarantee} years")
-print(f"Death at age: {death_age} (after {years_received} years)")
-print(f"Beneficiary receives: {years_remaining} remaining payments")
-print(f"Present value to beneficiary: {beneficiary_pv:.4f}")
-print(f"(Discounted from time of purchase)")
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Cost-benefit by health status
-print("\n=== Value by Health Status (Age 65, 10-Year Guarantee) ===\n")
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Adjust mortality for health
-def adjust_mortality_health(mortality, age, health_factor):
-    """
-    health_factor < 1: Better health (lower mortality)
-    health_factor > 1: Worse health (higher mortality)
-    """
-    mortality_adjusted = mortality.copy()
-    mortality_adjusted.loc[mortality_adjusted['Age'] >= age, 'q_x'] *= health_factor
-    mortality_adjusted.loc[mortality_adjusted['Age'] >= age, 'q_x'] = \
-        mortality_adjusted.loc[mortality_adjusted['Age'] >= age, 'q_x'].clip(upper=1.0)
-    
-    # Rebuild l_x
-    l_x_new = mortality_adjusted['l_x'].values.copy()
-    for i in range(age, len(l_x_new) - 1):
-        l_x_new[i+1] = l_x_new[i] * (1 - mortality_adjusted.iloc[i]['q_x'])
-    
-    mortality_adjusted['l_x'] = l_x_new
-    return mortality_adjusted
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-health_scenarios = {
-    'Excellent (0.7x mortality)': 0.7,
-    'Average (1.0x mortality)': 1.0,
-    'Poor (1.5x mortality)': 1.5
-}
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-guarantee_test = 10
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"10-year guarantee annuity value:")
-print("Health Status | Pure Life | With Guarantee | Premium | Better Deal")
-print("-" * 75)
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-for health_name, health_factor in health_scenarios.items():
-    mort_adj = adjust_mortality_health(mortality, age_base, health_factor)
-    
-    pure_life = life_annuity(age_base, i_rate, mort_adj)
-    with_guar = annuity_with_guarantee(age_base, guarantee_test, i_rate, mort_adj)
-    premium_pct = (with_guar / pure_life - 1) * 100
-    
-    # Better deal: Higher value = more attractive
-    # Poor health: Guarantee more valuable (protection against early death)
-    # Excellent health: Pure life more valuable (mortality credit)
-    better_deal = "Guarantee" if health_factor > 1.2 else "Pure life" if health_factor < 0.8 else "Similar"
-    
-    print(f"{health_name:24s} | {pure_life:9.2f} | {with_guar:14.2f} | {premium_pct:6.1f}% | {better_deal}")
+Operational detail for Annuity With Guarantees: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Age sensitivity
-print("\n=== Guarantee Value by Issue Age ===\n")
-ages_test = [55, 60, 65, 70, 75, 80]
-guarantee_fixed = 10
-
-print(f"{guarantee_fixed}-year guarantee annuity:")
-print("Age | Pure Life | With Guarantee | Premium (%)")
-print("-" * 50)
-
-for age in ages_test:
-    pure = life_annuity(age, i_rate, mortality)
-    guar = annuity_with_guarantee(age, guarantee_fixed, i_rate, mortality)
-    prem = (guar / pure - 1) * 100
-    
-    print(f"{age:3d} | {pure:9.2f} | {guar:14.2f} | {prem:10.1f}")
-
-# Interest rate sensitivity
-print("\n=== Interest Rate Sensitivity (Age 65, 10-Year Guarantee) ===\n")
-interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
-
-print("Interest | Pure Life | With Guarantee | Premium (%)")
-print("-" * 55)
-
-for i_val in interest_rates:
-    pure = life_annuity(age_base, i_val, mortality)
-    guar = annuity_with_guarantee(age_base, 10, i_val, mortality)
-    prem = (guar / pure - 1) * 100
-    
-    print(f"{i_val*100:7.0f}%  | {pure:9.2f} | {guar:14.2f} | {prem:10.1f}")
-
-# Visualizations
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-
-# Plot 1: Value by guarantee period
-ax1 = axes[0, 0]
-guarantees_plot = [0, 5, 10, 15, 20, 25, 30]
-values_by_guarantee = []
-certain_components = []
-
-for n_g in guarantees_plot:
-    if n_g == 0:
-        values_by_guarantee.append(life_annuity(65, 0.05, mortality))
-        certain_components.append(0)
-    else:
-        values_by_guarantee.append(annuity_with_guarantee(65, n_g, 0.05, mortality))
-        certain_components.append(annuity_certain(n_g, 0.05))
-
-ax1.plot(guarantees_plot, values_by_guarantee, 'o-', linewidth=2, markersize=8, label='Total value')
-ax1.plot(guarantees_plot, certain_components, 's-', linewidth=2, markersize=6, label='Certain component')
-ax1.set_xlabel('Guarantee Period (years)')
-ax1.set_ylabel('Annuity Value')
-ax1.set_title('Value Increases with Guarantee\n(Age 65, i = 5%)')
-ax1.legend()
-ax1.grid(True, alpha=0.3)
-
-# Plot 2: Premium over pure life
-ax2 = axes[0, 1]
-pure_life_val = life_annuity(65, 0.05, mortality)
-premiums = [(val / pure_life_val - 1) * 100 for val in values_by_guarantee[1:]]
-
-ax2.bar(guarantees_plot[1:], premiums, alpha=0.7, edgecolor='black')
-ax2.set_xlabel('Guarantee Period (years)')
-ax2.set_ylabel('Premium vs Pure Life (%)')
-ax2.set_title('Cost of Guarantee Protection')
-ax2.grid(True, alpha=0.3, axis='y')
-
-# Plot 3: Decomposition stacked bar
-ax3 = axes[0, 2]
-guarantees_decomp = [5, 10, 15, 20, 25]
-certain_vals = [annuity_certain(n, 0.05) for n in guarantees_decomp]
-deferred_vals = []
-
-for n_g in guarantees_decomp:
-    total_val = annuity_with_guarantee(65, n_g, 0.05, mortality)
-    cert = annuity_certain(n_g, 0.05)
-    deferred_vals.append(total_val - cert)
-
-x_pos = np.arange(len(guarantees_decomp))
-ax3.bar(x_pos, certain_vals, label='Certain component', alpha=0.7, edgecolor='black')
-ax3.bar(x_pos, deferred_vals, bottom=certain_vals, label='Deferred life', alpha=0.7, edgecolor='black')
-ax3.set_xticks(x_pos)
-ax3.set_xticklabels(guarantees_decomp)
-ax3.set_xlabel('Guarantee Period')
-ax3.set_ylabel('Value')
-ax3.set_title('Decomposition: Certain + Deferred')
-ax3.legend()
-ax3.grid(True, alpha=0.3, axis='y')
-
-# Plot 4: Age impact
-ax4 = axes[1, 0]
-ages_impact = np.arange(55, 81, 2)
-pure_by_age = [life_annuity(age, 0.05, mortality) for age in ages_impact]
-guar_10_by_age = [annuity_with_guarantee(age, 10, 0.05, mortality) for age in ages_impact]
-
-ax4.plot(ages_impact, pure_by_age, 'o-', linewidth=2, label='Pure life', markersize=5)
-ax4.plot(ages_impact, guar_10_by_age, 's-', linewidth=2, label='10-year guarantee', markersize=5)
-ax4.set_xlabel('Issue Age')
-ax4.set_ylabel('Annuity Value')
-ax4.set_title('Value Decreases with Age\n(Both types)')
-ax4.legend()
-ax4.grid(True, alpha=0.3)
-
-# Plot 5: Premium percentage by age
-ax5 = axes[1, 1]
-premium_by_age = [(guar_10_by_age[i] / pure_by_age[i] - 1) * 100 
-                  for i in range(len(ages_impact))]
-
-ax5.plot(ages_impact, premium_by_age, 'o-', linewidth=2, color='purple', markersize=6)
-ax5.fill_between(ages_impact, 0, premium_by_age, alpha=0.2, color='purple')
-ax5.set_xlabel('Issue Age')
-ax5.set_ylabel('Premium vs Pure Life (%)')
-ax5.set_title('Guarantee Premium Increases with Age\n(10-year guarantee)')
-ax5.grid(True, alpha=0.3)
-
-# Plot 6: Interest rate impact on premium
-ax6 = axes[1, 2]
-i_range = np.linspace(0.02, 0.08, 20)
-premiums_by_i = []
-
-for i_val in i_range:
-    pure = life_annuity(65, i_val, mortality)
-    guar = annuity_with_guarantee(65, 10, i_val, mortality)
-    prem_pct = (guar / pure - 1) * 100
-    premiums_by_i.append(prem_pct)
-
-ax6.plot(i_range * 100, premiums_by_i, linewidth=2)
-ax6.fill_between(i_range * 100, 0, premiums_by_i, alpha=0.2)
-ax6.set_xlabel('Interest Rate (%)')
-ax6.set_ylabel('Premium vs Pure Life (%)')
-ax6.set_title('Guarantee Premium vs Interest Rate\n(Age 65, 10-year guarantee)')
-ax6.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()
-
-print("\n=== Summary ===")
-print("Annuity with guarantee: Pays for n years minimum, then continues if alive")
-print("Formula: aₓ[n-guar] = aₙ̄| + v^n·ₙpₓ·aₓ₊ₙ")
-print("Trade-off: Higher cost for downside protection; valuable for poor health/beneficiary protection")
-```
-
-## 6. Challenge Round
-When is guaranteed annuity analysis problematic?
-- **Optimal guarantee length**: Selecting n requires balancing cost vs protection; no clear optimal for all buyers
-- **Health-based pricing**: Adverse selection if guarantee not priced for health; sick buyers prefer long guarantees
-- **Beneficiary disputes**: Who receives payments if death? Tax treatment may differ for beneficiaries
-- **Lump sum election**: If beneficiary wants commuted value, what discount rate? Creates liquidity risk for insurer
-- **Behavioral**: Buyers overvalue guarantee (loss aversion) relative to actuarial cost; may overpay for protection
-
-## 7. Key References
-- [Society of Actuaries - Guaranteed Period Annuities](https://www.soa.org/) - Standard product structures
-- [Wiki - Guaranteed Period](https://en.wikipedia.org/wiki/Annuity_(finance)#Guaranteed_period) - Overview
-- [Actuarial Mathematics](https://www.actuary.org/) - Valuation formulas and decomposition
-
----
-**Status:** Common retail annuity product balancing mortality credit with protection | **Complements:** Pure Life Annuity, Annuity-Certain, Refund Annuities

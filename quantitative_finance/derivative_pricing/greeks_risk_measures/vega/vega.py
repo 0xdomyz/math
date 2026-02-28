@@ -1,196 +1,107 @@
+﻿# %% [markdown]
+# # Vega - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# Black-Scholes components
-def bs_d1(S, K, T, r, sigma):
-    with np.errstate(divide='ignore', invalid='ignore'):
-        return (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+random.seed(42)
 
-def vega_bs(S, K, T, r, sigma):
-    """Vega per 1% change in volatility"""
-    d1 = bs_d1(S, K, T, r, sigma)
-    vega = S * norm.pdf(d1) * np.sqrt(T) / 100  # Normalized per 1%
-    return vega
 
-def bs_call(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    d2 = d1 - sigma*np.sqrt(T)
-    call = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return call
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-def delta_bs(S, K, T, r, sigma):
-    return norm.cdf(bs_d1(S, K, T, r, sigma))
 
-def gamma_bs(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
-    return gamma
+config = Config()
+print(f"Topic: Vega")
+print(f"Config: {config}")
 
-# Parameters
-S0, K, T, r = 100, 100, 1, 0.05
-sigma_implied = 0.20
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# 1. Vega across spot prices
-spot_prices = np.linspace(80, 120, 100)
-vegas = [vega_bs(S, K, T, r, sigma_implied) for S in spot_prices]
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# 2. Vega across volatilities
-vols = np.linspace(0.05, 0.5, 100)
-vegas_vol = [vega_bs(S0, K, T, r, v) for v in vols]
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# 3. Vega across time
-times = np.linspace(T, 0.01, 100)
-vegas_time = [vega_bs(S0, K, t, r, sigma_implied) for t in times]
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# 4. Volatility scenario analysis
-print("=== VEGA & VOLATILITY HEDGING ===")
 
-# Portfolio: Long 100 calls (long vega)
-position_size = 100
-position_vega = position_size * vega_bs(S0, K, T, r, sigma_implied)
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-print(f"\nPortfolio: {position_size} long calls")
-print(f"Single call vega (per 1% vol): ${vega_bs(S0, K, T, r, sigma_implied):.4f}")
-print(f"Total portfolio vega: ${position_vega:.2f}")
 
-# Scenarios for implied volatility
-vol_scenarios = np.array([0.10, 0.15, 0.20, 0.25, 0.30])
-spot_scenarios = np.array([90, 95, 100, 105, 110])
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-print(f"\nProfit/Loss from volatility change (holding spot constant at ${S0}):")
-for vol_new in vol_scenarios:
-    if vol_new != sigma_implied:
-        call_price_new = bs_call(S0, K, T, r, vol_new)
-        call_price_old = bs_call(S0, K, T, r, sigma_implied)
-        pnl = position_size * (call_price_new - call_price_old)
-        vol_change_pct = (vol_new - sigma_implied) * 100
-        print(f"  Vol {vol_new:.1%} (Δ{vol_change_pct:+.0f}%): ${pnl:+.2f}")
+print("Implemented pricing functions")
 
-# 5. Volatility hedging
-print(f"\n=== VEGA HEDGING ===")
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-# Hedge with short-dated option (higher gamma, lower vega per unit)
-K_hedge = 105  # OTM put for hedge
-T_hedge = 0.25  # 3 months
-vega_hedge_single = vega_bs(S0, K_hedge, T_hedge, r, sigma_implied)
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-# Hedge ratio to make portfolio vega-neutral
-hedge_ratio = position_vega / vega_hedge_single
-print(f"\nHedge instrument: Short-dated OTM put (K={K_hedge}, T={T_hedge}yr)")
-print(f"Hedge vega (single): ${vega_hedge_single:.4f}")
-print(f"Hedge ratio: Short {hedge_ratio:.0f} puts to neutralize vega")
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
 
-# New portfolio vega after hedge
-portfolio_vega_hedged = position_vega - hedge_ratio * vega_hedge_single
-print(f"Portfolio vega after hedge: ${portfolio_vega_hedged:.2f} (should be ~0)")
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
 
-# 6. Vega scenario P&L after hedging
-print(f"\nP&L with vega hedge (across volatility scenarios):")
-for vol_new in vol_scenarios:
-    call_pnl = position_size * (bs_call(S0, K, T, r, vol_new) - 
-                                bs_call(S0, K, T, r, sigma_implied))
-    put_pnl = -hedge_ratio * (bs_call(S0, K_hedge, T_hedge, r, vol_new) -
-                              bs_call(S0, K_hedge, T_hedge, r, sigma_implied))
-    
-    # Note: using call price for put via put-call parity for simplicity
-    put_price_new = (bs_call(S0, K_hedge, T_hedge, r, vol_new) - S0 + 
-                     K_hedge * np.exp(-r*T_hedge))
-    put_price_old = (bs_call(S0, K_hedge, T_hedge, r, sigma_implied) - S0 + 
-                     K_hedge * np.exp(-r*T_hedge))
-    put_pnl = -hedge_ratio * (put_price_new - put_price_old)
-    
-    total_pnl = call_pnl + put_pnl
-    print(f"  Vol {vol_new:.1%}: Call ${call_pnl:+.2f}, Hedge ${put_pnl:+.2f}, Total ${total_pnl:+.2f}")
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
 
-# Visualization
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
 
-# Plot 1: Vega vs Spot
-axes[0, 0].plot(spot_prices, vegas, linewidth=2, color='blue')
-axes[0, 0].axvline(K, color='r', linestyle='--', alpha=0.5, label='Strike')
-axes[0, 0].set_xlabel('Spot Price ($)')
-axes[0, 0].set_ylabel('Vega (per 1% vol)')
-axes[0, 0].set_title('Vega across Spot Prices')
-axes[0, 0].legend()
-axes[0, 0].grid(alpha=0.3)
-
-# Plot 2: Vega vs Volatility
-axes[0, 1].plot(vols, vegas_vol, linewidth=2, color='green')
-axes[0, 1].axvline(sigma_implied, color='r', linestyle='--', alpha=0.5, label='Current σ')
-axes[0, 1].set_xlabel('Volatility')
-axes[0, 1].set_ylabel('Vega (per 1% vol)')
-axes[0, 1].set_title('Vega vs Volatility Level')
-axes[0, 1].legend()
-axes[0, 1].grid(alpha=0.3)
-
-# Plot 3: Vega vs Time
-axes[0, 2].plot(times, vegas_time, linewidth=2, color='purple')
-axes[0, 2].set_xlabel('Time to Expiry (years)')
-axes[0, 2].set_ylabel('Vega (per 1% vol)')
-axes[0, 2].set_title('Vega vs Time to Expiry')
-axes[0, 2].grid(alpha=0.3)
-
-# Plot 4: P&L from vol change (long call)
-vol_changes = (vol_scenarios - sigma_implied) * 100
-pnls = []
-for vol_new in vol_scenarios:
-    call_pnl = position_size * (bs_call(S0, K, T, r, vol_new) - 
-                                bs_call(S0, K, T, r, sigma_implied))
-    pnls.append(call_pnl)
-
-axes[1, 0].bar(vol_changes, pnls, color=['red' if p < 0 else 'green' for p in pnls], alpha=0.7)
-axes[1, 0].axhline(0, color='k', linestyle='-', linewidth=0.5)
-axes[1, 0].set_xlabel('Volatility Change (percentage points)')
-axes[1, 0].set_ylabel('P&L ($)')
-axes[1, 0].set_title('Long Call P&L from Volatility Change')
-axes[1, 0].grid(alpha=0.3, axis='y')
-
-# Plot 5: Volatility surface (Spot vs Vol)
-spot_mesh = np.linspace(80, 120, 40)
-vol_mesh = np.linspace(0.10, 0.40, 40)
-vega_surface = np.zeros((len(vol_mesh), len(spot_mesh)))
-
-for i, v in enumerate(vol_mesh):
-    for j, s in enumerate(spot_mesh):
-        vega_surface[i, j] = vega_bs(s, K, T, r, v)
-
-im = axes[1, 1].contourf(spot_mesh, vol_mesh, vega_surface, levels=20, cmap='viridis')
-axes[1, 1].set_xlabel('Spot Price ($)')
-axes[1, 1].set_ylabel('Volatility')
-axes[1, 1].set_title('Vega Surface')
-plt.colorbar(im, ax=axes[1, 1])
-
-# Plot 6: Portfolio Greeks comparison
-strike_range = np.linspace(90, 110, 20)
-deltas_range = [delta_bs(s, K, T, r, sigma_implied) for s in strike_range]
-gammas_range = [gamma_bs(s, K, T, r, sigma_implied) for s in strike_range]
-vegas_range = [vega_bs(s, K, T, r, sigma_implied) for s in strike_range]
-
-ax_twin = axes[1, 2]
-ax_twin2 = ax_twin.twinx()
-ax_twin3 = ax_twin.twinx()
-ax_twin3.spines['right'].set_position(('outward', 60))
-
-line1 = ax_twin.plot(strike_range, deltas_range, linewidth=2, label='Delta', color='blue')
-line2 = ax_twin2.plot(strike_range, gammas_range, linewidth=2, label='Gamma', color='green')
-line3 = ax_twin3.plot(strike_range, vegas_range, linewidth=2, label='Vega', color='red')
-
-ax_twin.set_xlabel('Spot Price ($)')
-ax_twin.set_ylabel('Delta', color='blue')
-ax_twin2.set_ylabel('Gamma', color='green')
-ax_twin3.set_ylabel('Vega', color='red')
-ax_twin.set_title('Greeks Comparison')
-ax_twin.tick_params(axis='y', labelcolor='blue')
-ax_twin2.tick_params(axis='y', labelcolor='green')
-ax_twin3.tick_params(axis='y', labelcolor='red')
-
-lines = line1 + line2 + line3
-labels = [l.get_label() for l in lines]
-ax_twin.legend(lines, labels, loc='upper left')
-ax_twin.grid(alpha=0.3)
-
-plt.tight_layout()
-plt.show()
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

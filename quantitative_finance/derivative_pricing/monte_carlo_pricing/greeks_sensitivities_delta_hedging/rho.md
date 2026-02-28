@@ -1,12 +1,11 @@
-# Rho
+﻿# Rho
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** The first derivative of option price with respect to interest rates (ρ = ∂C/∂r), measuring price sensitivity to changes in the risk-free rate affecting discount factors and forward prices.  
 **Purpose:** Quantify interest rate exposure, manage rate risk in option portfolios, hedge against rate changes in fixed-income derivatives, assess impact of rate regime shifts on derivatives, model cross-asset (equity-rate) correlations  
 **Prerequisites:** Discount factors, forward prices, interest rate models, option pricing under constant rates, portfolio duration concepts
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Call Rho | Put Rho | Long Bond Future | Short Bond Future | Rate Swap |
 |--------|----------|---------|------------------|-------------------|-----------|
 | **Rho Sign** | ρ > 0 (positive) | ρ < 0 (negative) | ρ < 0 (inverse) | ρ > 0 | ρ ≈ 0 (neutral) |
@@ -17,8 +16,7 @@
 | **Portfolio Importance** | Low (equity focus) | Low (equity focus) | High (rate-sensitive) | High | Essential |
 | **Typical Value** | $0.10-$0.50 | -$0.10-$0.50 | Large negative/positive | Large | Near-zero |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Call Rho**  
 Long call: K=100, T=1yr, S=100, σ=20%, r=5%. BS call price ≈ $10.45. If r increases to 6% (+1%): call price ≈ $10.70 (gain ~$0.25). Rho ≈ $0.25. Interpretation: each 1% rate increase adds ~$0.25 to call value. Intuition: higher r increases forward price F = S e^{rT} → call payoff expected value increases.
 
@@ -28,8 +26,7 @@ Bank sells structured note: "equity-linked return" with embedded short call on S
 **Edge Case: Very Short/Long Maturity**  
 T → 0 (expiry tomorrow): rho → 0 (discount factor nearly 1). Change in r has minimal impact on final payoff. T → ∞ (far future): rho increases. But far-dated options are illiquid; practical rho risk concentrated in liquid tenors (6M-2Y). Near-maturity options: rho negligible. Long-dated options: rho material but often hedged separately (via bonds/swaps).
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Rho Framework:
 ├─ Definition & Interpretation:
@@ -122,8 +119,7 @@ Rho Framework:
 
 **Interaction:** Rho increases with maturity T and strike K; dominates for long-dated and far-OTM options; less material for short-dated equity derivatives.
 
-## 5. Mini-Project
-
+## Challenge Round
 Analyze rho exposure; simulate rate moves; hedge rho with bond positions:
 
 ```python
@@ -318,8 +314,7 @@ print("\nPlot saved: rho_analysis.png")
 - **Term Structure:** Rho increases with maturity; 10Y rho >> 3M rho
 - **P&L Sensitivity:** 100bp rate move → $0.30 × 100 = $30 per 100 contracts (material for large books)
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why is call rho positive (rates up → call value up) while put rho is negative?**  
 A: Rho = ∂C/∂r = K T e^{-rT} N(d2). Two effects: (1) discount factor e^{-rT} decreases with r (option value decreases), (2) forward price F = S e^{rT} increases with r. For calls: higher r → higher expected S_T (increased drift in risk-neutral measure) → call more likely ITM → payoff increases → dominates discount effect. For puts: opposite; higher r → less likely ITM → payoff decreases. Net: call rho positive, put rho negative.
 
@@ -338,8 +333,7 @@ A: Not directly specified; but empirically: rates fall → economy often stimula
 **Q6: Explain the relationship between rho, bond futures prices, and hedging efficiency.**  
 A: Bond futures price = (notional bond value) × (1 + duration × rate change). If rho negative (short rate risk), hedge by going long bond futures. Efficiency depends on: (1) duration match (bond duration ≈ rate sensitivity of portfolio), (2) correlation (rates and portfolio move together), (3) basis risk (futures-cash basis diverges). Practical: 10Y Treasury futures used for long-dated equity swaptions (duration ≈ 8 years). Position sizing: target delta-neutral in rate terms. Example: portfolio rho = $100/bp, bond future duration ≈ 8 years, contract value $100k → buy 1.25 contracts to hedge (100bp × $100/bp = $100bp exposure → need $100bp gain in bonds → $100k × 0.0125 = $1.25M adjusted notional).
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Rho (Finance)](https://en.wikipedia.org/wiki/Rho_(finance)) — Definition, interest rate sensitivity
 - [Wikipedia: Greeks (Finance)](https://en.wikipedia.org/wiki/Greeks_(finance)) — Rho in context
 - Hull: *Options, Futures & Derivatives* (Chapter 19) — Greeks, rho profile, interest rate hedging

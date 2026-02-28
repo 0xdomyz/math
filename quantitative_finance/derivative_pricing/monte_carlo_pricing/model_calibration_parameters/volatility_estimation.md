@@ -1,19 +1,18 @@
-# Volatility Estimation
+﻿# Volatility Estimation
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Estimating the dispersion of asset returns, typically as annualized standard deviation  
 **Purpose:** Input for option pricing, risk models, and Monte Carlo simulation  
 **Prerequisites:** Returns, variance, sampling frequency, annualization
 
-## 2. Comparative Framing
+## Comparative Framing
 | Method | Historical Volatility | Implied Volatility | Model-Based (GARCH) |
 |---|---|---|---|
 | **Data** | Past returns | Option prices | Past returns + dynamics |
 | **Output** | Realized σ | Market-consensus σ | Conditional σ_t |
 | **Use** | Backtesting | Pricing/hedging | Forecasting |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 Daily returns with std 1% → annualized σ ≈ 1% × √252 = 15.87%.
 
@@ -23,7 +22,7 @@ Using historical σ during regime shift underestimates risk → MC prices too lo
 **Edge Case:**  
 Illiquid asset with sparse data → volatility estimates unstable; use shrinkage or proxies.
 
-## 4. Layer Breakdown
+## Layer Breakdown
 ```
 Volatility Estimation Workflow:
 ├─ Input Data:
@@ -47,47 +46,7 @@ Volatility Estimation Workflow:
 
 **Interaction:** Choose estimator → compute σ → annualize → validate vs market
 
-## 5. Mini-Project
-Estimate volatility from daily prices and compare to rolling windows:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-np.random.seed(42)
-
-# Simulated price series
-n = 1000
-true_sigma = 0.2
-r = 0.05
-
-dt = 1/252
-Z = np.random.randn(n)
-returns = (r - 0.5*true_sigma**2)*dt + true_sigma*np.sqrt(dt)*Z
-prices = 100*np.exp(np.cumsum(returns))
-
-# Historical volatility
-log_returns = np.diff(np.log(prices))
-vol_daily = np.std(log_returns, ddof=1)
-vol_annual = vol_daily * np.sqrt(252)
-
-print(f"Estimated σ (annual): {vol_annual:.4f}")
-
-# Rolling volatility
-window = 60
-rolling = pd.Series(log_returns).rolling(window).std() * np.sqrt(252)
-
-plt.figure(figsize=(10,4))
-plt.plot(rolling, label='Rolling 60-day σ')
-plt.axhline(true_sigma, color='red', linestyle='--', label='True σ')
-plt.legend()
-plt.title('Rolling Volatility Estimate')
-plt.grid(alpha=0.3)
-plt.show()
-```
-
-## 6. Challenge Round
-
+## Challenge Round
 **Q1:** Why annualize by √252?  
 **A1:** Under iid returns, variance scales linearly with time; volatility scales with square root of time.
 
@@ -100,7 +59,7 @@ plt.show()
 **Q4:** Why is volatility not constant in practice?  
 **A4:** Volatility clusters; regimes change; shocks create heteroskedasticity.
 
-## 7. Key References
+## Key References
 - [Volatility (finance)](https://en.wikipedia.org/wiki/Volatility_(finance))  
 - [Historical volatility](https://en.wikipedia.org/wiki/Volatility_(finance)#Historical_volatility)
 

@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # rebalancing
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: rebalancing")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -108,7 +143,7 @@ print(f"  Final Value:               ${cal_total:>12,.2f}")
 print(f"  Final Stock Weight:        {cal_stock/cal_total:>12.1%}")
 print(f"  Total Return:              {(cal_total/initial_value - 1)*100:>11.2f}%")
 print()
-print(f"Threshold Rebalancing (±5%):")
+print(f"Threshold Rebalancing (Â±5%):")
 print(f"  Final Value:               ${thresh_total:>12,.2f}")
 print(f"  Final Stock Weight:        {thresh_stock/thresh_total:>12.1%}")
 print(f"  Total Return:              {(thresh_total/initial_value - 1)*100:>11.2f}%")
@@ -119,7 +154,7 @@ df = pd.DataFrame(results)
 plt.figure(figsize=(12, 6))
 plt.plot(df['date'], df['no_rebalance_stock_weight'], label='No Rebalancing', linewidth=2)
 plt.plot(df['date'], df['calendar_stock_weight'], label='Calendar (Quarterly)', linewidth=2, linestyle='--')
-plt.plot(df['date'], df['threshold_stock_weight'], label='Threshold (±5%)', linewidth=2, linestyle=':')
+plt.plot(df['date'], df['threshold_stock_weight'], label='Threshold (Â±5%)', linewidth=2, linestyle=':')
 plt.axhline(target_stock_weight, color='red', linestyle='-', linewidth=1, label='Target (60%)')
 plt.axhline(target_stock_weight + threshold, color='gray', linestyle=':', alpha=0.5)
 plt.axhline(target_stock_weight - threshold, color='gray', linestyle=':', alpha=0.5)
@@ -130,3 +165,36 @@ plt.legend()
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='rebalancing - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

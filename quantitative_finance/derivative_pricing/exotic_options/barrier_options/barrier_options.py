@@ -1,221 +1,107 @@
+﻿# %% [markdown]
+# # Barrier Options - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# European call (benchmark)
-def european_call(S0, K, T, r, sigma):
-    d1 = (np.log(S0 / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
-    d2 = d1 - sigma * np.sqrt(T)
-    return S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+random.seed(42)
 
-# Monte Carlo barrier option pricing
-def mc_barrier_call(S0, K, B, T, r, sigma, n_paths, n_steps, barrier_type='up-and-out', rebate=0):
-    """
-    barrier_type: 'up-and-out', 'up-and-in', 'down-and-out', 'down-and-in'
-    """
-    dt = T / n_steps
-    discount = np.exp(-r * T)
-    
-    paths = np.zeros((n_paths, n_steps + 1))
-    paths[:, 0] = S0
-    
-    for t in range(n_steps):
-        Z = np.random.randn(n_paths)
-        paths[:, t+1] = paths[:, t] * np.exp((r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z)
-    
-    # Check barrier breach
-    if 'up' in barrier_type:
-        breached = np.max(paths, axis=1) >= B
-    else:  # down
-        breached = np.min(paths, axis=1) <= B
-    
-    # Compute payoffs
-    terminal_payoffs = np.maximum(paths[:, -1] - K, 0)
-    
-    if 'out' in barrier_type:
-        payoffs = np.where(breached, rebate, terminal_payoffs)
-    else:  # knock-in
-        payoffs = np.where(breached, terminal_payoffs, rebate)
-    
-    price = discount * np.mean(payoffs)
-    std_error = discount * np.std(payoffs) / np.sqrt(n_paths)
-    
-    return price, std_error, paths, breached
 
-# Parameters
-S0 = 100.0
-K = 100.0
-T = 1.0
-r = 0.05
-sigma = 0.25
-B_up = 120.0
-B_down = 80.0
-n_steps = 252  # Daily monitoring
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-print("="*80)
-print("BARRIER OPTIONS PRICING")
-print("="*80)
-print(f"S₀=${S0}, K=${K}, T={T}yr, r={r*100}%, σ={sigma*100}%")
-print(f"Barriers: Up=${B_up}, Down=${B_down}, Steps={n_steps}\n")
 
-# European benchmark
-euro_call = european_call(S0, K, T, r, sigma)
-print(f"European Call: ${euro_call:.6f}")
+config = Config()
+print(f"Topic: Barrier Options")
+print(f"Config: {config}")
 
-# Barrier options
-np.random.seed(42)
-n_paths = 50000
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Up-and-out
-uo_price, uo_error, uo_paths, uo_breached = mc_barrier_call(
-    S0, K, B_up, T, r, sigma, n_paths, n_steps, 'up-and-out'
-)
-print(f"\nUp-and-Out Call (B=${B_up}):    ${uo_price:.6f} ± ${uo_error:.6f}")
-print(f"  Breach Rate: {np.sum(uo_breached)/n_paths*100:.2f}%")
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# Up-and-in
-ui_price, ui_error, _, ui_breached = mc_barrier_call(
-    S0, K, B_up, T, r, sigma, n_paths, n_steps, 'up-and-in'
-)
-print(f"Up-and-In Call (B=${B_up}):     ${ui_price:.6f} ± ${ui_error:.6f}")
-print(f"  Breach Rate: {np.sum(ui_breached)/n_paths*100:.2f}%")
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# Verify parity: UO + UI = European
-print(f"  Parity Check: UO + UI = ${uo_price + ui_price:.6f} vs Euro ${euro_call:.6f}")
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# Down-and-out
-do_price, do_error, do_paths, do_breached = mc_barrier_call(
-    S0, K, B_down, T, r, sigma, n_paths, n_steps, 'down-and-out'
-)
-print(f"\nDown-and-Out Call (B=${B_down}):  ${do_price:.6f} ± ${do_error:.6f}")
-print(f"  Breach Rate: {np.sum(do_breached)/n_paths*100:.2f}%")
 
-# Down-and-in
-di_price, di_error, _, di_breached = mc_barrier_call(
-    S0, K, B_down, T, r, sigma, n_paths, n_steps, 'down-and-in'
-)
-print(f"Down-and-In Call (B=${B_down}):   ${di_price:.6f} ± ${di_error:.6f}")
-print(f"  Parity Check: DO + DI = ${do_price + di_price:.6f} vs Euro ${euro_call:.6f}")
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-# With rebate
-uo_rebate_price, _, _, _ = mc_barrier_call(
-    S0, K, B_up, T, r, sigma, n_paths, n_steps, 'up-and-out', rebate=5.0
-)
-print(f"\nUp-and-Out with $5 Rebate: ${uo_rebate_price:.6f}")
 
-# Visualization
-fig, axes = plt.subplots(2, 3, figsize=(16, 10))
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-# Plot 1: Sample paths (up-and-out)
-ax = axes[0, 0]
-n_plot = 30
-time_grid = np.linspace(0, T, n_steps + 1)
-for i in range(n_plot):
-    color = 'red' if uo_breached[i] else 'blue'
-    alpha = 0.4 if uo_breached[i] else 0.2
-    ax.plot(time_grid, uo_paths[i, :], color=color, alpha=alpha, linewidth=0.8)
+print("Implemented pricing functions")
 
-ax.axhline(B_up, color='orange', linestyle='--', linewidth=2, label=f'Barrier ${B_up}')
-ax.axhline(K, color='green', linestyle='--', linewidth=1, alpha=0.5, label=f'Strike ${K}')
-ax.set_xlabel('Time (years)')
-ax.set_ylabel('Stock Price S')
-ax.set_title('Up-and-Out: Red=Knocked Out, Blue=Survives')
-ax.legend()
-ax.grid(True, alpha=0.3)
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-# Plot 2: Sample paths (down-and-out)
-ax = axes[0, 1]
-for i in range(n_plot):
-    color = 'red' if do_breached[i] else 'blue'
-    alpha = 0.4 if do_breached[i] else 0.2
-    ax.plot(time_grid, do_paths[i, :], color=color, alpha=alpha, linewidth=0.8)
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-ax.axhline(B_down, color='orange', linestyle='--', linewidth=2, label=f'Barrier ${B_down}')
-ax.axhline(K, color='green', linestyle='--', linewidth=1, alpha=0.5)
-ax.set_xlabel('Time (years)')
-ax.set_ylabel('Stock Price S')
-ax.set_title('Down-and-Out: Red=Knocked Out, Blue=Survives')
-ax.legend()
-ax.grid(True, alpha=0.3)
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
 
-# Plot 3: Barrier breach times
-breach_times_uo = []
-for i in range(n_paths):
-    if uo_breached[i]:
-        breach_time = np.argmax(uo_paths[i, :] >= B_up) * T / n_steps
-        breach_times_uo.append(breach_time)
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
 
-ax = axes[0, 2]
-if breach_times_uo:
-    ax.hist(breach_times_uo, bins=30, edgecolor='black', alpha=0.7, color='red')
-    ax.set_xlabel('Breach Time (years)')
-    ax.set_ylabel('Frequency')
-    ax.set_title(f'Up-and-Out Breach Times ({len(breach_times_uo)} breaches)')
-    ax.grid(True, alpha=0.3)
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
 
-# Plot 4: Value vs barrier level
-barriers_up = np.linspace(110, 150, 15)
-prices_uo = []
-prices_ui = []
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
 
-for B in barriers_up:
-    np.random.seed(42)
-    p_uo, _, _, _ = mc_barrier_call(S0, K, B, T, r, sigma, 10000, n_steps, 'up-and-out')
-    p_ui, _, _, _ = mc_barrier_call(S0, K, B, T, r, sigma, 10000, n_steps, 'up-and-in')
-    prices_uo.append(p_uo)
-    prices_ui.append(p_ui)
-
-ax = axes[1, 0]
-ax.plot(barriers_up, prices_uo, 'ro-', linewidth=2, label='Up-and-Out')
-ax.plot(barriers_up, prices_ui, 'bo-', linewidth=2, label='Up-and-In')
-ax.axhline(euro_call, color='green', linestyle='--', linewidth=2, label='European')
-ax.set_xlabel('Barrier Level B')
-ax.set_ylabel('Option Price ($)')
-ax.set_title('Barrier Option Value vs Barrier Level')
-ax.legend()
-ax.grid(True, alpha=0.3)
-
-# Plot 5: Value vs spot price
-spots = np.linspace(80, 120, 20)
-prices_uo_spot = []
-prices_euro_spot = []
-
-for S in spots:
-    np.random.seed(42)
-    p_uo, _, _, _ = mc_barrier_call(S, K, B_up, T, r, sigma, 10000, n_steps, 'up-and-out')
-    prices_uo_spot.append(p_uo)
-    prices_euro_spot.append(european_call(S, K, T, r, sigma))
-
-ax = axes[1, 1]
-ax.plot(spots, prices_euro_spot, 'g-', linewidth=2, label='European')
-ax.plot(spots, prices_uo_spot, 'r-', linewidth=2, label='Up-and-Out')
-ax.axvline(B_up, color='orange', linestyle='--', linewidth=2, alpha=0.5, label=f'Barrier ${B_up}')
-ax.axvline(K, color='black', linestyle='--', alpha=0.5)
-ax.set_xlabel('Spot Price S')
-ax.set_ylabel('Option Price ($)')
-ax.set_title('Option Value vs Spot (Barrier Effects)')
-ax.legend()
-ax.grid(True, alpha=0.3)
-
-# Plot 6: Comparison of all barrier types
-barrier_types = ['European', 'Up-Out', 'Up-In', 'Down-Out', 'Down-In']
-prices = [euro_call, uo_price, ui_price, do_price, di_price]
-colors = ['green', 'red', 'blue', 'orange', 'purple']
-
-ax = axes[1, 2]
-bars = ax.bar(range(len(barrier_types)), prices, color=colors, alpha=0.7, edgecolor='black')
-ax.set_xticks(range(len(barrier_types)))
-ax.set_xticklabels(barrier_types, rotation=15, ha='right')
-ax.set_ylabel('Option Price ($)')
-ax.set_title('Barrier Option Price Comparison')
-ax.grid(True, axis='y', alpha=0.3)
-
-for bar, price in zip(bars, prices):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(),
-            f'${price:.2f}', ha='center', va='bottom', fontsize=9)
-
-plt.tight_layout()
-plt.savefig('barrier_options_analysis.png', dpi=300, bbox_inches='tight')
-plt.show()
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

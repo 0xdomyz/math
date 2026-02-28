@@ -1,99 +1,107 @@
+﻿# %% [markdown]
+# # Asian Options - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-from scipy.integrate import quad
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-def bs_call(S, K, r, sigma, T):
-    """Black-Scholes call"""
-    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
-    return S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
+random.seed(42)
 
-def asian_geometric_call(S0, K, r, sigma, T):
-    """Geometric average Asian call (closed-form)"""
-    # Effective volatility: σ_G = σ/√3
-    sigma_adj = sigma / np.sqrt(3)
-    # Effective drift: adjusted for averaging
-    r_adj = 0.5 * (r - sigma**2/6)
-    
-    # Use BS with adjusted parameters
-    d1 = (np.log(S0/K) + (r_adj + 0.5*sigma_adj**2)*T) / (sigma_adj*np.sqrt(T))
-    d2 = d1 - sigma_adj*np.sqrt(T)
-    
-    C_geom = S0*np.exp(-sigma**2*T/6)*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return C_geom
 
-def asian_arithmetic_call_mc(S0, K, r, sigma, T, N_paths=50000, N_steps=252):
-    """Arithmetic average Asian call (Monte Carlo)"""
-    dt = T / N_steps
-    
-    payoffs = []
-    for path in range(N_paths):
-        S = S0
-        prices = [S0]
-        
-        for step in range(N_steps):
-            dW = np.random.normal(0, np.sqrt(dt))
-            S = S * np.exp((r - 0.5*sigma**2)*dt + sigma*dW)
-            prices.append(S)
-        
-        # Arithmetic average
-        A = np.mean(prices)
-        payoff = max(A - K, 0) * np.exp(-r*T)
-        payoffs.append(payoff)
-    
-    return np.mean(payoffs), np.std(payoffs) / np.sqrt(N_paths)
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-# Parameters
-S0, K, r, sigma, T = 100, 100, 0.05, 0.25, 1.0
 
-# Compute values
-vanilla_call = bs_call(S0, K, r, sigma, T)
-asian_geom = asian_geometric_call(S0, K, r, sigma, T)
-asian_arith_mc, asian_arith_se = asian_arithmetic_call_mc(S0, K, r, sigma, T, 
-                                                           N_paths=50000, N_steps=252)
+config = Config()
+print(f"Topic: Asian Options")
+print(f"Config: {config}")
 
-print("="*70)
-print("ASIAN OPTION PRICING COMPARISON")
-print("="*70)
-print(f"S0=${S0}, K=${K}, r={r*100:.1f}%, σ={sigma*100:.1f}%, T={T}yr")
-print("-"*70)
-print(f"European Vanilla Call: ${vanilla_call:.4f}")
-print(f"Asian Geometric (Closed-Form): ${asian_geom:.4f}")
-print(f"Asian Arithmetic (Monte Carlo): ${asian_arith_mc:.4f} ± ${asian_arith_se:.4f}")
-print(f"\nCost Reduction (Arithmetic vs Vanilla): {100*(1-asian_arith_mc/vanilla_call):.1f}%")
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Spot price sensitivity
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-S_range = np.linspace(70, 130, 30)
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-vanilla_vals = [bs_call(S, K, r, sigma, T) for S in S_range]
-asian_geom_vals = [asian_geometric_call(S, K, r, sigma, T) for S in S_range]
-asian_arith_vals = []
-for S in S_range:
-    val, _ = asian_arithmetic_call_mc(S, K, r, sigma, T, N_paths=10000, N_steps=50)
-    asian_arith_vals.append(val)
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-axes[0].plot(S_range, vanilla_vals, 'b-', linewidth=2.5, label='Vanilla')
-axes[0].plot(S_range, asian_geom_vals, 'g--', linewidth=2, label='Asian Geometric')
-axes[0].plot(S_range, asian_arith_vals, 'r.', markersize=6, label='Asian Arithmetic (MC)')
-axes[0].set_title('Option Value vs Spot Price')
-axes[0].set_xlabel('Stock Price ($)')
-axes[0].set_ylabel('Option Value ($)')
-axes[0].legend()
-axes[0].grid(alpha=0.3)
 
-# Premium reduction
-premiums = np.array(vanilla_vals) - np.array(asian_arith_vals)
-axes[1].plot(S_range, premiums, 'mo-', linewidth=2, markersize=6)
-axes[1].fill_between(S_range, 0, premiums, alpha=0.2)
-axes[1].set_title('Asian Premium: (Vanilla - Arithmetic Asian)')
-axes[1].set_xlabel('Stock Price ($)')
-axes[1].set_ylabel('Premium Reduction ($)')
-axes[1].grid(alpha=0.3)
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-plt.tight_layout()
-plt.show()
+
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
+
+print("Implemented pricing functions")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
+
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
+
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
+
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
+
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

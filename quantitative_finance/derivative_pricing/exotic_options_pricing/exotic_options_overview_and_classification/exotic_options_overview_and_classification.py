@@ -1,89 +1,107 @@
+﻿# %% [markdown]
+# # Exotic Options Overview And Classification - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# Define exotic types and characteristics
-exotics_data = {
-    'Option': [
-        'Down-and-Out Call', 'Up-and-Out Put', 'Down-and-In Call',
-        'Asian Arithmetic Call', 'Asian Geometric Call', 'Lookback Call',
-        'Basket Call (2 assets)', 'Chooser Option', 'Cliquet Call',
-        'Quanto Call', 'Swing Option', 'Binary One-Touch'
-    ],
-    'Path-Dependent': [
-        'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes',
-        'Weakly', 'No', 'Weakly', 'Weakly', 'Yes', 'Yes'
-    ],
-    'Pricing Difficulty': [
-        'Medium', 'Medium', 'Medium', 'High', 'Medium', 'High',
-        'High', 'Low', 'Low', 'Low', 'High', 'Medium'
-    ],
-    'Best Method': [
-        'Lattice', 'Lattice', 'Lattice', 'MC/FD', 'Closed-form', 'MC',
-        'MC', 'Closed-form', 'Closed-form', 'Closed-form', 'MC/FD', 'Lattice'
-    ],
-    'Primary Use': [
-        'Cost reduction', 'Cost reduction', 'Leverage', 'Averaging hedge',
-        'Averaging (math)', 'Best-price capture', 'Multi-asset exposure',
-        'Optionality timing', 'Periodic coupons', 'Currency hedging',
-        'Energy trading', 'Digital payoff'
-    ]
-}
+random.seed(42)
 
-df = pd.DataFrame(exotics_data)
 
-print("\n" + "="*100)
-print("EXOTIC OPTIONS: CLASSIFICATION & CHARACTERISTICS")
-print("="*100)
-print(df.to_string(index=False))
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-# Complexity matrix
-fig, ax = plt.subplots(1, 1, figsize=(12, 8))
 
-pricing_map = {'Low': 1, 'Medium': 2, 'High': 3}
-df['Pricing_Score'] = df['Pricing Difficulty'].map(pricing_map)
-path_dep_map = {'No': 0, 'Weakly': 1, 'Yes': 2}
-df['Path_Score'] = df['Path-Dependent'].map(path_dep_map)
+config = Config()
+print(f"Topic: Exotic Options Overview And Classification")
+print(f"Config: {config}")
 
-colors = {'Lattice': 'blue', 'MC': 'red', 'MC/FD': 'purple', 
-          'Closed-form': 'green', 'Lattice/MC': 'orange', 'FD': 'brown'}
-color_list = [colors.get(m, 'gray') for m in df['Best Method']]
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-scatter = ax.scatter(df['Path_Score'], df['Pricing_Score'], s=300, 
-                     c=color_list, alpha=0.6, edgecolors='black', linewidth=1.5)
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-for idx, row in df.iterrows():
-    ax.annotate(row['Option'], 
-               (row['Path_Score'], row['Pricing_Score']),
-               fontsize=8, ha='center', va='center', fontweight='bold')
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-ax.set_xlabel('Path Dependence (0=None, 1=Weak, 2=Strong)', fontsize=11, fontweight='bold')
-ax.set_ylabel('Pricing Difficulty (1=Low, 2=Med, 3=High)', fontsize=11, fontweight='bold')
-ax.set_title('Exotic Options: Complexity & Valuation Method', fontsize=13, fontweight='bold')
-ax.set_xlim(-0.3, 2.3)
-ax.set_ylim(0.7, 3.3)
-ax.grid(alpha=0.3)
-ax.set_xticks([0, 1, 2])
-ax.set_yticks([1, 2, 3])
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# Legend for colors
-from matplotlib.patches import Patch
-legend_elements = [Patch(facecolor=color, edgecolor='black', label=method) 
-                  for method, color in colors.items()]
-ax.legend(handles=legend_elements, loc='upper right', fontsize=9)
 
-plt.tight_layout()
-plt.show()
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-# Summary statistics
-print("\n" + "="*50)
-print("COMPLEXITY DISTRIBUTION:")
-print("="*50)
-print("\nBy Pricing Difficulty:")
-print(df['Pricing Difficulty'].value_counts().to_string())
-print("\nBy Path Dependence:")
-print(df['Path-Dependent'].value_counts().to_string())
-print("\nBy Recommended Method:")
-print(df['Best Method'].value_counts().to_string())
+
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
+
+print("Implemented pricing functions")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
+
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
+
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
+
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
+
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

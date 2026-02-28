@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # execution costs
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: execution costs")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
@@ -60,8 +95,8 @@ def calculate_spread_cost(quantity, price, spread_bps=10):
 def calculate_market_impact(quantity, volume, price, alpha=0.6):
     """
     Calculate market impact using power law model.
-    Impact = λ × (Q / V)^α
-    α ≈ 0.6 (empirical, square root-like but slightly steeper)
+    Impact = Î» Ã— (Q / V)^Î±
+    Î± â‰ˆ 0.6 (empirical, square root-like but slightly steeper)
     """
     lambda_param = 0.1  # Impact coefficient (calibrated)
     participation = quantity / volume
@@ -174,7 +209,7 @@ for result in strategies:
     print(f"   Spread Cost:       ${result['spread']:,.2f} ({result['spread']/result['total']*100:.1f}%)")
     print(f"   Market Impact:     ${result['impact']:,.2f} ({result['impact']/result['total']*100:.1f}%)")
     print(f"   Opportunity Cost:  ${result['opportunity']:,.2f} ({result['opportunity']/result['total']*100:.1f}%)")
-    print(f"   ─────────────────────────────────────")
+    print(f"   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€")
     print(f"   TOTAL COST:        ${result['total']:,.2f} ({result['total_bps']:.2f} bps)")
 
 # Find optimal strategy
@@ -198,10 +233,10 @@ def almgren_chriss_optimal_schedule(Q, T, sigma, lambda_temp, risk_aversion=1e-6
     T: Time horizon (number of periods)
     sigma: Volatility
     lambda_temp: Temporary market impact coefficient
-    risk_aversion: Trader's risk aversion (λ)
+    risk_aversion: Trader's risk aversion (Î»)
     """
     # Simplified: Optimal trajectory is linear decrease
-    # n_t = n_0 × (1 - t/T) where n_0 = Q
+    # n_t = n_0 Ã— (1 - t/T) where n_0 = Q
     
     trajectory = []
     times = np.linspace(0, T, T+1)
@@ -320,5 +355,38 @@ ax4.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('execution_costs_analysis.png', dpi=100, bbox_inches='tight')
 print("\n" + "="*70)
-print("✓ Visualization saved: execution_costs_analysis.png")
+print("âœ“ Visualization saved: execution_costs_analysis.png")
 plt.show()
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='execution costs - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

@@ -1,10 +1,12 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-from scipy.integrate import quad
 import warnings
-            from scipy.special import comb
-    from scipy.special import comb
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.integrate import quad
+from scipy.special import comb
+from scipy.stats import norm
+
+
 def integrand_P(S_T):
     payoff = max(S_T - K_verify, 0)
     return payoff * pricer.real_world_density(S_T, T, mu_real)
@@ -146,4 +148,5 @@ ax.legend()
 ax.grid(alpha=0.3, axis='y')
 
 plt.tight_layout()
+plt.show()plt.tight_layout()
 plt.show()

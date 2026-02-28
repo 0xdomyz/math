@@ -1,11 +1,11 @@
-# Cholesky Decomposition
+﻿# Cholesky Decomposition
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Factor a PSD matrix $A$ into $A = L L^T$, where $L$ is lower triangular  
 **Purpose:** Generate correlated normals and simulate multivariate processes efficiently  
 **Prerequisites:** Linear algebra, PSD matrices, multivariate normal
 
-## 2. Comparative Framing
+## Comparative Framing
 | Method | Cholesky | Eigen Decomposition | PCA Factor Model |
 |---|---|---|---|
 | **Speed** | Fast | Moderate | Fast (k factors) |
@@ -13,8 +13,7 @@
 | **Output** | Triangular $L$ | $Q \Lambda Q^T$ | $B B^T$ (low-rank) |
 | **Use** | Exact correlation | Exact correlation | Approximate correlation |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 $\rho=\begin{bmatrix}1&0.5\\0.5&1\end{bmatrix}$ → $L=\begin{bmatrix}1&0\\0.5&\sqrt{0.75}\end{bmatrix}$
 
@@ -24,7 +23,7 @@ Negative eigenvalue due to inconsistent correlations → Cholesky fails (not PSD
 **Edge Case:**  
 Perfect correlation $\rho=\mathbf{1}\mathbf{1}^T$ is PSD but singular → Cholesky fails unless jitter added.
 
-## 4. Layer Breakdown
+## Layer Breakdown
 ```
 Cholesky for Correlated Normals:
 ├─ Inputs:
@@ -44,46 +43,7 @@ Cholesky for Correlated Normals:
 
 **Interaction:** Factor $\rho$ → transform normals → drive correlated paths
 
-## 5. Mini-Project
-Simulate correlated normals and verify correlation:
-```python
-import numpy as np
-
-np.random.seed(42)
-
-rho = np.array([
-    [1.0, 0.7, 0.3],
-    [0.7, 1.0, 0.4],
-    [0.3, 0.4, 1.0]
-])
-
-# Cholesky factor
-L = np.linalg.cholesky(rho)
-
-# Simulate correlated normals
-n = 100000
-Z = np.random.randn(n, 3)
-X = Z @ L.T
-
-# Empirical correlation
-emp_rho = np.corrcoef(X.T)
-
-print("Target ρ:\n", rho)
-print("Empirical ρ:\n", np.round(emp_rho, 3))
-
-# Singular case handling (add jitter)
-try:
-    rho_sing = np.array([[1, 1], [1, 1]])
-    np.linalg.cholesky(rho_sing)
-except np.linalg.LinAlgError:
-    eps = 1e-6
-    rho_fix = rho_sing + eps * np.eye(2)
-    L_fix = np.linalg.cholesky(rho_fix)
-    print("Fixed singular matrix with jitter:", rho_fix)
-```
-
-## 6. Challenge Round
-
+## Challenge Round
 **Q1:** Why does Cholesky fail for non-PSD matrices?  
 **A1:** It requires all leading principal minors positive; negative eigenvalues imply negative variance in some directions.
 
@@ -96,7 +56,7 @@ except np.linalg.LinAlgError:
 **Q4:** How do you verify correctness?  
 **A4:** Compute empirical correlation of $X=ZL^T$ and compare to target $\rho$.
 
-## 7. Key References
+## Key References
 - [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition)  
 - [Multivariate normal distribution](https://en.wikipedia.org/wiki/Multivariate_normal_distribution)
 

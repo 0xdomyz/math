@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # force of interest
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for force of interest.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: force of interest")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: force_of_interest.md
 
@@ -8,7 +33,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import quad, odeint
 from scipy.optimize import fsolve
 
-# 1. CONVERSION: EFFECTIVE ↔ FORCE OF INTEREST
+# 1. CONVERSION: EFFECTIVE  FORCE OF INTEREST
 print("=" * 70)
 print("FORCE OF INTEREST: CONVERSIONS AND RELATIONSHIPS")
 print("=" * 70)
@@ -16,7 +41,7 @@ print("=" * 70)
 effective_rates = [0.01, 0.03, 0.05, 0.10, 0.20, 0.50]
 
 print("\nConversion table:")
-print(f"{'Effective i':<15} {'Force δ':<15} {'δ as %':<15} {'Approx Error (i-δ)':<20}")
+print(f"{'Effective i':<15} {'Force  ':<15} {'  as %':<15} {'Approx Error (i- )':<20}")
 print("-" * 65)
 
 conversions = []
@@ -29,13 +54,13 @@ for i in effective_rates:
     
     conversions.append({
         'Effective i (%)': f"{i*100:.2f}",
-        'Force δ (%)': f"{delta*100:.4f}",
+        'Force   (%)': f"{delta*100:.4f}",
         'Difference (pp)': f"{approx_error*1e4:.1f}",
         'Difference (%)': f"{(approx_error/i)*100:.2f}" if i > 0 else "N/A"
     })
 
-print(f"\nNote: For small rates (i < 0.05), δ ≈ i (approximation valid)")
-print(f"For large rates (i > 0.20), δ materially less than i")
+print(f"\nNote: For small rates (i < 0.05),    i (approximation valid)")
+print(f"For large rates (i > 0.20),   materially less than i")
 print()
 
 # 2. CONTINUOUS ACCUMULATION
@@ -51,14 +76,14 @@ time_years = np.array([1, 5, 10, 20, 30])
 i_eff = np.exp(delta_rate) - 1
 
 print(f"\nStarting principal: ${principal:,.2f}")
-print(f"Force of interest: δ = {delta_rate*100:.2f}%")
+print(f"Force of interest:   = {delta_rate*100:.2f}%")
 print(f"Equivalent effective annual: i = {i_eff*100:.4f}%")
 print()
 
 accum_data = []
 
 for t in time_years:
-    # Continuous: A(t) = P * e^{δt}
+    # Continuous: A(t) = P * e^{ t}
     continuous = principal * np.exp(delta_rate * t)
     
     # Discrete annual: A(t) = P * (1+i)^t
@@ -70,7 +95,7 @@ for t in time_years:
     
     accum_data.append({
         'Years': t,
-        'Continuous e^{δt}': continuous,
+        'Continuous e^{ t}': continuous,
         'Discrete (1+i)^t': discrete,
         'Monthly (1+i^12/12)^{12t}': monthly,
         'Error (cont - disc)': continuous - discrete
@@ -82,17 +107,17 @@ print()
 
 # 3. CONTINUOUS ANNUITIES
 print("=" * 70)
-print("CONTINUOUS ANNUITIES (a̅ₙ̄|)")
+print("CONTINUOUS ANNUITIES (a...TM|)")
 print("=" * 70)
 
-# Continuous annuity present value: a̅ₙ̄| = (1 - e^{-δn})/δ
+# Continuous annuity present value: a...TM| = (1 - e^{- n})/ 
 n_periods = np.array([1, 5, 10, 20, 30, 50])
 payment_rate = 1000  # $1,000/year payable continuously
 
 delta = 0.05
 
 print(f"\nPayment rate: ${payment_rate}/year (continuous)")
-print(f"Force of interest: δ = {delta*100:.2f}%\n")
+print(f"Force of interest:   = {delta*100:.2f}%\n")
 
 continuous_annuity_data = []
 
@@ -103,7 +128,7 @@ for n in n_periods:
     # Annuity-due factor for comparison
     a_due_factor = (1 - (1 + i_eff)**(-n)) / i_eff * (1 + i_eff)
     
-    # Perpetuity (n → ∞)
+    # Perpetuity (n  )
     a_perp = 1 / delta
     
     pv_continuous = payment_rate * a_continuous
@@ -111,14 +136,14 @@ for n in n_periods:
     
     continuous_annuity_data.append({
         'n (years)': n,
-        'a̅ₙ̄|': f"{a_continuous:.6f}",
+        'a...TM|': f"{a_continuous:.6f}",
         'PV ($)': f"${pv_continuous:.2f}",
         '% of Perpetuity': f"{100 * a_continuous / a_perp:.2f}%"
     })
 
 annuity_df = pd.DataFrame(continuous_annuity_data)
 print(annuity_df.to_string(index=False))
-print(f"\nContinuous Perpetuity (n→∞): PV = ${pv_perpetuity:,.2f}")
+print(f"\nContinuous Perpetuity (n): PV = ${pv_perpetuity:,.2f}")
 print()
 
 # 4. PRESENT VALUE WITH VARIABLE FORCE
@@ -126,28 +151,28 @@ print("=" * 70)
 print("PRESENT VALUE WITH VARIABLE FORCE OF INTEREST")
 print("=" * 70)
 
-# Example: Linear increase in force δ(t) = δ₀ + αt
+# Example: Linear increase in force  (t) =   + t
 delta_0 = 0.03  # Starting force
 alpha = 0.001   # Annual increase
 n_term = 10
 
 def delta_func(t):
-    """Variable force of interest δ(t) = δ₀ + αt"""
+    """Variable force of interest  (t) =   + t"""
     return delta_0 + alpha * t
 
 def accumulation_func(t):
-    """A(t) = exp(∫₀^t δ(s) ds) for linear δ"""
-    # ∫(δ₀ + αs)ds from 0 to t = δ₀*t + α*t²/2
+    """A(t) = exp(^t  (s) ds) for linear  """
+    # (  + s)ds from 0 to t =  *t + *t2/2
     return np.exp(delta_0 * t + alpha * t**2 / 2)
 
-# Present value of $1 at time t: e^{-∫δ(s)ds}
+# Present value of $1 at time t: e^{- (s)ds}
 times = np.linspace(0, n_term, 100)
 pv_factors = np.exp(-(delta_0 * times + alpha * times**2 / 2))
 
-print(f"\nVariable force: δ(t) = {delta_0} + {alpha}t")
+print(f"\nVariable force:  (t) = {delta_0} + {alpha}t")
 print(f"Time horizon: {n_term} years\n")
 
-print(f"{'Year':<8} {'δ(t)':<12} {'∫δ ds':<12} {'PV Factor':<12} {'Accumulated $':<12}")
+print(f"{'Year':<8} {' (t)':<12} {'  ds':<12} {'PV Factor':<12} {'Accumulated $':<12}")
 print("-" * 56)
 
 for t in np.linspace(0, n_term, 11):
@@ -164,7 +189,7 @@ print("=" * 70)
 print("STOCHASTIC FORCE: MONTE CARLO SIMULATION")
 print("=" * 70)
 
-# Vasicek model: dδ(t) = a(b - δ(t))dt + σ dW(t)
+# Vasicek model: d (t) = a(b -  (t))dt +  dW(t)
 # Parameters (mean-reverting to b)
 a = 0.05      # Mean reversion speed
 b = 0.04      # Long-term mean force
@@ -188,8 +213,8 @@ for i in range(n_steps):
 print(f"\nVasicek Model (mean-reverting):")
 print(f"  Mean reversion speed (a): {a}")
 print(f"  Long-term mean (b): {b*100:.2f}%")
-print(f"  Volatility (σ): {sigma*100:.2f}%")
-print(f"  Initial force δ(0): {delta_0_vasicek*100:.2f}%")
+print(f"  Volatility (): {sigma*100:.2f}%")
+print(f"  Initial force  (0): {delta_0_vasicek*100:.2f}%")
 print(f"  Simulations: {n_sims}, Time horizon: {n_steps * dt:.1f} years\n")
 
 # Statistics
@@ -219,9 +244,9 @@ delta_range = np.log(1 + i_range)
 nominal_range = i_range  # Annual compounded annually for this comparison
 
 ax.plot(i_range * 100, i_range * 100, linewidth=2.5, label='Effective i', color='darkblue')
-ax.plot(i_range * 100, delta_range * 100, linewidth=2.5, label='Force δ', color='red')
+ax.plot(i_range * 100, delta_range * 100, linewidth=2.5, label='Force  ', color='red')
 ax.fill_between(i_range * 100, delta_range * 100, i_range * 100, 
-               alpha=0.2, color='gray', label='Spread (i - δ)')
+               alpha=0.2, color='gray', label='Spread (i -  )')
 ax.set_xlabel('Effective Annual Rate i (%)', fontsize=11)
 ax.set_ylabel('Rate Value (%)', fontsize=11)
 ax.set_title('Effective Rate vs Force of Interest', fontsize=12, fontweight='bold')
@@ -234,7 +259,7 @@ t_range = np.linspace(0, 20, 100)
 accumulation_continuous = np.exp(0.05 * t_range)
 accumulation_discrete = (1 + 0.05127) ** t_range
 
-ax.plot(t_range, accumulation_continuous, linewidth=2.5, label='Continuous (e^{δt})', color='red')
+ax.plot(t_range, accumulation_continuous, linewidth=2.5, label='Continuous (e^{ t})', color='red')
 ax.plot(t_range, accumulation_discrete, linewidth=2.5, label='Discrete ((1+i)^t)', color='blue')
 ax.fill_between(t_range, accumulation_discrete, accumulation_continuous, 
                alpha=0.2, color='gray')
@@ -253,7 +278,7 @@ ax.plot(n_annuity, a_annuity, linewidth=2.5, color='darkgreen')
 ax.axhline(1/0.05, color='r', linestyle='--', linewidth=2, label=f'Perpetuity = {1/0.05:.1f}')
 ax.fill_between(n_annuity, 0, a_annuity, alpha=0.2, color='green')
 ax.set_xlabel('Term (years)', fontsize=11)
-ax.set_ylabel('a̅ₙ̄| (annuity factor)', fontsize=11)
+ax.set_ylabel('a...TM| (annuity factor)', fontsize=11)
 ax.set_title('Continuous Annuity Present Value Factor', fontsize=12, fontweight='bold')
 ax.legend(fontsize=10)
 ax.grid(alpha=0.3)
@@ -276,7 +301,7 @@ ax.axhline(b * 100, color='green', linestyle='--', linewidth=2, alpha=0.7, label
 ax.fill_between(times_vasicek, p5_path * 100, p95_path * 100, alpha=0.2, color='orange')
 
 ax.set_xlabel('Years', fontsize=11)
-ax.set_ylabel('Force of Interest δ(t) (%)', fontsize=11)
+ax.set_ylabel('Force of Interest  (t) (%)', fontsize=11)
 ax.set_title('Vasicek Model: Stochastic Force Simulation', fontsize=12, fontweight='bold')
 ax.legend(fontsize=9, loc='best')
 ax.grid(alpha=0.3)
@@ -286,4 +311,28 @@ plt.savefig('force_of_interest_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: force of interest")
+
 

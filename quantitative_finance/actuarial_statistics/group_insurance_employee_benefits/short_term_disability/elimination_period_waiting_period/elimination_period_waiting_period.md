@@ -1,158 +1,114 @@
-# Elimination Period & Waiting Period
+﻿# Elimination Period Waiting Period
 
-## 1. Concept Skeleton
-**Definition:** Waiting period before short-term disability (STD) benefits commence; employee bears loss during this window  
-**Purpose:** Reduce moral hazard, align with emergency savings expectations, control claim frequency and insurer costs  
-**Prerequisites:** Disability insurance fundamentals, claim adjudication process, benefit triggers
+## Concept Skeleton
+**Definition:** Elimination Period Waiting Period is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Factor | 0-Day | 7-Day | 14-Day |
-|--------|-------|--------|--------|
-| **Employee out-of-pocket cost** | None | ~1 week salary loss | ~2 week salary loss |
-| **Claim frequency impact** | High (all absences) | Moderate | Lower (weeds out brief absences) |
-| **Insurer cost** | Highest premiums | Mid-range | Lower premiums |
-| **Market prevalence** | Rare (union/government) | Common | Standard for group STD |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-Employee disability begins Monday; 7-day elimination period → benefits start following Monday (1 week salary loss by employee)
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-0-day elimination with no definition of disability → claims for minor colds or 1-day absences drain pool, premium spikes
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-Stacked STD after Long-Term Disability: LTD 90-day elimination means STD covers first 90 days; overlap period uses STD benefit
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Elimination Period Waiting Period | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Elimination Period Structure:
-├─ Calendar Days vs Business Days:
-│   ├─ Calendar: 7, 14, 21, 30 days from disability onset
-│   ├─ Business Days: Only weekdays count; weekends/holidays pause clock
-│   └─ Impact: Calendar-day periods are shorter effective wait
-├─ Continuous vs Non-Continuous Disability:
-│   ├─ Continuous: Single unbroken absence; elimination period runs once
-│   ├─ Non-Continuous: Multiple short absences for same condition
-│   │   ├─ If gap < 30 days: Treated as continuous (period doesn't reset)
-│   │   └─ If gap ≥ 30 days: New elimination period applies (reset)
-│   └─ Recurrence rule: Prevents re-triggering via small gaps
-├─ Elimination Period vs Benefit Waiting:
-│   ├─ Elimination: Time before benefits paid (insurer waits)
-│   ├─ Integration with STD: No retroactive payment for elimination period
-│   └─ Integration with LTD: STD covers gap, then LTD begins
-└─ Exceptions & Modifications:
-    ├─ Accident vs Sickness: Some plans waive for accidents (0-day)
-    ├─ Recurrent claims: May honor prior elimination if same cause
-    └─ Return-to-work incentives: Partial benefits during ramp-up
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Elimination Period Waiting Period.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-## 5. Mini-Project: Elimination Period Impact on Claims
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Elimination Period Waiting Period.
 
-**Goal:** Model frequency impact of varying elimination periods on a group STD plan.
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# Simulated population: 1000 employees, 1 year
-np.random.seed(42)
-n_employees = 1000
-claims_data = []
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-# Generate claim events: rate ~0.5 per employee per year
-for emp_id in range(n_employees):
-    # Poisson process: average 0.5 claims/year
-    n_claims = np.random.poisson(0.5)
-    
-    for claim_idx in range(n_claims):
-        # Random claim start date
-        day_of_year = np.random.randint(1, 366)
-        
-        # Duration (log-normal: most short, some long)
-        duration = np.random.lognormal(mean=2, sigma=1.2)  # ~7 days median
-        duration = max(1, int(duration))
-        
-        claims_data.append({
-            'emp_id': emp_id,
-            'start_day': day_of_year,
-            'duration_days': duration
-        })
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-df = pd.DataFrame(claims_data)
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-# Calculate claims paid under different elimination periods
-elimination_periods = [0, 7, 14, 21]
-results = []
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-for elim_days in elimination_periods:
-    # Days benefit paid = max(0, duration - elimination)
-    df['days_paid'] = df['duration_days'].apply(
-        lambda d: max(0, d - elim_days)
-    )
-    
-    # Count non-zero claims (those that trigger any payment)
-    claims_paid = (df['days_paid'] > 0).sum()
-    
-    # Total benefit days (proxy for cost)
-    total_benefit_days = df['days_paid'].sum()
-    
-    results.append({
-        'Elimination Days': elim_days,
-        'Claims Paid': claims_paid,
-        'Total Benefit Days': total_benefit_days,
-        'Avg Days per Claim': total_benefit_days / max(1, claims_paid)
-    })
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Elimination Period Waiting Period outputs in pricing, reserving, and solvency workflows.
 
-results_df = pd.DataFrame(results)
-print("Elimination Period Impact on Claims:\n")
-print(results_df.to_string(index=False))
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-# Visualization
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-# Plot 1: Claims paid vs elimination period
-axes[0].bar(results_df['Elimination Days'], results_df['Claims Paid'], 
-            color='steelblue', alpha=0.7, edgecolor='black')
-axes[0].set_xlabel('Elimination Period (days)')
-axes[0].set_ylabel('Number of Claims Paid')
-axes[0].set_title('Claims Frequency vs Elimination Period')
-axes[0].grid(axis='y', alpha=0.3)
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 2: Total benefit days vs elimination period
-axes[1].plot(results_df['Elimination Days'], results_df['Total Benefit Days'], 
-             'o-', linewidth=2, markersize=8, color='darkred')
-axes[1].set_xlabel('Elimination Period (days)')
-axes[1].set_ylabel('Total Benefit Days Paid')
-axes[1].set_title('Total Claims Cost vs Elimination Period')
-axes[1].grid(alpha=0.3)
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-plt.tight_layout()
-plt.show()
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Sensitivity: show claim duration distribution
-print("\n\nClaim Duration Distribution:")
-print(df['duration_days'].describe())
-print(f"Median duration: {df['duration_days'].median():.1f} days")
-print(f"% claims < 7 days: {(df['duration_days'] < 7).sum() / len(df) * 100:.1f}%")
-print(f"% claims < 14 days: {(df['duration_days'] < 14).sum() / len(df) * 100:.1f}%")
-```
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-**Key Insights:**
-- 7-day elimination eliminates ~30–50% of very short claims (< 7 days)
-- 14-day elimination reduces claim count ~50%, but few claims shorter than 14 days
-- Longer periods improve insurer costs but shift burden entirely to employees
-- Business day vs calendar day choice affects effective waiting period
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-## 6. Relationships & Dependencies
-- **To Claim Adjudication:** Elimination period is trigger; determines when evaluation begins
-- **To Benefit Amount:** Once triggered, benefit amount calculated independent of elimination length
-- **To Offset Provisions:** Elimination period doesn't affect offsets (e.g., SSDI offset still applies)
-- **To Return-to-Work Riders:** Some plans reduce or waive elimination if employee returns part-time
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-## References
-- [Group Disability Insurance Standards](https://www.acli.com) - American Council of Life Insurers
-- [UNUM STD Plan Design](https://www.unum.com) - Common market parameters
-- [Actuarial Standards Board: ASB #1](https://www.actuarialstandardsboard.org/) - Valuation standards
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Elimination Period Waiting Period: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 

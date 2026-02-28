@@ -1,12 +1,11 @@
-# Black-Scholes Model
+﻿# Black-Scholes Model
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Closed-form mathematical model for pricing European options under continuous-time stochastic asset dynamics, assuming log-normal price distribution and frictionless markets.  
 **Purpose:** Benchmark option valuation, calibrate volatility, compute hedge ratios (Greeks), foundation for advanced pricing models, market conventions  
 **Prerequisites:** Stochastic differential equations, Itô's lemma, risk-neutral valuation, geometric Brownian motion, option payoff structures
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Model | Black-Scholes | Binomial Tree | Monte Carlo | Local Volatility |
 |-------|---------------|---------------|-------------|------------------|
 | **Closed-Form** | Yes | No | No | No |
@@ -17,8 +16,7 @@
 | **Smile/Skew** | None assumed | Can apply | Can apply | Natural fit |
 | **Industry Use** | Ubiquitous | Rarely now | Common | Advanced books |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 ATM European call, S=100, K=100, T=1yr, σ=20%, r=5%:
 - d₁ = [ln(1) + (0.05 + 0.02)(1)] / (0.20) ≈ 0.349
@@ -32,8 +30,7 @@ Merton (1973): Assumes perfect markets, no transaction costs, continuous trading
 **Edge Case:**  
 Very short maturity T → 0: d₁, d₂ → ±∞ depending on S vs K. Call → max(S - K, 0) (intrinsic), put → max(K - S, 0). Theta effect dominates: per-day value decay accelerates. BS breaks at T=0 (singularity); use binomial at final node or numerical methods.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Black-Scholes Valuation Framework:
 ├─ Asset Dynamics (Assumptions):
@@ -74,8 +71,7 @@ Black-Scholes Valuation Framework:
 
 **Interaction:** As S increases, d₁ increases → N(d₁) increases → delta increases → Gamma effect dominates near K.
 
-## 5. Mini-Project
-
+## Challenge Round
 Implement Black-Scholes pricing, Greeks, implied volatility calibration, and compare to Monte Carlo:
 
 ```python
@@ -311,8 +307,7 @@ print("\nPlot saved: black_scholes_analysis.png")
 - **Delta:** Smooth sigmoid from 0 to 1; ATM ≈ 0.5. Hedge ratio for replication.
 - **Gamma:** Peaks ATM; largest convexity where uncertainty highest. Critical for rehedging.
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Derive the Black-Scholes PDE from Itô's lemma and delta hedging. Why does drift μ cancel?**  
 A: Start with dS = μS dt + σS dW. Consider option V(S, t). By Itô: dV = (∂V/∂t + μS ∂V/∂S + 0.5σ²S² ∂²V/∂S²) dt + σS ∂V/∂S dW. Construct delta-neutral portfolio: Π = V - Δ×S where Δ = ∂V/∂S. Then dΠ = (∂V/∂t + 0.5σ²S² ∂²V/∂S²) dt (Brownian term cancels). No-arbitrage: dΠ/Π = r dt (bond return). Therefore: ∂V/∂t + 0.5σ²S² ∂²V/∂S² + rS ∂V/∂S - rV = 0. Drift μ disappears because we hedge it away; only σ and r remain (hence "risk-neutral").
 
@@ -331,8 +326,7 @@ A: With dividend yield q, forward price F = S e^{(r-q)T}. Dividend reduces futur
 **Q6: What is the relationship between BS vega and the volatility smile? How do you price an ATM option if market prices show a skew?**  
 A: BS assumes flat volatility (vega = ∂C/∂σ treats σ as constant). Real markets show volatility smile/skew: IV depends on strike K. OTM puts have higher IV (tail risk premium; want to pay more for downside insurance). If smile present: interpolate IV(K) from market prices, then use BS with local σ(K). More sophisticated: use Heston (stochastic volatility) or local volatility models that fit entire surface. For pricing ATM: use surface interpolation (e.g., SABR model) to extract IV(K=S), then BS. Arbitrage-free calibration ensures smooth vol surface.
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Black–Scholes Model](https://en.wikipedia.org/wiki/Black%E2%80%93Scholes_model) — Formula, Greeks, derivation, assumptions
 - [Wikipedia: Itô's Lemma](https://en.wikipedia.org/wiki/It%C3%B4%27s_lemma) — Stochastic calculus, chain rule for SDEs
 - Hull: *Options, Futures & Derivatives* — Chapters 13-15: BS derivation, Greeks, implied vol

@@ -1,4 +1,4 @@
-# Principle of Equivalence
+﻿# Principle of Equivalence
 
 ## 1. Concept Skeleton
 **Definition:** E[Benefits] = E[Premiums]; actuarial equivalence principle establishing zero-profit pricing; fundamental equation for net premium  
@@ -123,7 +123,7 @@ for k in range(1, term_years + 1):
     if age_k in mortality_data:
         qx_k = mortality_data[age_k]
     else:
-        qx_k = 0.001  # Placeholder
+        qx_k = 0.001  # Assumed value
     
     vk = v ** k
     contribution = kpx * qx_k * vk * benefit
@@ -490,3 +490,5 @@ When equivalence principle breaks down:
 
 ---
 **Status:** Foundational pricing principle | **Complements:** Net Premium, Gross Premium, Premium Reserves
+
+

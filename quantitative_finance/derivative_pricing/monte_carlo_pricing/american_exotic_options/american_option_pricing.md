@@ -1,12 +1,11 @@
-# American Option Pricing
+﻿# American Option Pricing
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Options exercisable at any time before expiry (t ∈ [0,T]), requiring optimal early exercise decision by comparing immediate payoff vs continuation value at each time step.  
 **Purpose:** Value American calls/puts; implement early exercise policy; quantify American premium over European; handle dividend-paying stocks; solve optimal stopping problems.  
 **Prerequisites:** European option pricing, dynamic programming, backward induction, optimal stopping theory, martingale representation
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | American Option | European Option | Bermudan Option | Perpetual American |
 |--------|----------------|-----------------|-----------------|-------------------|
 | **Exercise Rights** | Any time ≤ T | Only at T | Specific dates | No expiry (T=∞) |
@@ -17,8 +16,7 @@
 | **Typical Examples** | LEAP puts, stock options | Index options (cash) | Employee stock options | Academic curiosity |
 | **Pricing Method** | Binomial tree or LSM | Black-Scholes | Binomial or LSM | Closed-form integral |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: American Put Early Exercise**  
 Stock S=$50, strike K=$100, time to expiry T=1yr, r=5%, σ=20%. European put: BS formula ≈ $47.80. Immediate exercise value: $100-$50 = $50. American put worth ≥ $50 (early exercise value) vs European $47.80. Optimal strategy: exercise now (capture $50 intrinsic) rather than wait (risk S rises). American put premium: ~$50.50 (simulation) vs $47.80 European. Early exercise triggered when deep ITM (S << K) and time value negligible.
 
@@ -28,8 +26,7 @@ American call on stock without dividends: never optimal to exercise early (excep
 **Edge Case: Deep ITM American Put Near Expiry**  
 S=$10, K=$100, T=0.01yr (3 days), r=5%. Immediate exercise value: $90. Continuation value (wait 3 days): ~$90 - $0.04 (interest loss on $90) = $89.96. Early exercise dominates. Deep ITM + short time → early exercise optimal. Threshold: S* ≈ K × (1 - r×T) for puts. Below S*, exercise immediately.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 American Option Pricing Framework:
 ├─ Optimal Stopping Problem:
@@ -101,8 +98,7 @@ American Option Pricing Framework:
 
 **Interaction:** Forward paths → Regression → Backward decision → Exercise boundary → American value
 
-## 5. Mini-Project
-
+## Challenge Round
 Implement Longstaff-Schwartz algorithm for American put; compare to European:
 
 ```python
@@ -418,8 +414,7 @@ print("="*80)
 - **Exercise boundary:** S*(t) increases as t→T (threshold rises near expiry)
 - **Convergence:** O(1/√N) standard error; 10,000 paths gives ±$0.05 precision
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why is American put premium highest for deep ITM puts with long maturity?**  
 A: Deep ITM (S << K): Intrinsic value K-S large; holding option means delaying receipt of K-S cash. Early exercise captures K-S immediately, earns interest r×(K-S)×T over remaining time. Long T: More interest forgone by holding → higher early exercise value → larger premium. Example: S=$50, K=$100, T=2yr, r=5% → early exercise earns $50×0.05×2=$5 interest vs. holding. Premium ≈ $5-8 (10-16% of European value). Intuition: Time value of money dominates optionality for deep ITM.
 
@@ -438,8 +433,7 @@ A: Perpetual American put (T=∞) threshold: S* = K × (r/(r + 0.5σ²)) = 100 �
 **Q6: How does regression degree in LSM affect American put pricing accuracy?**  
 A: Low degree (1-2 Laguerre): Under-fit continuation value → poor exercise decision → underestimate American value (exercise too early). High degree (5+): Over-fit → regression captures noise → unstable exercise policy → wider variance in price estimates. Optimal: degree 3-4 Laguerre polynomials (captures nonlinear continuation, avoids overfitting). Empirical: degree 3 gives 0.01% price error; degree 2 gives 0.05%; degree 5+ gives 0.02% but 2× variance. Practical: always use degree 3 Laguerre (Longstaff-Schwartz paper default); validates against binomial tree.
 
-## 7. Key References
-
+## Key References
 - Longstaff & Schwartz (2001): "Valuing American Options by Simulation" — LSM algorithm, Laguerre basis
 - [Wikipedia: American Option](https://en.wikipedia.org/wiki/American_option) — Early exercise, optimal stopping
 - Cox, Ross, Rubinstein (1979): "Option Pricing: Binomial Tree Model" — Discrete-time American pricing

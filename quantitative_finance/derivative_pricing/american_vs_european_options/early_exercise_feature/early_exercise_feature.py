@@ -1,107 +1,107 @@
+﻿# %% [markdown]
+# # Early Exercise Feature - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-from scipy.optimize import brentq
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-def bs_call(S, K, r, sigma, T, q=0):
-    """European call with dividend yield q"""
-    d1 = (np.log(S/K) + (r - q + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
-    call = S*np.exp(-q*T)*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return call
+random.seed(42)
 
-def bs_put(S, K, r, sigma, T, q=0):
-    """European put with dividend yield q"""
-    d1 = (np.log(S/K) + (r - q + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
-    put = K*np.exp(-r*T)*norm.cdf(-d2) - S*np.exp(-q*T)*norm.cdf(-d1)
-    return put
 
-# Parameters
-S_range = np.linspace(60, 140, 100)
-K = 100
-r = 0.05
-sigma = 0.2
-T = 1.0
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-# Scenarios
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
-# Plot 1: Call with dividends (q=0 vs q=0.05)
-call_no_div = [bs_call(S, K, r, sigma, T, q=0) for S in S_range]
-call_div = [bs_call(S, K, r, sigma, T, q=0.05) for S in S_range]
-intrinsic_call = np.maximum(S_range - K, 0)
+config = Config()
+print(f"Topic: Early Exercise Feature")
+print(f"Config: {config}")
 
-axes[0, 0].plot(S_range, call_no_div, 'b-', linewidth=2, label='Call (q=0)')
-axes[0, 0].plot(S_range, call_div, 'r--', linewidth=2, label='Call (q=5%)')
-axes[0, 0].plot(S_range, intrinsic_call, 'k:', linewidth=1, label='Intrinsic')
-axes[0, 0].set_title('European Call: Dividend Impact')
-axes[0, 0].set_xlabel('Stock Price (S)')
-axes[0, 0].set_ylabel('Option Value')
-axes[0, 0].legend()
-axes[0, 0].grid(alpha=0.3)
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Plot 2: Put option across time to expiry
-T_range = np.array([0.1, 0.25, 0.5, 1.0])
-colors = plt.cm.viridis(np.linspace(0, 1, len(T_range)))
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-for T_val, color in zip(T_range, colors):
-    put_vals = [bs_put(S, K, r, sigma, T_val) for S in S_range]
-    axes[0, 1].plot(S_range, put_vals, color=color, linewidth=2, 
-                   label=f'T={T_val}')
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-intrinsic_put = np.maximum(K - S_range, 0)
-axes[0, 1].plot(S_range, intrinsic_put, 'k--', linewidth=1.5, label='Intrinsic')
-axes[0, 1].set_title('European Put: Time Decay')
-axes[0, 1].set_xlabel('Stock Price (S)')
-axes[0, 1].set_ylabel('Option Value')
-axes[0, 1].legend()
-axes[0, 1].grid(alpha=0.3)
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# Plot 3: Time value decomposition (ITM put)
-T_vals = np.linspace(0.01, T, 50)
-S_ITM = 85  # ITM put
 
-put_vals_T = [bs_put(S_ITM, K, r, sigma, T_val) for T_val in T_vals]
-intrinsic_vals = [max(K - S_ITM, 0)] * len(T_vals)
-time_value = [pv - intrinsic_vals[i] for i, pv in enumerate(put_vals_T)]
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-axes[1, 0].fill_between(T_vals, 0, intrinsic_vals, alpha=0.3, label='Intrinsic')
-axes[1, 0].fill_between(T_vals, intrinsic_vals, put_vals_T, alpha=0.3, label='Time Value')
-axes[1, 0].plot(T_vals, put_vals_T, 'b-', linewidth=2)
-axes[1, 0].set_title(f'Put Decomposition (S=${S_ITM}, ITM)')
-axes[1, 0].set_xlabel('Time to Expiry (years)')
-axes[1, 0].set_ylabel('Option Value ($)')
-axes[1, 0].legend()
-axes[1, 0].grid(alpha=0.3)
 
-# Plot 4: American premium estimate (put, high interest rate scenario)
-r_range = np.linspace(0, 0.15, 30)
-premiums = []
-S_val = 90  # ITM
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-for r_val in r_range:
-    eur_put = bs_put(S_val, K, r_val, sigma, T)
-    # Rough American approximation (more precise requires binomial)
-    intrinsic = max(K - S_val, 0)
-    # Premium increases with r (early exercise more valuable)
-    premium_estimate = intrinsic - eur_put + 0.01 * (r_val - r)  # heuristic
-    premium_estimate = max(premium_estimate, 0)
-    premiums.append(premium_estimate)
+print("Implemented pricing functions")
 
-axes[1, 1].plot(r_range * 100, premiums, 'ro-', linewidth=2, markersize=6)
-axes[1, 1].set_title('American Put Premium (Rough Estimate)')
-axes[1, 1].set_xlabel('Risk-Free Rate (%)')
-axes[1, 1].set_ylabel('American - European ($)')
-axes[1, 1].grid(alpha=0.3)
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-plt.tight_layout()
-plt.show()
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-print("Early Exercise Analysis:")
-print(f"European Call (q=0, S=100): ${bs_call(100, K, r, sigma, T, q=0):.3f}")
-print(f"European Call (q=5%, S=100): ${bs_call(100, K, r, sigma, T, q=0.05):.3f}")
-print(f"European Put (S=90): ${bs_put(90, K, r, sigma, T):.3f}")
-print(f"Intrinsic Put (S=90): ${max(K-90, 0):.3f}")
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
+
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
+
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

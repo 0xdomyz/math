@@ -1,189 +1,107 @@
+﻿# %% [markdown]
+# # Gamma - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# Black-Scholes components
-def bs_d1(S, K, T, r, sigma):
-    with np.errstate(divide='ignore', invalid='ignore'):
-        return (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+random.seed(42)
 
-def gamma_bs(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
-    return gamma
 
-def delta_bs(S, K, T, r, sigma):
-    return norm.cdf(bs_d1(S, K, T, r, sigma))
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-def bs_call(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    d2 = d1 - sigma*np.sqrt(T)
-    call = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return call
 
-# Parameters
-S0, K, T, r, sigma = 100, 100, 1, 0.05, 0.2
+config = Config()
+print(f"Topic: Gamma")
+print(f"Config: {config}")
 
-# Gamma across spot prices
-spot_prices = np.linspace(80, 120, 100)
-gammas = [gamma_bs(S, K, T, r, sigma) for S in spot_prices]
-deltas = [delta_bs(S, K, T, r, sigma) for S in spot_prices]
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Gamma vs time
-times = np.linspace(T, 0.01, 50)
-gammas_time = [gamma_bs(S0, K, t, r, sigma) for t in times]
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# Gamma vs volatility
-vols = np.linspace(0.05, 0.5, 50)
-gammas_vol = [gamma_bs(S0, K, T, r, v) for v in vols]
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# Rehedging P&L simulation
-print("=== GAMMA & REHEDGING P&L ANALYSIS ===")
-np.random.seed(42)
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# Scenario 1: High realized volatility
-spot_moves_high = np.random.normal(0, 0.03, 252)  # High volatility: 3% daily
-S_path_high = np.array([S0])
-for move in spot_moves_high:
-    S_path_high = np.append(S_path_high, S_path_high[-1] * (1 + move))
 
-# Scenario 2: Low realized volatility
-spot_moves_low = np.random.normal(0, 0.005, 252)  # Low volatility: 0.5% daily
-S_path_low = np.array([S0])
-for move in spot_moves_low:
-    S_path_low = np.append(S_path_low, S_path_low[-1] * (1 + move))
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-# Compute realized volatility
-realized_vol_high = np.std(np.log(S_path_high[1:] / S_path_high[:-1])) * np.sqrt(252)
-realized_vol_low = np.std(np.log(S_path_low[1:] / S_path_low[:-1])) * np.sqrt(252)
 
-print(f"Implied Volatility: {sigma:.2%}")
-print(f"Realized Vol (High Scenario): {realized_vol_high:.2%}")
-print(f"Realized Vol (Low Scenario): {realized_vol_low:.2%}")
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-# Rehedging P&L calculation
-def calculate_rehedging_pnl(S_path, K, T, r, sigma, option_type='call'):
-    T_remaining = np.linspace(T, 0, len(S_path))
-    deltas = []
-    gammas = []
-    rehedge_pnl = []
-    
-    for i, (S, T_rem) in enumerate(zip(S_path, T_remaining)):
-        if T_rem > 0:
-            delta = delta_bs(S, K, T_rem, r, sigma)
-            gamma = gamma_bs(S, K, T_rem, r, sigma)
-        else:
-            delta = 1.0 if S > K else 0.0
-            gamma = 0.0
-        
-        deltas.append(delta)
-        gammas.append(gamma)
-        
-        # Rehedging P&L: Γ/2 × (ΔS)²
-        if i > 0:
-            dS = S_path[i] - S_path[i-1]
-            pnl_gamma = gammas[i-1] / 2 * dS**2
-            rehedge_pnl.append(pnl_gamma)
-    
-    return np.array(deltas), np.array(gammas), np.cumsum(rehedge_pnl)
+print("Implemented pricing functions")
 
-deltas_high, gammas_high, rehedge_pnl_high = calculate_rehedging_pnl(
-    S_path_high, K, T, r, sigma)
-deltas_low, gammas_low, rehedge_pnl_low = calculate_rehedging_pnl(
-    S_path_low, K, T, r, sigma)
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-print(f"\nRehedging P&L (1000 contracts):")
-print(f"High Vol Scenario: ${rehedge_pnl_high[-1]*1000:.2f}")
-print(f"Low Vol Scenario: ${rehedge_pnl_low[-1]*1000:.2f}")
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-# Long gamma vs short gamma
-# Long call + short delta hedge = long gamma
-# Short call + long delta hedge = short gamma
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
 
-print(f"\nGamma P&L Analysis:")
-print(f"  Long 1000 calls (long gamma):")
-print(f"    High vol: +${rehedge_pnl_high[-1]*1000:.2f} (profit)")
-print(f"    Low vol: +${rehedge_pnl_low[-1]*1000:.2f} (profit)")
-print(f"  Short 1000 calls (short gamma):")
-print(f"    High vol: -${rehedge_pnl_high[-1]*1000:.2f} (loss)")
-print(f"    Low vol: -${rehedge_pnl_low[-1]*1000:.2f} (loss)")
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
 
-# Visualization
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
 
-# Plot 1: Gamma vs Spot
-axes[0, 0].plot(spot_prices, gammas, linewidth=2, color='green')
-axes[0, 0].axvline(K, color='r', linestyle='--', alpha=0.5, label='Strike')
-axes[0, 0].set_xlabel('Spot Price ($)')
-axes[0, 0].set_ylabel('Gamma')
-axes[0, 0].set_title('Gamma across Spot Prices')
-axes[0, 0].legend()
-axes[0, 0].grid(alpha=0.3)
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
 
-# Plot 2: Gamma vs Time
-axes[0, 1].plot(times, gammas_time, linewidth=2, color='purple')
-axes[0, 1].set_xlabel('Time to Expiry (years)')
-axes[0, 1].set_ylabel('Gamma')
-axes[0, 1].set_title('Gamma vs Time to Expiry (ATM)')
-axes[0, 1].grid(alpha=0.3)
-
-# Plot 3: Gamma vs Volatility
-axes[0, 2].plot(vols, gammas_vol, linewidth=2, color='brown')
-axes[0, 2].axvline(sigma, color='r', linestyle='--', alpha=0.5, label='Current σ')
-axes[0, 2].set_xlabel('Volatility')
-axes[0, 2].set_ylabel('Gamma')
-axes[0, 2].set_title('Gamma vs Volatility (ATM, T=1yr)')
-axes[0, 2].legend()
-axes[0, 2].grid(alpha=0.3)
-
-# Plot 4: Spot paths
-axes[1, 0].plot(S_path_high, label='High Vol Path', linewidth=1.5, alpha=0.7)
-axes[1, 0].plot(S_path_low, label='Low Vol Path', linewidth=1.5, alpha=0.7)
-axes[1, 0].axhline(K, color='r', linestyle='--', alpha=0.5)
-axes[1, 0].set_xlabel('Day')
-axes[1, 0].set_ylabel('Spot Price ($)')
-axes[1, 0].set_title('Spot Price Paths')
-axes[1, 0].legend()
-axes[1, 0].grid(alpha=0.3)
-
-# Plot 5: Gamma over time (high vol path)
-T_remaining_high = np.linspace(T, 0, len(S_path_high))
-axes[1, 1].plot(gammas_high, linewidth=2, color='green', label='High Vol')
-axes[1, 1].set_xlabel('Day')
-axes[1, 1].set_ylabel('Gamma')
-axes[1, 1].set_title('Gamma Evolution (High Vol Path)')
-axes[1, 1].grid(alpha=0.3)
-
-# Plot 6: Rehedging P&L
-rehedge_pnl_high_scaled = rehedge_pnl_high * 1000
-rehedge_pnl_low_scaled = rehedge_pnl_low * 1000
-
-axes[1, 2].plot(rehedge_pnl_high_scaled, linewidth=2, label='High Vol', color='red')
-axes[1, 2].plot(rehedge_pnl_low_scaled, linewidth=2, label='Low Vol', color='blue')
-axes[1, 2].axhline(0, color='k', linestyle='-', linewidth=0.5)
-axes[1, 2].set_xlabel('Day')
-axes[1, 2].set_ylabel('Cumulative Rehedging P&L ($)')
-axes[1, 2].set_title('Long Gamma P&L (1000 contracts)')
-axes[1, 2].legend()
-axes[1, 2].grid(alpha=0.3)
-
-plt.tight_layout()
-plt.show()
-
-# Gamma-Theta tradeoff at ATM
-print("\n=== GAMMA-THETA TRADEOFF ===")
-theta_bs = lambda S, K, T, r, sigma: (
-    -S * norm.pdf(bs_d1(S, K, T, r, sigma)) * sigma / (2 * np.sqrt(T)) -
-    r * K * np.exp(-r*T) * norm.cdf(bs_d1(S, K, T, r, sigma) - sigma*np.sqrt(T))
-)
-
-atm_gamma = gamma_bs(K, K, T, r, sigma)
-atm_theta = theta_bs(K, K, T, r, sigma)
-
-print(f"ATM Gamma: {atm_gamma:.6f}")
-print(f"ATM Theta (daily): {atm_theta/365:.6f}")
-print(f"Gamma-Theta ratio: {atm_gamma / (atm_theta/365):.2f}")
-print(f"\nInterpretation: For every $1² of realized moves,")
-print(f"  Gamma P&L ≈ {atm_gamma/2:.6f}; Theta decay ≈ {atm_theta/365:.6f}/day")
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

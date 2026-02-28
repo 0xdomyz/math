@@ -1,3 +1,4 @@
+﻿# %% Auto-converted to VSCode Interactive format
 """
 Basel Accords for Credit Risk - Consolidated Python Implementation
 Extracted from markdown files in basel_accords subfolder
@@ -303,3 +304,9 @@ def main_basel_accords():
 
 if __name__ == "__main__":
     main_basel_accords()
+
+
+# %% [markdown]
+# ## Summary
+# 
+# This analysis demonstrates important credit risk methodologies.

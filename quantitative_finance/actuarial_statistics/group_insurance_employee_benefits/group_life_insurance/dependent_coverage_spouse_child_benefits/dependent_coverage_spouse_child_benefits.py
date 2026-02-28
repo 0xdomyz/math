@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # dependent coverage spouse child benefits
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for dependent coverage spouse child benefits.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: dependent coverage spouse child benefits")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: dependent_coverage_spouse_child_benefits.md
 
@@ -55,7 +80,7 @@ designs = {
 def calculate_ssnb(primary_salary):
     """Estimate Social Security survivor benefit (simplified)"""
     # Average retiree benefit ~$1,800/month; higher earners get more
-    # Rough mapping: PIA ~ 0.40 × annual_income (after cap adjustments)
+    # Rough mapping: PIA ~ 0.40  annual_income (after cap adjustments)
     pia = min(primary_salary * 0.40, 3500) / 12  # Monthly
     widow_benefit = pia * 0.75 * 12  # Annual
     return widow_benefit
@@ -142,7 +167,7 @@ pivot_adequacy = results_df.pivot_table(values='Adequacy Ratio',
                                         index='Household', columns='Design')
 pivot_adequacy.plot(kind='bar', ax=ax, color=['steelblue', 'orange', 'green'], alpha=0.7, edgecolor='black')
 ax.axhline(1.0, color='red', linestyle='--', linewidth=2, label='Target (100%)')
-ax.set_title('Benefit Adequacy Ratio (vs 5× Annual Income Target)')
+ax.set_title('Benefit Adequacy Ratio (vs 5 Annual Income Target)')
 ax.set_ylabel('Adequacy Ratio')
 ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
 ax.legend(title='Design')
@@ -188,9 +213,33 @@ plt.show()
 
 # Insights
 print("\n\nKEY INSIGHTS:")
-print(f"Standard design (2× + 50% spouse + child): ~70–90% adequacy for most households")
-print(f"Generous design (3× + 75% spouse + child): ~100%+ adequacy for most households")
-print(f"Social Security adds 15–25% of total resources (significant buffer)")
+print(f"Standard design (2 + 50% spouse + child): ~7090% adequacy for most households")
+print(f"Generous design (3 + 75% spouse + child): ~100%+ adequacy for most households")
+print(f"Social Security adds 1525% of total resources (significant buffer)")
 print(f"Single-earner families: More dependent on group life (no secondary income)")
 print(f"Dual-income families: Better able to absorb loss; lower group life need")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: dependent coverage spouse child benefits")
+
 

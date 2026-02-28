@@ -1,19 +1,18 @@
-# GARCH Models
+﻿# GARCH Models
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Volatility models where conditional variance depends on past shocks and past variance  
 **Purpose:** Forecast time-varying volatility; improve MC inputs and risk estimates  
 **Prerequisites:** Time series, conditional variance, stationarity
 
-## 2. Comparative Framing
+## Comparative Framing
 | Model | GARCH(1,1) | EWMA | Stochastic Volatility |
 |---|---|---|---|
 | **Dynamics** | $\sigma_t^2=\omega+\alpha\epsilon_{t-1}^2+\beta\sigma_{t-1}^2$ | $\sigma_t^2=\lambda\sigma_{t-1}^2+(1-\lambda)\epsilon_{t-1}^2$ | Separate latent process |
 | **Mean Reversion** | Yes | No (implicit) | Yes |
 | **Use** | Forecasting | Risk metrics | Option pricing |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 GARCH(1,1) fitted to returns gives $\alpha=0.07, \beta=0.90$ → persistent volatility.
 
@@ -23,7 +22,7 @@ Assuming constant σ in crisis → underestimates near-term risk; GARCH adjusts 
 **Edge Case:**  
 If $\alpha+\beta \ge 1$, variance is non-stationary; forecasts explode.
 
-## 4. Layer Breakdown
+## Layer Breakdown
 ```
 GARCH(1,1) Calibration:
 ├─ Model:
@@ -46,48 +45,7 @@ GARCH(1,1) Calibration:
 
 **Interaction:** Fit parameters → forecast σ_t → simulate returns with time-varying volatility
 
-## 5. Mini-Project
-Fit GARCH(1,1) and compare to EWMA:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from arch import arch_model
-
-np.random.seed(42)
-
-# Simulated returns
-n = 2000
-returns = np.random.normal(0, 0.01, n)
-
-# Fit GARCH(1,1)
-model = arch_model(returns*100, vol='GARCH', p=1, q=1, mean='Zero')
-res = model.fit(disp='off')
-
-print(res.params)
-
-# Conditional volatility
-cond_vol = res.conditional_volatility / 100
-
-# EWMA
-lam = 0.94
-sigma2 = np.zeros(n)
-sigma2[0] = np.var(returns)
-for t in range(1, n):
-    sigma2[t] = lam * sigma2[t-1] + (1-lam) * returns[t-1]**2
-
-ewma = np.sqrt(sigma2)
-
-plt.figure(figsize=(10,4))
-plt.plot(cond_vol, label='GARCH σ')
-plt.plot(ewma, label='EWMA σ', alpha=0.7)
-plt.legend()
-plt.title('Conditional Volatility: GARCH vs EWMA')
-plt.grid(alpha=0.3)
-plt.show()
-```
-
-## 6. Challenge Round
-
+## Challenge Round
 **Q1:** Why is $\alpha+\beta$ called persistence?  
 **A1:** It measures how long shocks affect variance; values near 1 imply slow decay.
 
@@ -100,7 +58,7 @@ plt.show()
 **Q4:** How does GARCH affect option prices?  
 **A4:** It produces forward-looking σ_t paths; pricing depends on expected future variance.
 
-## 7. Key References
+## Key References
 - [GARCH](https://en.wikipedia.org/wiki/Autoregressive_conditional_heteroskedasticity)  
 - Bollerslev, T. “Generalized autoregressive conditional heteroskedasticity” (1986)
 

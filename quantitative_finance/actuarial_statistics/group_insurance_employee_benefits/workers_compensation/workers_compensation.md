@@ -1,182 +1,116 @@
-# Workers' Compensation
+﻿# Workers Compensation
 
 ## Concept Skeleton
+**Definition:** Workers Compensation is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-Workers' compensation is a state-mandated, no-fault insurance system providing medical care and wage replacement for employees injured or ill due to job-related causes, in exchange for employer immunity from tort liability. Benefits include medical treatment (unlimited in most states), temporary/permanent disability indemnity (percentage of wages), death benefits to dependents, and vocational rehabilitation, financed by employer-paid premiums based on payroll and occupational hazard classifications.
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-**Core Components:**
-- **No-fault liability**: Employee receives benefits regardless of fault; employer gains lawsuit protection
-- **Medical benefits**: Full coverage of necessary treatment, therapy, medications (no deductibles/copays)
-- **Indemnity benefits**: Wage replacement during disability (typically 2/3 of average weekly wage, subject to state maximums)
-- **Permanent disability ratings**: Scheduled awards (e.g., loss of hand) or unscheduled (whole-person impairment)
-- **Occupational disease**: Coverage extends to illnesses arising from workplace exposure (asbestosis, carpal tunnel, etc.)
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Why it matters:** Protects workers from financial hardship after job injuries while shielding employers from unlimited litigation; actuarial pricing balances adequate reserves for long-tail claims with competitive rates across industries.
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
----
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
 ## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Workers Compensation | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-| Dimension | **Workers' Compensation** | **Short-Term Disability (STD)** | **Long-Term Disability (LTD)** |
-|-----------|---------------------------|---------------------------------|--------------------------------|
-| **Cause of disability** | Job-related injury/illness only | Non-occupational illness/injury | Non-occupational illness/injury |
-| **Benefit structure** | 2/3 wages (state max) + full medical | 60–70% salary for 13–26 weeks | 50–67% salary to age 65 |
-| **Waiting period** | 3–7 days (varies by state) | 0–14 days | 90–180 days |
-| **Coverage mandate** | Mandatory employer coverage | Voluntary employee benefit | Voluntary employee benefit |
-| **Tax treatment** | Benefits tax-free | Taxable if employer-paid | Taxable if employer-paid |
-| **Employer liability** | Exclusive remedy (no tort suits)* | N/A (no liability shield) | N/A (no liability shield) |
-
-*Exceptions: intentional harm, gross negligence may allow tort claims in some states.
-
-**Key insight:** Workers' comp is statutory and exclusive for job injuries; STD/LTD cover off-the-job disabilities. Integration is rare due to separate legal frameworks, but coordination may occur in return-to-work scenarios.
-
----
-
-## Examples & Counterexamples
-
-### Examples of Workers' Compensation
-
-1. **Construction worker falls from scaffold**  
-   - Fractures leg; requires surgery, 6 months recovery  
-   - **Medical benefits**: Full coverage of ER, surgery, PT (no copays)  
-   - **Temporary total disability (TTD)**: 2/3 × $1,200/week (AWW) = $800/week for 26 weeks  
-   - **Permanent partial disability (PPD)**: 10% leg impairment = scheduled award (e.g., 52 weeks × 10% × $800 = $4,160)
-
-2. **Office worker develops carpal tunnel from repetitive keyboard use**  
-   - Occupational disease claim  
-   - Medical treatment: splints, injections, potential surgery  
-   - Modified duty assignment (ergonomic keyboard, reduced hours) with temporary partial disability if wages reduced
-
-3. **Death benefit for workplace fatality**  
-   - Employee killed in industrial accident  
-   - Dependents receive weekly death benefits (e.g., 2/3 AWW until remarriage or children reach age 18)  
-   - Funeral expenses (typically $5,000–$10,000 cap per state)
-
-### Non-Examples (or Edge Cases)
-
-- **Injury during lunch break off-site**: Typically not compensable (not "arising out of and in the course of employment").
-- **Heart attack at work with no job-related stress/exertion**: May be denied unless causal link established (pre-existing condition).
-- **Horseplay injury (self-inflicted)**: May be excluded if employee substantially deviated from job duties; employer may contest.
-
----
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Workers Compensation.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
 ## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Workers Compensation.
 
-**Layer 1: Compensability and Claim Reporting**  
-Employer must be notified promptly (state deadlines, e.g., 30 days). Claim filed with state workers' comp board or insurer. Compensability requires: (1) employment relationship, (2) injury/illness, (3) arising out of and in the course of employment. Disputed claims proceed to administrative hearings or board review.
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-**Layer 2: Medical Case Management**  
-Injured worker receives treatment from approved provider panel (or personal physician in some states). Insurer may direct care to occupational health clinics, utilization review to control costs. Independent medical examinations (IMEs) assess maximum medical improvement (MMI) and impairment ratings.
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-**Layer 3: Indemnity Benefit Calculation**  
-- **Temporary Total Disability (TTD)**: 2/3 AWW (average weekly wage, computed from prior 52 weeks) while unable to work.  
-- **Temporary Partial Disability (TPD)**: If returns to light duty at reduced wage, benefit = 2/3 × (AWW - current wage).  
-- **Permanent Partial Disability (PPD)**: Lump sum or weekly payments based on impairment rating (AMA Guides to Evaluation of Permanent Impairment).  
-- **Permanent Total Disability (PTD)**: Lifetime benefits if unable to return to any employment.
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-**Layer 4: Pricing and Loss Reserving**  
-Premium rates by class code (e.g., clerical 0.10 per $100 payroll; roofing 25.00 per $100). Experience modification factor adjusts rate based on employer's claim history. Reserves: case reserves for known claims, IBNR (incurred but not reported), and bulk reserves for future development of long-tail claims (e.g., cumulative trauma, occupational disease).
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
----
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-## Mini-Project: Premium Calculation by Class Code
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-**Goal:** Calculate workers' comp premium for a multi-class employer using manual rates and experience mod.
-
-```python
-import numpy as np
-
-# Payroll and class codes
-class_codes = [
-    {"code": "8810", "description": "Clerical Office", "payroll": 1_000_000, "rate": 0.20},  # per $100
-    {"code": "5403", "description": "Carpentry", "payroll": 500_000, "rate": 12.50},
-    {"code": "5022", "description": "Masonry", "payroll": 300_000, "rate": 18.00},
-]
-
-# Experience modification factor (1.0 = average; <1.0 = better than average; >1.0 = worse)
-experience_mod = 0.90  # 10% credit for good loss experience
-
-# Calculate manual premium by class
-manual_premiums = []
-for cls in class_codes:
-    premium = (cls["payroll"] / 100) * cls["rate"]
-    manual_premiums.append(premium)
-    print(f"{cls['description']:20s} | Payroll: ${cls['payroll']:>10,} | "
-          f"Rate: ${cls['rate']:>6.2f} | Premium: ${premium:>10,.2f}")
-
-total_manual_premium = np.sum(manual_premiums)
-print(f"\n{'Total Manual Premium:':40s} ${total_manual_premium:>10,.2f}")
-
-# Apply experience modification
-final_premium = total_manual_premium * experience_mod
-print(f"Experience Mod: {experience_mod:.2f}")
-print(f"{'Final Premium (with Exp Mod):':40s} ${final_premium:>10,.2f}")
-
-# Estimate expected losses (assume 65% loss ratio)
-expected_losses = final_premium * 0.65
-print(f"\n{'Expected Losses (65% loss ratio):':40s} ${expected_losses:>10,.2f}")
-print(f"{'Overhead & Profit Margin:':40s} ${final_premium - expected_losses:>10,.2f}")
-```
-
-**Expected Output (illustrative):**
-```
-Clerical Office      | Payroll: $1,000,000 | Rate:   $0.20 | Premium:  $2,000.00
-Carpentry            | Payroll:   $500,000 | Rate:  $12.50 | Premium: $62,500.00
-Masonry              | Payroll:   $300,000 | Rate:  $18.00 | Premium: $54,000.00
-
-Total Manual Premium:                    $118,500.00
-Experience Mod: 0.90
-Final Premium (with Exp Mod):             $106,650.00
-
-Expected Losses (65% loss ratio):          $69,322.50
-Overhead & Profit Margin:                  $37,327.50
-```
-
-**Interpretation:**  
-- High-hazard classes (masonry, carpentry) dominate premium despite lower payroll.  
-- Experience mod rewards employers with strong safety programs.  
-- Loss ratio (losses / premium) is key metric; insurers target 60–70% for profitability.
-
----
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Workers Compensation outputs in pricing, reserving, and solvency workflows.
 
 ## Challenge Round
-
-1. **Exclusive Remedy Doctrine**  
-   An employee injured by defective machinery sues employer for negligence. Employer cites workers' comp exclusive remedy. What is the likely outcome?
-
-   <details><summary>Hint</summary>Employer is generally immune from tort suits; exclusive remedy doctrine bars negligence claims. *Exception*: Employee may sue third-party manufacturer for product liability (employer remains protected). Some states allow tort claims for intentional harm or gross negligence.</details>
-
-2. **Subrogation Rights**  
-   Employee injured in car accident caused by third party while driving for work. Workers' comp pays $100,000 in benefits. Employee recovers $150,000 in tort settlement. How does insurer recover?
-
-   <details><summary>Solution</summary>
-   Insurer has subrogation right to recover $100,000 from tort settlement. Employee retains $50,000 (difference). If settlement were only $80,000, insurer and employee share proportionally per state rules (e.g., insurer $80k, employee $0, or pro-rated).
-   </details>
-
-3. **Second Injury Fund**  
-   Employee with pre-existing 20% back impairment suffers additional 30% impairment from work injury (total 50% combined). Employer liable for 30%; who pays remaining 20%?
-
-   <details><summary>Solution</summary>
-   State Second Injury Fund (or Special Disability Fund) reimburses employer for excess disability attributable to pre-existing condition. Encourages hiring workers with disabilities without penalizing employer for combined effects. (Note: Many states have phased out these funds due to funding challenges.)
-   </details>
-
-4. **Loss Development Factor**  
-   An insurer sets case reserves of $500,000 for claims from policy year 2020. Historical data shows reserves develop to 1.4× by final settlement (average 5 years). Estimate ultimate losses.
-
-   <details><summary>Solution</summary>
-   **Ultimate losses** = $500,000 × 1.4 = $700,000.  
-   Loss development triangles and chain-ladder methods refine these estimates; actuaries monitor paid vs. incurred ratios to adjust reserves annually.
-   </details>
-
----
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
 ## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-- **National Council on Compensation Insurance (NCCI)**: Class codes, rate filings, loss cost data ([NCCI.com](https://www.ncci.com/))
-- **State Workers' Compensation Boards**: Benefit schedules, dispute resolution, employer compliance (varies by state)
-- **IAIABC (International Association of Industrial Accident Boards and Commissions)**: Research and best practices ([IAIABC.org](https://www.iaiabc.org/))
-- **AMA Guides to the Evaluation of Permanent Impairment**: Standard reference for disability ratings
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-**Further Reading:**  
-- *Workers' Compensation Insurance Pricing* (CAS study note): ratemaking, experience rating, retrospective rating plans  
-- State-specific statutes: benefit tables, medical fee schedules, administrative procedures
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Workers Compensation: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+

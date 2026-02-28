@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # term annuity
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for term annuity.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: term annuity")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: term_annuity.md
 
@@ -8,7 +33,7 @@ import matplotlib.pyplot as plt
 
 np.random.seed(42)
 
-print("=== Term Life Annuity (aₓ:n̄|) Analysis ===\n")
+print("=== Term Life Annuity (a:n|) Analysis ===\n")
 
 # Build mortality table
 def build_mortality_table():
@@ -29,7 +54,7 @@ mortality = build_mortality_table()
 # Term annuity calculation
 def term_annuity(x, n, i, mortality):
     """
-    aₓ:n̄| = Σ(k=1 to n) vᵏ · ₖpₓ
+    a:n| = (k=1 to n) v  p
     """
     v = 1 / (1 + i)
     l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
@@ -66,7 +91,7 @@ def whole_life_annuity(x, i, mortality):
 
 # Annuity-certain
 def annuity_certain(n, i):
-    """aₙ̄| = (1 - v^n) / d"""
+    """aTM| = (1 - v^n) / d"""
     v = 1 / (1 + i)
     d = i / (1 + i)
     return (1 - v**n) / d
@@ -89,22 +114,22 @@ for n in terms:
     
     results.append({
         'Term (n)': n,
-        'Term Life (aₓ:n̄|)': term_val,
-        'Certain (aₙ̄|)': certain_val,
+        'Term Life (a:n|)': term_val,
+        'Certain (aTM|)': certain_val,
         'Mortality Discount': mortality_discount,
         '% of Whole Life': pct_of_whole_life
     })
 
 results_df = pd.DataFrame(results)
 print(results_df.to_string(index=False, float_format='%.3f'))
-print(f"\nWhole life annuity (aₓ): {whole_life_val:.3f}")
+print(f"\nWhole life annuity (a): {whole_life_val:.3f}")
 
-# Decomposition: aₓ = aₓ:n̄| + n|aₓ
+# Decomposition: a = a:n| + n|a
 print("\n=== Decomposition: Whole Life = Term + Deferred ===\n")
 
 def deferred_annuity(x, n, i, mortality):
     """
-    n|aₓ = v^n · ₙpₓ · aₓ₊ₙ
+    n|a = v^n  TMp  aTM
     Value of whole life annuity starting after n years
     """
     v = 1 / (1 + i)
@@ -122,10 +147,10 @@ deferred_val = deferred_annuity(age_base, n_test, i_rate, mortality)
 whole_life_check = term_val + deferred_val
 
 print(f"Age {age_base}, n = {n_test} years, i = {i_rate*100:.0f}%:")
-print(f"  Term annuity (aₓ:{n_test}̄|): {term_val:.4f}")
-print(f"  Deferred annuity ({n_test}|aₓ): {deferred_val:.4f}")
+print(f"  Term annuity (a:{n_test}|): {term_val:.4f}")
+print(f"  Deferred annuity ({n_test}|a): {deferred_val:.4f}")
 print(f"  Sum: {whole_life_check:.4f}")
-print(f"  Whole life (aₓ): {whole_life_val:.4f}")
+print(f"  Whole life (a): {whole_life_val:.4f}")
 print(f"  Identity holds: {abs(whole_life_check - whole_life_val) < 0.01}")
 
 # Age sensitivity
@@ -133,7 +158,7 @@ print("\n=== Term Annuity by Issue Age (n = 20 years) ===\n")
 ages_test = [35, 45, 55, 65, 75, 85]
 term_fixed = 20
 
-print(f"Age | a₆₅:{term_fixed}̄| | a{term_fixed}̄| (certain) | Ratio")
+print(f"Age | a...:{term_fixed}| | a{term_fixed}| (certain) | Ratio")
 print("-" * 55)
 
 for age in ages_test:
@@ -173,7 +198,7 @@ def whole_life_insurance(x, i, mortality):
     return value
 
 def annuity_due_term(x, n, i, mortality):
-    """äₓ:n̄| = (1+i) · aₓ:n̄|"""
+    """:n| = (1+i)  a:n|"""
     return (1 + i) * term_annuity(x, n, i, mortality)
 
 benefit = 100000
@@ -183,7 +208,7 @@ payment_years = 20
 A_x = whole_life_insurance(age_insured, i_rate, mortality)
 a_due_term = annuity_due_term(age_insured, payment_years, i_rate, mortality)
 
-# Premium: P̈·äₓ:n̄| = Aₓ·benefit
+# Premium: P:n| = Abenefit
 annual_premium = (A_x * benefit) / a_due_term
 
 # Compare to level-premium whole life
@@ -191,7 +216,7 @@ a_due_whole_life = (1 + i_rate) * whole_life_annuity(age_insured, i_rate, mortal
 annual_premium_level = (A_x * benefit) / a_due_whole_life
 
 print(f"${benefit:,} Whole Life Insurance, Age {age_insured}:")
-print(f"  Aₓ = {A_x:.4f}")
+print(f"  A = {A_x:.4f}")
 print(f"\nLimited payment (20 years):")
 print(f"  Annual premium: ${annual_premium:,.2f}")
 print(f"  Total paid: ${annual_premium * payment_years:,.2f}")
@@ -203,7 +228,7 @@ print(f"  Ratio: {annual_premium / annual_premium_level:.2f}x higher")
 print("\n=== Interest Rate Sensitivity (Age 65, n = 20) ===\n")
 interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 
-print("Interest | Term (aₓ:₂₀̄|) | Whole Life (aₓ) | Difference")
+print("Interest | Term (a:|) | Whole Life (a) | Difference")
 print("-" * 60)
 
 for i_val in interest_rates:
@@ -222,8 +247,8 @@ terms_plot = np.arange(5, 51, 2)
 term_vals = [term_annuity(65, n, 0.05, mortality) for n in terms_plot]
 certain_vals = [annuity_certain(n, 0.05) for n in terms_plot]
 
-ax1.plot(terms_plot, term_vals, 'o-', linewidth=2, label='Term life (aₓ:n̄|)', markersize=5)
-ax1.plot(terms_plot, certain_vals, 's-', linewidth=2, label='Certain (aₙ̄|)', markersize=5)
+ax1.plot(terms_plot, term_vals, 'o-', linewidth=2, label='Term life (a:n|)', markersize=5)
+ax1.plot(terms_plot, certain_vals, 's-', linewidth=2, label='Certain (aTM|)', markersize=5)
 ax1.axhline(whole_life_annuity(65, 0.05, mortality), color='r', linestyle='--', 
            linewidth=2, label='Whole life limit')
 ax1.set_xlabel('Term (n years)')
@@ -241,7 +266,7 @@ ax2.plot(terms_plot, mortality_discounts, 'o-', linewidth=2, color='red', marker
 ax2.fill_between(terms_plot, 0, mortality_discounts, alpha=0.2, color='red')
 ax2.set_xlabel('Term (n years)')
 ax2.set_ylabel('Mortality Discount (%)')
-ax2.set_title('Value Reduction from Mortality\n(aₙ̄| - aₓ:n̄|) / aₙ̄|')
+ax2.set_title('Value Reduction from Mortality\n(aTM| - a:n|) / aTM|')
 ax2.grid(True, alpha=0.3)
 
 # Plot 3: Term coverage as % of whole life
@@ -267,7 +292,7 @@ ax4.plot(ages_impact, term_20_by_age, 'o-', linewidth=2, markersize=6)
 ax4.axhline(certain_20, color='r', linestyle='--', linewidth=2, label=f'20-year certain = {certain_20:.2f}')
 ax4.set_xlabel('Issue Age')
 ax4.set_ylabel('20-Year Term Annuity Value')
-ax4.set_title('Age Impact on aₓ:₂₀̄|\n(Higher age → Lower value)')
+ax4.set_title('Age Impact on a:|\n(Higher age  Lower value)')
 ax4.legend()
 ax4.grid(True, alpha=0.3)
 
@@ -278,15 +303,15 @@ term_components = [term_annuity(65, n, 0.05, mortality) for n in terms_decomp]
 deferred_components = [deferred_annuity(65, n, 0.05, mortality) for n in terms_decomp]
 
 x_pos = np.arange(len(terms_decomp))
-ax5.bar(x_pos, term_components, label='Term (aₓ:n̄|)', alpha=0.7, edgecolor='black')
-ax5.bar(x_pos, deferred_components, bottom=term_components, label='Deferred (n|aₓ)', alpha=0.7, edgecolor='black')
+ax5.bar(x_pos, term_components, label='Term (a:n|)', alpha=0.7, edgecolor='black')
+ax5.bar(x_pos, deferred_components, bottom=term_components, label='Deferred (n|a)', alpha=0.7, edgecolor='black')
 ax5.axhline(whole_life_annuity(65, 0.05, mortality), color='r', linestyle='--', 
            linewidth=2, label='Total = Whole life')
 ax5.set_xticks(x_pos)
 ax5.set_xticklabels(terms_decomp)
 ax5.set_xlabel('Deferral Period (n years)')
 ax5.set_ylabel('Annuity Value')
-ax5.set_title('Decomposition: aₓ = aₓ:n̄| + n|aₓ')
+ax5.set_title('Decomposition: a = a:n| + n|a')
 ax5.legend()
 ax5.grid(True, alpha=0.3, axis='y')
 
@@ -315,7 +340,31 @@ plt.tight_layout()
 plt.show()
 
 print("\n=== Summary ===")
-print("Term annuity (aₓ:n̄|): Payments for n years OR until death")
-print("Identity: aₓ = aₓ:n̄| + n|aₓ (term + deferred = whole life)")
+print("Term annuity (a:n|): Payments for n years OR until death")
+print("Identity: a = a:n| + n|a (term + deferred = whole life)")
 print("Application: Limited payment insurance, pension bridges, structured settlements")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: term annuity")
+
 

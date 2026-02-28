@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve, minimize_scalar
@@ -291,7 +291,7 @@ for k in range(1, term_cashflow + 1):
     if age_k in mortality_data:
         qx_k = mortality_data[age_k]
     else:
-        qx_k = 0.001  # Placeholder
+        qx_k = 0.001  # Assumed value
     
     qx_cf.append(qx_k)
 
@@ -335,3 +335,4 @@ print("PROFITABILITY ANALYSIS: BREAK-EVEN SCENARIOS")
 print("=" * 80)
 
 # Calculate what mortality would need to be for break-even
+

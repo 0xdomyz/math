@@ -1,0 +1,18 @@
+﻿Total topics audited: 37
+Markdown section/order failures: 0
+Markdown word-count failures (2000-3000): 24
+Comparative table shape failures: 23
+Examples subsection failures: 24
+Layer breakdown structural failures: 37
+Challenge round count failures: 19
+Key references count failures: 20
+Python missing/non-interactive failures: 0
+Python section-order failures: 0
+Python markdown-cell count (<6) failures: 0
+Python setup/import/print/viz heuristic failures: 0
+Top 5 shortest topics:
+  - backtest_framework: 1422
+  - walk_forward_analysis: 1558
+  - monte_carlo_simulation: 1595
+  - performance_metrics: 1611
+  - curve_fitting_risk: 1670

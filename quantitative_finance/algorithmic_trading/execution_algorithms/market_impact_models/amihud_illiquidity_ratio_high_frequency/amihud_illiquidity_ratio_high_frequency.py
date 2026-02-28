@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # amihud illiquidity ratio high frequency
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: amihud illiquidity ratio high frequency")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -68,7 +103,7 @@ for ticker, df in data_dict.items():
     print(f"  Mean Amihud:    {amihud_mean:.6f}")
     print(f"  Median Amihud:  {amihud_median:.6f}")
     print(f"  Std Dev:        {amihud_std:.6f}")
-    print(f"  Min–Max:        {df['amihud'].min():.6f} – {df['amihud'].max():.6f}")
+    print(f"  Minâ€“Max:        {df['amihud'].min():.6f} â€“ {df['amihud'].max():.6f}")
     print(f"  Avg daily vol:  ${df['volume_M'].mean():.1f}M")
 
 # Correlation analysis
@@ -89,7 +124,7 @@ for ticker, df in data_dict.items():
     from scipy.stats import linregress
     slope, intercept, r_value, p_value, std_err = linregress(lag1, current)
     
-    print(f"{ticker}: AR(1) coeff = {slope:.3f} (R² = {r_value**2:.3f})")
+    print(f"{ticker}: AR(1) coeff = {slope:.3f} (RÂ² = {r_value**2:.3f})")
 
 # Time-of-year pattern
 print("\n\nTIME-OF-YEAR PATTERN")
@@ -158,7 +193,7 @@ print("\n\nEXECUTION ALGORITHM: DYNAMIC PARTICIPATION BASED ON AMIHUD")
 print("=" * 80)
 print("\nParticipation Rate (target % of market volume):")
 print("  Amihud < 0.0001 (liquid): 30% participation")
-print("  Amihud 0.0001–0.001: 20% participation")
+print("  Amihud 0.0001â€“0.001: 20% participation")
 print("  Amihud > 0.001 (illiquid): 10% participation")
 
 for ticker, df in data_dict.items():
@@ -175,5 +210,38 @@ for ticker, df in data_dict.items():
         guidance = "Patient execution recommended"
     
     print(f"\n{ticker}: Current 20-d Amihud = {recent_amihud:.6f}")
-    print(f"  → Recommended participation: {par_rate}%")
-    print(f"  → Strategy: {guidance}")
+    print(f"  â†’ Recommended participation: {par_rate}%")
+    print(f"  â†’ Strategy: {guidance}")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='amihud illiquidity ratio high frequency - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

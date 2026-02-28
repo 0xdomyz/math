@@ -1,19 +1,18 @@
-# Brownian Motion (Wiener Process)
+﻿# Brownian Motion (Wiener Process)
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Continuous-time process with independent increments, $W_0=0$, and $W_t-W_s \sim \mathcal{N}(0,t-s)$  
 **Purpose:** Core noise source in SDEs and Monte Carlo pricing  
 **Prerequisites:** Normal distribution, independent increments
 
-## 2. Comparative Framing
+## Comparative Framing
 | Process | Brownian Motion | Random Walk | OU |
 |---|---|---|---|
 | **Time** | Continuous | Discrete | Continuous |
 | **Increments** | Normal | Any | Mean-reverting |
 | **Variance** | Grows linearly | Grows with steps | Bounded long-run |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 Simulate $W_T = \sqrt{T}Z$ with $Z\sim\mathcal{N}(0,1)$.
 
@@ -23,7 +22,7 @@ Using dependent increments breaks martingale properties; SDE solutions become in
 **Edge Case:**  
 $T \to 0$ gives tiny increments; discretization dominates error.
 
-## 4. Layer Breakdown
+## Layer Breakdown
 ```
 Brownian Motion Properties:
 ├─ W_0 = 0
@@ -35,32 +34,7 @@ Brownian Motion Properties:
 
 **Interaction:** Generate Brownian increments → drive SDEs → simulate paths
 
-## 5. Mini-Project
-Simulate and visualize Brownian paths:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-
-np.random.seed(42)
-T, n, paths = 1.0, 252, 5
-
-dt = T / n
-W = np.zeros((paths, n+1))
-
-for i in range(n):
-    dW = np.sqrt(dt) * np.random.randn(paths)
-    W[:, i+1] = W[:, i] + dW
-
-for p in range(paths):
-    plt.plot(np.linspace(0, T, n+1), W[p])
-
-plt.title('Brownian Motion Paths')
-plt.grid(alpha=0.3)
-plt.show()
-```
-
-## 6. Challenge Round
-
+## Challenge Round
 **Q1:** Why is Brownian motion a martingale?  
 **A1:** $E[W_t\mid\mathcal{F}_s]=W_s$ due to independent, mean-zero increments.
 
@@ -73,7 +47,7 @@ plt.show()
 **Q4:** Why is Brownian motion central to finance?  
 **A4:** It models continuous random shocks in asset prices.
 
-## 7. Key References
+## Key References
 - [Wiener process](https://en.wikipedia.org/wiki/Wiener_process)  
 - [Brownian motion](https://en.wikipedia.org/wiki/Brownian_motion)
 

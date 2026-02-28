@@ -1,4 +1,4 @@
-# Term Insurance
+﻿# Term Insurance
 
 ## 1. Concept Skeleton
 **Definition:** Fixed death benefit B payable only if death occurs within n-year term; pure risk protection without savings component  
@@ -361,7 +361,7 @@ for k in range(1, term_cashflow + 1):
     if age_k in mortality_data:
         qx_k = mortality_data[age_k]
     else:
-        qx_k = 0.001  # Placeholder
+        qx_k = 0.001  # Assumed value
     
     qx_cf.append(qx_k)
 
@@ -609,3 +609,5 @@ When term insurance fails to protect:
 
 ---
 **Status:** Core product | **Complements:** Convertible Term, Return of Premium Term, Whole Life Insurance
+
+

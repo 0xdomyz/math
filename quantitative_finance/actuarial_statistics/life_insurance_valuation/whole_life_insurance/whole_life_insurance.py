@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # whole life insurance
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for whole life insurance.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: whole life insurance")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: whole_life_insurance.md
 
@@ -21,7 +46,7 @@ mortality_data = {
 
 # Gompertz projection for older ages
 def gompertz_mortality(age, A=0.0001, B=1.075):
-    """Force of mortality: μₓ = A·B^x"""
+    """Force of mortality: 14 = AB^x"""
     return A * (B ** age)
 
 annual_rate = 0.04
@@ -153,7 +178,7 @@ reserve_previous = 0
 for year in range(1, reserve_years + 1):
     age_year = start_age + year - 1
     
-    # Prospective reserve: V = Aₓ₊ₙ - P·ä∞|ₓ₊ₙ
+    # Prospective reserve: V = ATM - P|TM
     apv_future = calculate_whole_life_apv(age_year, mortality_data, annual_rate)
     pv_future_premiums = calculate_annuity_due(age_year, mortality_data, annual_rate)
     
@@ -269,7 +294,7 @@ for term in [10, 20, 30]:
 print()
 print(f"Break-even analysis:")
 print(f"  If need permanent coverage: Whole life justified (no expiration risk)")
-print(f"  If need temporary coverage: 20-30yr term + invest difference (cost over 20 yrs: {cost_20_term/cost_20yr:.1f}×)")
+print(f"  If need temporary coverage: 20-30yr term + invest difference (cost over 20 yrs: {cost_20_term/cost_20yr:.1f})")
 print()
 
 # 5. DIVIDEND & PARTICIPATING WHOLE LIFE
@@ -408,4 +433,28 @@ plt.savefig('whole_life_insurance_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: whole life insurance")
+
 

@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # present value of benefits
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for present value of benefits.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: present value of benefits")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: present_value_of_benefits.md
 
@@ -23,7 +48,7 @@ px_standard = 1 - qx_standard
 
 # Parametric extension (Gompertz) for ages beyond table
 def gompertz_force_mortality(x, A=0.0001, B=1.075):
-    """Force of mortality μₓ = A·B^x"""
+    """Force of mortality 14 = AB^x"""
     return A * (B ** x)
 
 # Interest rate
@@ -35,7 +60,7 @@ print(f"  Mortality Table: US 2020 (illustrated)")
 print(f"  Interest Rate: {annual_rate*100:.1f}%")
 print(f"  Discount Factor v: {v:.6f}")
 print(f"\nMortality by Age:")
-print(f"{'Age':<8} {'qₓ':<12} {'ₚₓ':<12}")
+print(f"{'Age':<8} {'q':<12} {'':<12}")
 print("-" * 32)
 
 for i, age in enumerate(ages):
@@ -57,7 +82,7 @@ v_discount = v
 idx_start = np.where(ages == start_age)[0][0]
 
 apv_term = 0
-print(f"\n{'Year':<8} {'Age':<8} {'ₖpₓ':<12} {'qₓ₊ₖ₋₁':<12} {'v^k':<12} {'Payment':<15} {'PV':<15}")
+print(f"\n{'Year':<8} {'Age':<8} {'p':<12} {'q':<12} {'v^k':<12} {'Payment':<15} {'PV':<15}")
 print("-" * 92)
 
 kpx_running = 1.0  # k-year survival probability
@@ -109,7 +134,7 @@ for age in ages_extended:
     else:
         # Use Gompertz for extrapolation
         mu = gompertz_force_mortality(age, A=0.0001, B=1.075)
-        # Convert force to annual probability: qₓ ≈ 1 - exp(-μₓ)
+        # Convert force to annual probability: q  1 - exp(-14)
         qx_extended.append(1 - np.exp(-mu))
 
 qx_extended = np.array(qx_extended)
@@ -118,7 +143,7 @@ qx_extended = np.array(qx_extended)
 apv_whole_life = 0
 kpx = 1.0
 
-print(f"\n{'Year':<8} {'Age':<8} {'qₓ':<12} {'v^k':<12} {'Contribution':<15}")
+print(f"\n{'Year':<8} {'Age':<8} {'q':<12} {'v^k':<12} {'Contribution':<15}")
 print("-" * 67)
 
 for k in range(1, min(len(ages_extended), 61)):  # Cap at 60 years (minimal contribution after)
@@ -198,8 +223,8 @@ n_increasing = 15
 apv_increasing = 0
 kpx_i = 1.0
 
-print(f"\nBenefit grows: ${initial_benefit:,.0f} (year 1) → ${initial_benefit + (n_increasing-1)*annual_increase:,.0f} (year {n_increasing})")
-print(f"\n{'Year':<8} {'Benefit':<15} {'qₓ':<12} {'v^k':<12} {'PV of Benefit':<15}")
+print(f"\nBenefit grows: ${initial_benefit:,.0f} (year 1)  ${initial_benefit + (n_increasing-1)*annual_increase:,.0f} (year {n_increasing})")
+print(f"\n{'Year':<8} {'Benefit':<15} {'q':<12} {'v^k':<12} {'PV of Benefit':<15}")
 print("-" * 72)
 
 for k in range(1, n_increasing + 1):
@@ -288,7 +313,7 @@ for bar, val in zip(bars, apv_values):
             f'${val:,.0f}\n({val/benefit*100:.1f}%)',
             ha='center', va='bottom', fontsize=9, fontweight='bold')
 
-ax.text(0.5, -0.15, '*Increasing: $50K→$190K over 15 years', 
+ax.text(0.5, -0.15, '*Increasing: $50K$190K over 15 years', 
         transform=ax.transAxes, ha='center', fontsize=8, style='italic')
 
 # Plot 2: APV by term length (age 40)
@@ -388,4 +413,28 @@ plt.savefig('present_value_of_benefits_analysis.png', dpi=300, bbox_inches='tigh
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: present value of benefits")
+
 

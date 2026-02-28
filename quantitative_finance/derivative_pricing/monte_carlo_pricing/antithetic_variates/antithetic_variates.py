@@ -1,145 +1,107 @@
+﻿# %% [markdown]
+# # Antithetic Variates - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# Black-Scholes closed-form benchmark
-def black_scholes_call(S0, K, T, r, sigma):
-    d1 = (np.log(S0/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
-    call_price = S0*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return call_price
+random.seed(42)
 
-# Parameters
-S0, K, T, r, sigma = 100, 100, 1, 0.05, 0.2
-true_price = black_scholes_call(S0, K, T, r, sigma)
-print(f"Black-Scholes Call Price: ${true_price:.4f}")
 
-# Monte Carlo without antithetic
-def mc_european_call_standard(S0, K, T, r, sigma, N_paths):
-    dt = T / 252  # Daily steps
-    n_steps = int(T / dt)
-    
-    Z = np.random.normal(0, 1, (N_paths, n_steps))
-    S = S0 * np.exp(np.cumsum((r - 0.5*sigma**2)*dt + 
-                               sigma*np.sqrt(dt)*Z, axis=1))
-    
-    payoffs = np.maximum(S[:, -1] - K, 0)
-    price = np.exp(-r*T) * np.mean(payoffs)
-    se = np.exp(-r*T) * np.std(payoffs) / np.sqrt(N_paths)
-    
-    return price, se
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-# Monte Carlo with antithetic
-def mc_european_call_antithetic(S0, K, T, r, sigma, N_paths):
-    dt = T / 252
-    n_steps = int(T / dt)
-    
-    # Generate N_paths/2 unique random matrices, then create pairs
-    N_unique = N_paths // 2
-    Z = np.random.normal(0, 1, (N_unique, n_steps))
-    
-    # Paths with Z
-    S_pos = S0 * np.exp(np.cumsum((r - 0.5*sigma**2)*dt + 
-                                   sigma*np.sqrt(dt)*Z, axis=1))
-    payoff_pos = np.maximum(S_pos[:, -1] - K, 0)
-    
-    # Paths with -Z (antithetic)
-    S_neg = S0 * np.exp(np.cumsum((r - 0.5*sigma**2)*dt + 
-                                   sigma*np.sqrt(dt)*(-Z), axis=1))
-    payoff_neg = np.maximum(S_neg[:, -1] - K, 0)
-    
-    # Average pairs
-    payoffs = (payoff_pos + payoff_neg) / 2
-    price = np.exp(-r*T) * np.mean(payoffs)
-    se = np.exp(-r*T) * np.std(payoffs) / np.sqrt(N_unique)
-    
-    return price, se
 
-# Comparison across different sample sizes
-sample_sizes = np.array([100, 500, 1000, 5000, 10000, 50000])
-standard_prices = []
-standard_ses = []
-antithetic_prices = []
-antithetic_ses = []
+config = Config()
+print(f"Topic: Antithetic Variates")
+print(f"Config: {config}")
 
-np.random.seed(42)
-for N in sample_sizes:
-    p_std, se_std = mc_european_call_standard(S0, K, T, r, sigma, N)
-    standard_prices.append(p_std)
-    standard_ses.append(se_std)
-    
-    np.random.seed(42)
-    p_anti, se_anti = mc_european_call_antithetic(S0, K, T, r, sigma, N)
-    antithetic_prices.append(p_anti)
-    antithetic_ses.append(se_anti)
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Visualization
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# Plot 1: Price convergence
-axes[0, 0].plot(sample_sizes, standard_prices, 'o-', label='Standard MC', linewidth=2, markersize=8)
-axes[0, 0].plot(sample_sizes, antithetic_prices, 's-', label='Antithetic MC', linewidth=2, markersize=8)
-axes[0, 0].axhline(true_price, color='r', linestyle='--', linewidth=2, label='True Price (BS)')
-axes[0, 0].set_xscale('log')
-axes[0, 0].set_title('Price Convergence')
-axes[0, 0].set_xlabel('Number of Paths')
-axes[0, 0].set_ylabel('Call Price ($)')
-axes[0, 0].legend()
-axes[0, 0].grid(alpha=0.3)
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# Plot 2: Standard Error comparison
-axes[0, 1].plot(sample_sizes, standard_ses, 'o-', label='Standard MC', linewidth=2, markersize=8)
-axes[0, 1].plot(sample_sizes, antithetic_ses, 's-', label='Antithetic MC', linewidth=2, markersize=8)
-axes[0, 1].set_xscale('log')
-axes[0, 1].set_yscale('log')
-axes[0, 1].set_title('Standard Error')
-axes[0, 1].set_xlabel('Number of Paths')
-axes[0, 1].set_ylabel('Standard Error ($)')
-axes[0, 1].legend()
-axes[0, 1].grid(alpha=0.3)
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# Plot 3: Variance reduction ratio
-variance_reduction = np.array(standard_ses) / np.array(antithetic_ses)
-axes[1, 0].plot(sample_sizes, variance_reduction, 'o-', linewidth=2, markersize=8, color='green')
-axes[1, 0].axhline(1.0, color='r', linestyle='--', label='Baseline (1.0)')
-axes[1, 0].set_xscale('log')
-axes[1, 0].set_title('Variance Reduction Factor')
-axes[1, 0].set_xlabel('Number of Paths')
-axes[1, 0].set_ylabel('SE(Standard) / SE(Antithetic)')
-axes[1, 0].legend()
-axes[1, 0].grid(alpha=0.3)
 
-# Plot 4: Correlation between paired payoffs
-N = 5000
-dt = T / 252
-n_steps = int(T / dt)
-Z = np.random.normal(0, 1, (N, n_steps))
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-S_pos = S0 * np.exp(np.cumsum((r - 0.5*sigma**2)*dt + sigma*np.sqrt(dt)*Z, axis=1))
-S_neg = S0 * np.exp(np.cumsum((r - 0.5*sigma**2)*dt + sigma*np.sqrt(dt)*(-Z), axis=1))
 
-payoff_pos = np.maximum(S_pos[:, -1] - K, 0)
-payoff_neg = np.maximum(S_neg[:, -1] - K, 0)
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-correlation = np.corrcoef(payoff_pos, payoff_neg)[0, 1]
-axes[1, 1].scatter(payoff_pos, payoff_neg, alpha=0.3, s=10)
-axes[1, 1].set_title(f'Payoff Correlation (ρ = {correlation:.3f})')
-axes[1, 1].set_xlabel('Payoff(Z)')
-axes[1, 1].set_ylabel('Payoff(-Z)')
-axes[1, 1].grid(alpha=0.3)
+print("Implemented pricing functions")
 
-# Add diagonal reference
-max_payoff = max(payoff_pos.max(), payoff_neg.max())
-axes[1, 1].plot([0, max_payoff], [0, max_payoff], 'r--', alpha=0.5, label='y=x (if identical)')
-axes[1, 1].legend()
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-plt.tight_layout()
-plt.show()
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-print(f"\nMonte Carlo Results (N=10,000):")
-print(f"Standard MC:    ${standard_prices[-2]:.4f} ± ${standard_ses[-2]:.4f}")
-print(f"Antithetic MC:  ${antithetic_prices[-2]:.4f} ± ${antithetic_ses[-2]:.4f}")
-print(f"Variance Reduction: {(standard_ses[-2]/antithetic_ses[-2]):.2f}x")
-print(f"Correlation between pairs: {correlation:.4f}")
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
+
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
+
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

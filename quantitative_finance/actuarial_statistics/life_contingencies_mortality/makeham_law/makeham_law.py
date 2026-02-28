@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # makeham law
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for makeham law.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: makeham law")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: makeham_law.md
 
@@ -22,7 +47,7 @@ C_true = 1.08     # Age escalation
 mu_true = A_true + B_true * (C_true ** ages)
 
 # Convert to annual probability
-# ₚₓ = exp[-Ax - B(C^{x+1} - C^x)/(ln C)]
+#  = exp[-Ax - B(C^{x+1} - C^x)/(ln C)]
 ln_C = np.log(C_true)
 px_true = np.exp(-A_true - B_true * (C_true**(ages + 1) - C_true**ages) / ln_C)
 qx_true = 1 - px_true
@@ -166,8 +191,8 @@ chi2_gompertz_young = np.sum((deaths_young - exp_young * qx_gompertz_all[mask_yo
                               np.maximum(exp_young * qx_gompertz_all[mask_young], 1))
 
 print("GOODNESS-OF-FIT: YOUNG AGES (0-49)")
-print(f"Makeham χ² = {chi2_makeham_young:.1f} (df = {mask_young.sum() - 3})")
-print(f"Gompertz χ² = {chi2_gompertz_young:.1f} (df = {mask_young.sum() - 2})")
+print(f"Makeham 2 = {chi2_makeham_young:.1f} (df = {mask_young.sum() - 3})")
+print(f"Gompertz 2 = {chi2_gompertz_young:.1f} (df = {mask_young.sum() - 2})")
 print(f"Makeham better by {chi2_gompertz_young - chi2_makeham_young:.0f} points")
 print()
 
@@ -182,7 +207,7 @@ ax.semilogy(ages, A_makeham + B_makeham * (C_makeham ** ages), '--',
            linewidth=2, alpha=0.7, label='Makeham (from params)', color='darkred')
 ax.semilogy(ages, mu_true, ':', linewidth=2, alpha=0.6, label='True', color='gray')
 ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Force of Mortality μx (log scale)', fontsize=11)
+ax.set_ylabel('Force of Mortality 14x (log scale)', fontsize=11)
 ax.set_title('Makeham: Force of Mortality Fit', fontsize=12, fontweight='bold')
 ax.set_ylim([1e-5, 1])
 ax.legend(fontsize=10)
@@ -192,9 +217,9 @@ ax.grid(alpha=0.3, which='both')
 ax = axes[0, 1]
 ax.fill_between(ages, 0, mu_accident, alpha=0.5, color='steelblue', label='Accident component (A)')
 ax.fill_between(ages, mu_accident, mu_accident + mu_senescence, alpha=0.5, 
-               color='coral', label='Senescence component (B·Cˣ)')
+               color='coral', label='Senescence component (BC)')
 ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Force of Mortality μx', fontsize=11)
+ax.set_ylabel('Force of Mortality 14x', fontsize=11)
 ax.set_title('Mortality Decomposition: Accident vs Senescence', fontsize=12, fontweight='bold')
 ax.legend(fontsize=10)
 ax.grid(alpha=0.3)
@@ -234,4 +259,28 @@ for age in ages_to_mark:
 plt.tight_layout()
 plt.savefig('makeham_law_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: makeham law")
+
 

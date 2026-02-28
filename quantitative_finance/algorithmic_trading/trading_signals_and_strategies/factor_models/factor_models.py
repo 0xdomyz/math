@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # factor models
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: factor models")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,11 +53,11 @@ cma_ret = np.random.normal(0.0025, 0.04, n_months)   # 2.5% investment, 4% vol
 # Hypothetical stock returns (mixture of factors + noise)
 stock_alpha = 0.0005  # 0.5% monthly alpha (~6% annual)
 stock_ret = (stock_alpha + 
-             1.0 * market_ret +    # β_m = 1.0
-             0.5 * hml_ret +       # β_v = 0.5 (value tilt)
-             -0.3 * smb_ret +      # β_s = -0.3 (large-cap tilt)
-             0.4 * rmw_ret +       # β_p = 0.4 (quality tilt)
-             -0.2 * cma_ret +      # β_i = -0.2 (growth-oriented capex)
+             1.0 * market_ret +    # Î²_m = 1.0
+             0.5 * hml_ret +       # Î²_v = 0.5 (value tilt)
+             -0.3 * smb_ret +      # Î²_s = -0.3 (large-cap tilt)
+             0.4 * rmw_ret +       # Î²_p = 0.4 (quality tilt)
+             -0.2 * cma_ret +      # Î²_i = -0.2 (growth-oriented capex)
              np.random.normal(0, 0.02, n_months))  # idiosyncratic noise
 
 dates = pd.date_range('2004-01-31', periods=n_months, freq='M')
@@ -173,9 +208,9 @@ for factor in ['market', 'hml', 'smb', 'rmw', 'cma']:
 
 rolling_dates = dates[window:]
 
-print(f"Average β (across rolling windows):")
+print(f"Average Î² (across rolling windows):")
 for factor, betas_r in rolling_betas.items():
-    print(f"  {factor.upper()}: {np.mean(betas_r):.3f} (±{np.std(betas_r):.3f})")
+    print(f"  {factor.upper()}: {np.mean(betas_r):.3f} (Â±{np.std(betas_r):.3f})")
 
 # VISUALIZATION
 fig, axes = plt.subplots(3, 2, figsize=(15, 12))
@@ -206,7 +241,7 @@ ax.scatter(y_pred * 100, y * 100, alpha=0.5, s=20)
 ax.plot([-5, 15], [-5, 15], 'r--', linewidth=2)
 ax.set_xlabel('Predicted Return (%)')
 ax.set_ylabel('Actual Return (%)')
-ax.set_title(f'FF5 Fit (R² = {r_squared:.4f})')
+ax.set_title(f'FF5 Fit (RÂ² = {r_squared:.4f})')
 ax.grid(alpha=0.3)
 
 # Plot 4: Residuals
@@ -215,14 +250,14 @@ ax.hist(residuals * 100, bins=30, edgecolor='black', alpha=0.7)
 ax.axvline(0, color='red', linestyle='--', linewidth=2)
 ax.set_xlabel('Residual (%)')
 ax.set_ylabel('Frequency')
-ax.set_title(f'Residual Distribution (σ = {residual_std_err*100:.2f}%/month)')
+ax.set_title(f'Residual Distribution (Ïƒ = {residual_std_err*100:.2f}%/month)')
 ax.grid(alpha=0.3, axis='y')
 
 # Plot 5: Rolling betas
 ax = axes[2, 0]
-ax.plot(rolling_dates, rolling_betas['market'], label='Market β', linewidth=1.5)
-ax.plot(rolling_dates, rolling_betas['hml'], label='HML β', linewidth=1.5)
-ax.plot(rolling_dates, rolling_betas['smb'], label='SMB β', linewidth=1.5)
+ax.plot(rolling_dates, rolling_betas['market'], label='Market Î²', linewidth=1.5)
+ax.plot(rolling_dates, rolling_betas['hml'], label='HML Î²', linewidth=1.5)
+ax.plot(rolling_dates, rolling_betas['smb'], label='SMB Î²', linewidth=1.5)
 ax.axhline(y=0, color='black', linestyle='-', alpha=0.3)
 ax.set_title('Rolling Factor Exposures (24-month window)')
 ax.set_ylabel('Beta')
@@ -253,7 +288,40 @@ print(f"\n" + "="*100)
 print("INSIGHTS")
 print(f"="*100)
 print(f"- FF5 explains {r_squared*100:.1f}% of stock return variance")
-print(f"- Key exposures: Market β={beta_market:.2f}, Value β={beta_hml:.2f}, Quality β={beta_rmw:.2f}")
+print(f"- Key exposures: Market Î²={beta_market:.2f}, Value Î²={beta_hml:.2f}, Quality Î²={beta_rmw:.2f}")
 print(f"- Annualized alpha: {alpha_annual:.2f}% (may be exploitable if >2%)")
 print(f"- Factor betas vary over time (rolling window shows instability)")
 print(f"- Residuals approximately normal (model reasonably specified)")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='factor models - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

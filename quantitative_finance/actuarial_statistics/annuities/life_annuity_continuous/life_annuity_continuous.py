@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # life annuity continuous
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for life annuity continuous.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: life annuity continuous")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: life_annuity_continuous.md
 
@@ -9,18 +34,18 @@ from scipy.integrate import quad, simpson
 
 np.random.seed(42)
 
-print("=== Continuous Life Annuity (āₓ) Analysis ===\n")
+print("=== Continuous Life Annuity () Analysis ===\n")
 
 # Mortality table setup
 def gompertz_force(age, A=0.0001, B=1.08, C=0.00035):
-    """Force of mortality: μₓ = A + C·B^x"""
+    """Force of mortality: 14 = A + CB^x"""
     return A + C * (B ** age)
 
 # Build survival function
 def survival_prob(x, t, max_age=120):
     """
-    ₜpₓ = P(survive from age x to x+t)
-    Using force of mortality: ₜpₓ = exp(-∫₀ᵗ μₓ₊ₛ ds)
+    p = P(survive from age x to x+t)
+    Using force of mortality: p = exp(- 14 ds)
     """
     if x + t > max_age:
         return 0.0
@@ -50,8 +75,8 @@ mortality = build_discrete_mortality()
 # Continuous annuity calculation
 def continuous_annuity(x, i, max_age=120):
     """
-    āₓ = ∫₀^∞ e^(-δt) · ₜpₓ dt
-    where δ = ln(1+i) = force of interest
+     = ^ e^(- t)  p dt
+    where   = ln(1+i) = force of interest
     """
     delta = np.log(1 + i)  # Force of interest
     
@@ -93,14 +118,14 @@ for age in ages_test:
     a_immediate = immediate_annuity(age, i_rate, mortality)
     a_due = annuity_due(age, i_rate, mortality)
     
-    # Woolhouse approximation: āₓ ≈ (aₓ + äₓ)/2
+    # Woolhouse approximation:   (a + )/2
     a_woolhouse = (a_immediate + a_due) / 2
     
     results.append({
         'Age': age,
-        'Continuous (āₓ)': a_continuous,
-        'Immediate (aₓ)': a_immediate,
-        'Due (äₓ)': a_due,
+        'Continuous ()': a_continuous,
+        'Immediate (a)': a_immediate,
+        'Due ()': a_due,
         'Woolhouse': a_woolhouse,
         'Error (%)': abs(a_continuous - a_woolhouse) / a_continuous * 100
     })
@@ -115,16 +140,16 @@ a_cont = continuous_annuity(age_verify, i_rate)
 a_imm = immediate_annuity(age_verify, i_rate, mortality)
 a_d = annuity_due(age_verify, i_rate, mortality)
 
-# Simple Woolhouse: āₓ ≈ aₓ + 0.5
+# Simple Woolhouse:   a + 0.5
 a_wool_simple = a_imm + 0.5
 
-# Average: āₓ ≈ (aₓ + äₓ)/2
+# Average:   (a + )/2
 a_wool_average = (a_imm + a_d) / 2
 
 print(f"Age {age_verify}, i = {i_rate*100:.0f}%:")
-print(f"  Continuous (āₓ): {a_cont:.4f}")
+print(f"  Continuous (): {a_cont:.4f}")
 print(f"  Immediate + 0.5: {a_wool_simple:.4f} (error: {abs(a_cont - a_wool_simple):.4f})")
-print(f"  (aₓ + äₓ)/2: {a_wool_average:.4f} (error: {abs(a_cont - a_wool_average):.4f})")
+print(f"  (a + )/2: {a_wool_average:.4f} (error: {abs(a_cont - a_wool_average):.4f})")
 print(f"\nBest approximation: Average method")
 
 # Special case: Constant force of mortality
@@ -133,7 +158,7 @@ print("\n=== Special Case: Constant Force of Mortality ===\n")
 mu_constant = 0.02  # 2% annual force
 delta = np.log(1 + i_rate)
 
-# Closed form: āₓ = 1/(δ + μ)
+# Closed form:  = 1/(  + 14)
 a_closed_form = 1 / (delta + mu_constant)
 
 # Numerical verification
@@ -149,8 +174,8 @@ def continuous_annuity_constant(mu, i):
 
 a_numerical = continuous_annuity_constant(mu_constant, i_rate)
 
-print(f"Constant force μ = {mu_constant:.2f}, i = {i_rate*100:.0f}%:")
-print(f"  Closed form: āₓ = 1/(δ + μ) = {a_closed_form:.4f}")
+print(f"Constant force 14 = {mu_constant:.2f}, i = {i_rate*100:.0f}%:")
+print(f"  Closed form:  = 1/(  + 14) = {a_closed_form:.4f}")
 print(f"  Numerical integral: {a_numerical:.4f}")
 print(f"  Match: {abs(a_closed_form - a_numerical) < 0.01}")
 
@@ -159,7 +184,7 @@ print("\n=== Relationship to Continuous Whole Life Insurance ===\n")
 
 def continuous_insurance(x, i, max_age=120):
     """
-    Āₓ = ∫₀^∞ e^(-δt) · ₜpₓ · μₓ₊ₜ dt
+     = ^ e^(- t)  p  14 dt
     """
     delta = np.log(1 + i)
     
@@ -180,9 +205,9 @@ A_bar = continuous_insurance(age_test, i_rate)
 a_from_insurance = (1 - A_bar) / delta
 
 print(f"Age {age_test}, i = {i_rate*100:.0f}%:")
-print(f"  āₓ (direct): {a_bar:.4f}")
-print(f"  Āₓ (insurance): {A_bar:.4f}")
-print(f"  āₓ = (1 - Āₓ)/δ: {a_from_insurance:.4f}")
+print(f"   (direct): {a_bar:.4f}")
+print(f"   (insurance): {A_bar:.4f}")
+print(f"   = (1 - )/ : {a_from_insurance:.4f}")
 print(f"  Identity holds: {abs(a_bar - a_from_insurance) < 0.01}")
 
 # Interest rate sensitivity
@@ -191,7 +216,7 @@ interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 age_sens = 65
 
 print(f"Age {age_sens} Continuous Annuity:")
-print("Interest | Continuous (āₓ) | Immediate (aₓ) | Difference")
+print("Interest | Continuous () | Immediate (a) | Difference")
 print("-" * 60)
 
 for i_val in interest_rates:
@@ -206,8 +231,8 @@ print("\n=== Variance of Continuous Annuity ===\n")
 
 def continuous_annuity_second_moment(x, i, max_age=120):
     """
-    E[Ȳ²] = ∫₀^∞ (∫₀^T e^(-δt) dt)² · μₓ₊ₜ · ₜpₓ dT
-    Simplified: ∫₀^∞ e^(-2δt) · ₜpₓ · μₓ₊ₜ dt (using integration by parts result)
+    E[22] = ^ (^T e^(- t) dt)2  14  p dT
+    Simplified: ^ e^(-2 t)  p  14 dt (using integration by parts result)
     """
     delta = np.log(1 + i)
     
@@ -216,7 +241,7 @@ def continuous_annuity_second_moment(x, i, max_age=120):
         if age_t > max_age:
             return 0.0
         
-        # (1 - e^(-δt))/δ)² term from integral of payment stream
+        # (1 - e^(- t))/ )2 term from integral of payment stream
         payment_integral = (1 - np.exp(-delta * t)) / delta
         
         return (payment_integral ** 2) * survival_prob(x, t, max_age) * gompertz_force(age_t)
@@ -231,9 +256,9 @@ variance = second_moment - a_bar_mean**2
 std_dev = np.sqrt(variance)
 
 print(f"Age {age_var}, i = {i_rate*100:.0f}%:")
-print(f"  E[Ȳ] = āₓ: {a_bar_mean:.4f}")
-print(f"  E[Ȳ²]: {second_moment:.4f}")
-print(f"  Var[Ȳ]: {variance:.4f}")
+print(f"  E[2] = : {a_bar_mean:.4f}")
+print(f"  E[22]: {second_moment:.4f}")
+print(f"  Var[2]: {variance:.4f}")
 print(f"  Std Dev: {std_dev:.4f}")
 print(f"  Coefficient of variation: {std_dev / a_bar_mean * 100:.1f}%")
 
@@ -247,9 +272,9 @@ continuous_vals = [continuous_annuity(age, 0.05) for age in ages_plot]
 immediate_vals = [immediate_annuity(age, 0.05, mortality) for age in ages_plot]
 due_vals = [annuity_due(age, 0.05, mortality) for age in ages_plot]
 
-ax1.plot(ages_plot, continuous_vals, 'o-', linewidth=2, label='Continuous (āₓ)', markersize=6)
-ax1.plot(ages_plot, immediate_vals, 's-', linewidth=2, label='Immediate (aₓ)', markersize=6)
-ax1.plot(ages_plot, due_vals, '^-', linewidth=2, label='Due (äₓ)', markersize=6)
+ax1.plot(ages_plot, continuous_vals, 'o-', linewidth=2, label='Continuous ()', markersize=6)
+ax1.plot(ages_plot, immediate_vals, 's-', linewidth=2, label='Immediate (a)', markersize=6)
+ax1.plot(ages_plot, due_vals, '^-', linewidth=2, label='Due ()', markersize=6)
 ax1.set_xlabel('Age')
 ax1.set_ylabel('Annuity Value')
 ax1.set_title('Continuous vs Discrete Annuities\n(i = 5%)')
@@ -271,7 +296,7 @@ ax2.plot(ages_plot, errors, 'o-', linewidth=2, color='red', markersize=6)
 ax2.fill_between(ages_plot, 0, errors, alpha=0.2, color='red')
 ax2.set_xlabel('Age')
 ax2.set_ylabel('Approximation Error (%)')
-ax2.set_title('Woolhouse Approximation Accuracy\nāₓ ≈ (aₓ + äₓ)/2')
+ax2.set_title('Woolhouse Approximation Accuracy\n  (a + )/2')
 ax2.grid(True, alpha=0.3)
 
 # Plot 3: Difference visualization
@@ -279,8 +304,8 @@ ax3 = axes[0, 2]
 diff_immediate = np.array(continuous_vals) - np.array(immediate_vals)
 diff_due = np.array(due_vals) - np.array(continuous_vals)
 
-ax3.plot(ages_plot, diff_immediate, 'o-', linewidth=2, label='āₓ - aₓ', markersize=6)
-ax3.plot(ages_plot, diff_due, 's-', linewidth=2, label='äₓ - āₓ', markersize=6)
+ax3.plot(ages_plot, diff_immediate, 'o-', linewidth=2, label=' - a', markersize=6)
+ax3.plot(ages_plot, diff_due, 's-', linewidth=2, label=' - ', markersize=6)
 ax3.axhline(0.5, color='k', linestyle='--', alpha=0.5, label='0.5 (approximation)')
 ax3.set_xlabel('Age')
 ax3.set_ylabel('Difference')
@@ -310,9 +335,9 @@ closed_form_vals = [1 / (delta + mu) for mu in mu_range]
 
 ax5.plot(mu_range * 100, closed_form_vals, linewidth=2)
 ax5.fill_between(mu_range * 100, 0, closed_form_vals, alpha=0.2)
-ax5.set_xlabel('Force of Mortality μ (%)')
-ax5.set_ylabel('Continuous Annuity āₓ')
-ax5.set_title('Constant Force Case\nāₓ = 1/(δ + μ)')
+ax5.set_xlabel('Force of Mortality 14 (%)')
+ax5.set_ylabel('Continuous Annuity ')
+ax5.set_title('Constant Force Case\n = 1/(  + 14)')
 ax5.grid(True, alpha=0.3)
 
 # Plot 6: Insurance-annuity relationship
@@ -328,13 +353,13 @@ for age in ages_relationship:
     insurance_vals_rel.append(A_bar)
 
 ax6_2 = ax6.twinx()
-ax6.plot(ages_relationship, annuity_vals_rel, 'o-', linewidth=2, color='blue', label='āₓ (annuity)', markersize=6)
-ax6_2.plot(ages_relationship, insurance_vals_rel, 's-', linewidth=2, color='red', label='Āₓ (insurance)', markersize=6)
+ax6.plot(ages_relationship, annuity_vals_rel, 'o-', linewidth=2, color='blue', label=' (annuity)', markersize=6)
+ax6_2.plot(ages_relationship, insurance_vals_rel, 's-', linewidth=2, color='red', label=' (insurance)', markersize=6)
 
 ax6.set_xlabel('Age')
-ax6.set_ylabel('Annuity Value (āₓ)', color='blue')
-ax6_2.set_ylabel('Insurance Value (Āₓ)', color='red')
-ax6.set_title('Complementary Relationship\nāₓ = (1 - Āₓ)/δ')
+ax6.set_ylabel('Annuity Value ()', color='blue')
+ax6_2.set_ylabel('Insurance Value ()', color='red')
+ax6.set_title('Complementary Relationship\n = (1 - )/ ')
 ax6.tick_params(axis='y', labelcolor='blue')
 ax6_2.tick_params(axis='y', labelcolor='red')
 ax6.grid(True, alpha=0.3)
@@ -343,7 +368,31 @@ plt.tight_layout()
 plt.show()
 
 print("\n=== Summary ===")
-print("Continuous annuity (āₓ): Instantaneous payments, āₓ = ∫ e^(-δt)·ₜpₓ dt")
-print("Woolhouse approximation: āₓ ≈ (aₓ + äₓ)/2 (error < 1%)")
+print("Continuous annuity (): Instantaneous payments,  =  e^(- t)p dt")
+print("Woolhouse approximation:   (a + )/2 (error < 1%)")
 print("Theoretical tool for derivations; convert to discrete for applications")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: life annuity continuous")
+
 

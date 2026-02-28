@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # mean reversion strategies
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: mean reversion strategies")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -29,16 +64,16 @@ print(f"-" * 50)
 score, p_value, _ = coint(df['A'], df['B'])
 print(f"Cointegration test p-value: {p_value:.4f}")
 if p_value < 0.05:
-    print(f"✓ Series are cointegrated (stationary spread)")
+    print(f"âœ“ Series are cointegrated (stationary spread)")
 else:
-    print(f"✗ Series are NOT cointegrated")
+    print(f"âœ— Series are NOT cointegrated")
 
 # Regression to estimate hedge ratio
 from scipy import stats
 slope, intercept, r_value, p_value_reg, std_err = stats.linregress(df['B'], df['A'])
 hedge_ratio = slope
 
-print(f"\nHedge Ratio (β): {hedge_ratio:.4f}")
+print(f"\nHedge Ratio (Î²): {hedge_ratio:.4f}")
 print(f"R-squared: {r_value**2:.4f}")
 
 # Step 2: Calculate spread
@@ -59,9 +94,9 @@ print(f"Max Z-score: {df['z_score'].max():.2f}")
 adf_stat, adf_p, _, _, _, _ = adfuller(df['spread'].dropna())
 print(f"\nADF test p-value: {adf_p:.4f}")
 if adf_p < 0.05:
-    print(f"✓ Spread is stationary (I(0))")
+    print(f"âœ“ Spread is stationary (I(0))")
 else:
-    print(f"✗ Spread is NOT stationary")
+    print(f"âœ— Spread is NOT stationary")
 
 # Step 3: Generate trading signals
 print(f"\nStep 3: Trading Signals")
@@ -74,7 +109,7 @@ df['signal'] = 0
 df.loc[df['z_score'] > threshold_entry, 'signal'] = -1  # Short A, Long B
 df.loc[df['z_score'] < -threshold_entry, 'signal'] = 1  # Long A, Short B
 
-print(f"Entry threshold (Z-score): ±{threshold_entry}")
+print(f"Entry threshold (Z-score): Â±{threshold_entry}")
 print(f"Number of entry signals: {(df['signal'] != 0).sum()}")
 
 # Step 4: Backtest with position tracking
@@ -145,7 +180,7 @@ fig, axes = plt.subplots(3, 2, figsize=(15, 12))
 # Plot 1: Price series A and B
 ax = axes[0, 0]
 ax.plot(df.index, df['A'], label='Price A', linewidth=1.5)
-ax.plot(df.index, hedge_ratio * df['B'], label=f'{hedge_ratio:.2f} × Price B', linewidth=1.5, alpha=0.7)
+ax.plot(df.index, hedge_ratio * df['B'], label=f'{hedge_ratio:.2f} Ã— Price B', linewidth=1.5, alpha=0.7)
 ax.set_title('Cointegrated Price Series')
 ax.set_ylabel('Price ($)')
 ax.legend()
@@ -156,7 +191,7 @@ ax = axes[0, 1]
 ax.plot(df.index, df['spread'], label='Spread', linewidth=1)
 ax.plot(df.index, df['mean'], label='20-day Mean', linewidth=2, color='orange')
 ax.fill_between(df.index, df['mean'] - 2*df['std'], df['mean'] + 2*df['std'], alpha=0.2, color='red')
-ax.set_title('Spread with ±2σ Bands')
+ax.set_title('Spread with Â±2Ïƒ Bands')
 ax.set_ylabel('Spread ($)')
 ax.legend()
 ax.grid(alpha=0.3)
@@ -215,3 +250,36 @@ print(f"- Best trades: Fast reversion (held <50 days) with +0.5-2% returns")
 print(f"- Worst trades: Slow reversion or regime break (held >100 days) with -1-5% losses")
 print(f"- Sensitivity: Breaks down if cointegration fails (monitor p-value)")
 print(f"- Improvements: Add regime filter, dynamic threshold, portfolio diversification")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='mean reversion strategies - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

@@ -1,9 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
 import time
 import warnings
-    from scipy.special import comb
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.special import comb
+from scipy.stats import norm
 
 # Block 1
 warnings.filterwarnings('ignore')
@@ -349,4 +350,4 @@ ax.legend()
 ax.grid(alpha=0.3, axis='y')
 
 plt.tight_layout()
-plt.show()
+plt.show()plt.show()

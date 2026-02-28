@@ -1,12 +1,11 @@
-# Monte Carlo vs Black-Scholes
+﻿# Monte Carlo vs Black-Scholes
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Comparative analysis of Monte Carlo simulation and Black-Scholes closed-form pricing for European options, evaluating accuracy, flexibility, computational cost, and practical tradeoffs.  
 **Purpose:** Understand when MC provides value over closed-form, validate MC implementations against analytical benchmarks, manage convergence error vs runtime, choose optimal pricing engine  
 **Prerequisites:** Black-Scholes formula, Monte Carlo fundamentals, European option payoffs, numerical convergence, variance reduction
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Black-Scholes | Monte Carlo |
 |--------|---------------|------------|
 | **Closed-Form** | Yes, O(1) | No, O(n) |
@@ -22,8 +21,7 @@
 | **Speed (1000 calls)** | < 1ms | 100ms-10s (depends on N) |
 | **Cost of Greeks** | Analytical derivatives | Finite diff or AD (extra cost) |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: ATM Call**  
 S=100, K=100, T=1, σ=0.20, r=0.05, q=0:
 - **BS:** C = $10.45 (exact, instantaneous)
@@ -42,8 +40,7 @@ Market prices 100 options across strikes. To calibrate surface:
 - **BS approach:** For each option price, invert BS → IV(K). Fast but assumes BS models each correctly; smile/skew not captured.
 - **MC + calibration:** Simulate paths under Heston (stochastic vol), solve optimization: minimize |MC_price(params) - market_price| across all strikes. Slower but recovers true volatility surface shape.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 MC vs BS Comparison Framework:
 ├─ Speed & Computational Cost:
@@ -93,8 +90,7 @@ MC vs BS Comparison Framework:
 
 **Interaction:** Choose MC when BS inapplicable (exotic, multivariate, stochastic vol); use BS to benchmark MC accuracy.
 
-## 5. Mini-Project
-
+## Challenge Round
 Implement both BS and MC pricing for European options; compare convergence, speed, Greeks:
 
 ```python
@@ -346,8 +342,7 @@ print("\nPlot saved: mc_vs_bs_analysis.png")
 - **Time Trade-off:** Doubling N doubles time but halves standard error (costly improvement)
 - **Greeks:** MC delta from bumps matches BS but noisier; 1M paths needed for 2-3 decimal places
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: For a European call, MC converges to BS as N → ∞. What does MC gain in practice?**  
 A: MC shines when BS inapplicable: (1) Path-dependent payoffs (Asian, lookback) where BS has no closed form. (2) Multiple underlyings with correlation (basket options). (3) Stochastic volatility (Heston model); BS assumes σ constant. (4) Jump processes; BS assumes continuous paths. (5) Portfolio risk aggregation across 1000s of instruments. For vanilla European options, MC is slower than BS; use MC for validation, BS for speed.
 
@@ -366,8 +361,7 @@ A: Standard practice: SE ≤ 1% of price. If price ≈ $10, need SE ≤ 0.10. Fo
 **Q6: MC prices have confidence intervals due to randomness. How do you interpret a 95% CI in a risk report?**  
 A: 95% CI = [Price - 1.96×SE, Price + 1.96×SE]. Interpretation: if we ran the simulation 100 times (different random seeds), ~95 of them would have price in this interval. Risk: wide CI indicates high model uncertainty (high payoff variance or too few paths). Mitigation: (1) increase N, (2) apply variance reduction, (3) check if payoff volatility is genuinely high (legitimate risk indicator). In reports: quote price ± half-width (e.g., "$10.45 ± 0.05" for 95% CI).
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Monte Carlo Method](https://en.wikipedia.org/wiki/Monte_Carlo_method) — Fundamentals, convergence, error analysis
 - [Wikipedia: Black–Scholes Model](https://en.wikipedia.org/wiki/Black%E2%80%93Scholes_model) — Closed-form solution
 - Glasserman: *Monte Carlo Methods in Financial Engineering* (Chapter 2) — MC vs analytical methods, convergence rates

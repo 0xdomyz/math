@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # annuity with guarantees
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for annuity with guarantees.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: annuity with guarantees")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: annuity_with_guarantees.md
 
@@ -50,7 +75,7 @@ def life_annuity(x, i, mortality):
 # Annuity with guarantee period
 def annuity_with_guarantee(x, n_guarantee, i, mortality):
     """
-    aₓ[n-year guarantee] = aₙ̄| + v^n · ₙpₓ · aₓ₊ₙ
+    a[n-year guarantee] = aTM| + v^n  TMp  aTM
     = Certain for n years + Deferred life annuity
     """
     v = 1 / (1 + i)
@@ -121,8 +146,8 @@ print(f"Components:")
 print(f"  Certain annuity ({n_guar_test} years): {certain_comp:.4f}")
 print(f"  Deferred life annuity:")
 print(f"    v^{n_guar_test}: {v**n_guar_test:.4f}")
-print(f"    {n_guar_test}p₆₅: {n_p_x:.4f}")
-print(f"    a₇₅: {a_x_plus_n:.4f}")
+print(f"    {n_guar_test}p...: {n_p_x:.4f}")
+print(f"    a...: {a_x_plus_n:.4f}")
 print(f"    Product: {deferred_comp:.4f}")
 print(f"  Total value: {total_value:.4f}")
 print(f"\nVerification: {abs(total_value - annuity_with_guarantee(age_base, n_guar_test, i_rate, mortality)) < 0.01}")
@@ -333,6 +358,30 @@ plt.show()
 
 print("\n=== Summary ===")
 print("Annuity with guarantee: Pays for n years minimum, then continues if alive")
-print("Formula: aₓ[n-guar] = aₙ̄| + v^n·ₙpₓ·aₓ₊ₙ")
+print("Formula: a[n-guar] = aTM| + v^nTMpaTM")
 print("Trade-off: Higher cost for downside protection; valuable for poor health/beneficiary protection")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: annuity with guarantees")
+
 

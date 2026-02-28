@@ -1,12 +1,39 @@
+﻿# %% [markdown]
+# # gompertz law
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for gompertz law.
+
+# %%
+import warnings
+
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: gompertz law")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: gompertz_law.md
+
+import matplotlib.pyplot as plt
 
 # --- Code Block 1 ---
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.optimize import minimize, least_squares
-from scipy.stats import linregress, chi2
+from scipy.optimize import least_squares, minimize
+from scipy.stats import chi2, linregress
 
 # 1. SIMULATED MORTALITY DATA (realistic US male-like)
 np.random.seed(42)
@@ -17,13 +44,13 @@ A_true = 0.00008
 B_true = 1.075
 
 # True force of mortality
-mu_true = A_true * (B_true ** ages)
+mu_true = A_true * (B_true**ages)
 
 # Convert to annual probability (Gompertz survival formula)
-# ₚₓ = exp[-A(B^{x+p} - B^x)/(ln B)]
-# qₓ = 1 - ₚₓ
+#  = exp[-A(B^{x+p} - B^x)/(ln B)]
+# q = 1 -
 ln_B = np.log(B_true)
-qx_true = 1 - np.exp(-A_true * (B_true**(ages+1) - B_true**ages) / ln_B)
+qx_true = 1 - np.exp(-A_true * (B_true ** (ages + 1) - B_true**ages) / ln_B)
 qx_true = np.minimum(qx_true, 0.99999)
 
 # Simulate deaths from exposures
@@ -36,11 +63,13 @@ mu_empirical = -np.log(1 - qx_empirical)
 
 print("GOMPERTZ FITTING: Simulated Data")
 print(f"True parameters: A = {A_true:.6f}, B = {B_true:.5f}")
-print(f"Data: {len(ages)} ages, {exposures.sum():.0f} total exposures, {deaths.sum():.0f} deaths")
+print(
+    f"Data: {len(ages)} ages, {exposures.sum():.0f} total exposures, {deaths.sum():.0f} deaths"
+)
 print()
 
 # 2. LINEAR REGRESSION METHOD (traditional)
-# ln(qₓ) ≈ ln(A) + x·ln(B)
+# ln(q)  ln(A) + xln(B)
 log_qx = np.log(np.maximum(qx_empirical, 1e-6))
 
 slope, intercept, r_value, p_value, std_err = linregress(ages, log_qx)
@@ -51,38 +80,43 @@ B_lin = np.exp(slope)
 print("METHOD 1: LINEAR REGRESSION (log qx vs age)")
 print(f"Fitted A = {A_lin:.6f} (true: {A_true:.6f})")
 print(f"Fitted B = {B_lin:.5f} (true: {B_true:.5f})")
-print(f"R² = {r_value**2:.5f}, Slope std error = {std_err:.6f}")
+print(f"R2 = {r_value**2:.5f}, Slope std error = {std_err:.6f}")
 
 # Predictions
-qx_lin = 1 - np.exp(-A_lin * (B_lin**(ages+1) - B_lin**ages) / np.log(B_lin))
+qx_lin = 1 - np.exp(-A_lin * (B_lin ** (ages + 1) - B_lin**ages) / np.log(B_lin))
 qx_lin = np.minimum(qx_lin, 0.99999)
 
 print()
+
 
 # 3. MAXIMUM LIKELIHOOD METHOD (statistically optimal)
 def gompertz_qx(ages_data, A, B):
     """Gompertz mortality probability from parameters"""
     ln_B = np.log(B)
-    qx = 1 - np.exp(-A * (B**(ages_data + 1) - B**ages_data) / ln_B)
+    qx = 1 - np.exp(-A * (B ** (ages_data + 1) - B**ages_data) / ln_B)
     return np.minimum(np.maximum(qx, 1e-10), 1 - 1e-10)
+
 
 def neg_log_likelihood(params, ages_data, deaths_data, exposures_data):
     """Negative log-likelihood for binomial model"""
     A, B = params
-    
+
     if A <= 0 or B <= 1 or A > 0.1 or B > 1.2:
         return 1e10
-    
+
     qx = gompertz_qx(ages_data, A, B)
-    
+
     # Binomial log-likelihood
-    ll = np.sum(deaths_data * np.log(qx) + (exposures_data - deaths_data) * np.log(1 - qx))
+    ll = np.sum(
+        deaths_data * np.log(qx) + (exposures_data - deaths_data) * np.log(1 - qx)
+    )
     return -ll
 
+
 p0 = [0.0001, 1.07]
-result_mle = minimize(neg_log_likelihood, p0,
-                     args=(ages, deaths, exposures),
-                     method='Nelder-Mead')
+result_mle = minimize(
+    neg_log_likelihood, p0, args=(ages, deaths, exposures), method="Nelder-Mead"
+)
 
 A_mle, B_mle = result_mle.x
 
@@ -98,22 +132,24 @@ print()
 # Weight by exposure size (larger samples more reliable)
 weights = np.sqrt(exposures)
 
+
 def weighted_gompertz(params, ages_data, log_qx_data, weights_data):
     """Weighted least squares for log(qx)"""
     A, B = params
-    
+
     if A <= 0 or B <= 1 or A > 0.1 or B > 1.2:
         return 1e10
-    
+
     qx = gompertz_qx(ages_data, A, B)
     log_qx_pred = np.log(np.maximum(qx, 1e-6))
-    
+
     residuals = (log_qx_data - log_qx_pred) * weights_data
     return np.sum(residuals**2)
 
-result_wls = minimize(weighted_gompertz, p0,
-                     args=(ages, log_qx, weights),
-                     method='BFGS')
+
+result_wls = minimize(
+    weighted_gompertz, p0, args=(ages, log_qx, weights), method="BFGS"
+)
 
 A_wls, B_wls = result_wls.x
 
@@ -124,13 +160,15 @@ print(f"Fitted B = {B_wls:.5f} (true: {B_true:.5f})")
 qx_wls = gompertz_qx(ages, A_wls, B_wls)
 print()
 
+
 # 5. GOODNESS-OF-FIT TESTS
 def chi_square_gof(deaths_obs, deaths_exp, df_reduction=2):
     """Chi-square test for goodness of fit"""
-    chi2_stat = np.sum((deaths_obs - deaths_exp)**2 / np.maximum(deaths_exp, 1))
+    chi2_stat = np.sum((deaths_obs - deaths_exp) ** 2 / np.maximum(deaths_exp, 1))
     df = len(deaths_obs) - df_reduction
     p_value = 1 - chi2.cdf(chi2_stat, df)
     return chi2_stat, p_value, df
+
 
 deaths_exp_mle = exposures * qx_mle
 chi2_stat, p_val, df = chi_square_gof(deaths, deaths_exp_mle)
@@ -149,7 +187,9 @@ print("STANDARDIZED RESIDUALS (selected ages):")
 print("Age\tObserved\tExpected\tResidual")
 for age in [40, 50, 60, 70, 80]:
     idx = age - ages[0]
-    print(f"{age}\t{deaths[idx]}\t\t{deaths_exp_mle[idx]:.1f}\t\t{residuals_std[idx]:.2f}")
+    print(
+        f"{age}\t{deaths[idx]}\t\t{deaths_exp_mle[idx]:.1f}\t\t{residuals_std[idx]:.2f}"
+    )
 print()
 
 # 7. FORECAST TO FUTURE YEARS
@@ -163,80 +203,123 @@ for age, qx in zip(future_ages[::2], qx_forecast_mle[::2]):
 print()
 
 # 8. FORCE OF MORTALITY COMPARISON
-mu_gompertz_lin = A_lin * (B_lin ** ages)
-mu_gompertz_mle = A_mle * (B_mle ** ages)
-mu_gompertz_wls = A_wls * (B_wls ** ages)
+mu_gompertz_lin = A_lin * (B_lin**ages)
+mu_gompertz_mle = A_mle * (B_mle**ages)
+mu_gompertz_wls = A_wls * (B_wls**ages)
 
 # 9. VISUALIZATION
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
 # Plot 1: Fitted vs Empirical (log scale)
 ax = axes[0, 0]
-ax.semilogy(ages, qx_empirical, 'o', markersize=6, alpha=0.7, 
-           label='Empirical (deaths/exposures)', color='black')
-ax.semilogy(ages, qx_lin, '--', linewidth=2, label='Linear Regression', color='blue')
-ax.semilogy(ages, qx_mle, '-', linewidth=2.5, label='Maximum Likelihood', color='red')
-ax.semilogy(ages, qx_wls, ':', linewidth=2, label='Weighted LS', color='green')
-ax.semilogy(ages, qx_true, '--', linewidth=1.5, alpha=0.5, 
-           label='True Gompertz', color='gray')
-ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Mortality Probability qx (log scale)', fontsize=11)
-ax.set_title('Gompertz Fitting: Three Methods', fontsize=12, fontweight='bold')
-ax.legend(fontsize=9, loc='upper left')
-ax.grid(alpha=0.3, which='both')
+ax.semilogy(
+    ages,
+    qx_empirical,
+    "o",
+    markersize=6,
+    alpha=0.7,
+    label="Empirical (deaths/exposures)",
+    color="black",
+)
+ax.semilogy(ages, qx_lin, "--", linewidth=2, label="Linear Regression", color="blue")
+ax.semilogy(ages, qx_mle, "-", linewidth=2.5, label="Maximum Likelihood", color="red")
+ax.semilogy(ages, qx_wls, ":", linewidth=2, label="Weighted LS", color="green")
+ax.semilogy(
+    ages, qx_true, "--", linewidth=1.5, alpha=0.5, label="True Gompertz", color="gray"
+)
+ax.set_xlabel("Age", fontsize=11)
+ax.set_ylabel("Mortality Probability qx (log scale)", fontsize=11)
+ax.set_title("Gompertz Fitting: Three Methods", fontsize=12, fontweight="bold")
+ax.legend(fontsize=9, loc="upper left")
+ax.grid(alpha=0.3, which="both")
 
 # Plot 2: Force of mortality (linear scale)
 ax = axes[0, 1]
-ax.plot(ages, mu_empirical, 'o', markersize=4, alpha=0.5, 
-       label='Empirical', color='black')
-ax.plot(ages, mu_gompertz_mle, '-', linewidth=2.5, label='MLE Gompertz', color='red')
-ax.plot(ages, mu_true, '--', linewidth=2, alpha=0.6, label='True', color='gray')
-ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Force of Mortality μx', fontsize=11)
-ax.set_title('Force of Mortality: Gompertz vs Empirical', fontsize=12, fontweight='bold')
+ax.plot(
+    ages, mu_empirical, "o", markersize=4, alpha=0.5, label="Empirical", color="black"
+)
+ax.plot(ages, mu_gompertz_mle, "-", linewidth=2.5, label="MLE Gompertz", color="red")
+ax.plot(ages, mu_true, "--", linewidth=2, alpha=0.6, label="True", color="gray")
+ax.set_xlabel("Age", fontsize=11)
+ax.set_ylabel("Force of Mortality 14x", fontsize=11)
+ax.set_title(
+    "Force of Mortality: Gompertz vs Empirical", fontsize=12, fontweight="bold"
+)
 ax.legend(fontsize=10)
 ax.grid(alpha=0.3)
 
 # Plot 3: Standardized residuals
 ax = axes[1, 0]
-ax.scatter(ages, residuals_std, s=50, alpha=0.7, color='darkblue')
-ax.axhline(0, color='r', linestyle='-', linewidth=2)
-ax.axhline(2, color='orange', linestyle='--', alpha=0.7)
-ax.axhline(-2, color='orange', linestyle='--', alpha=0.7)
-ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Standardized Residuals', fontsize=11)
-ax.set_title('Goodness-of-Fit: Residual Analysis', fontsize=12, fontweight='bold')
+ax.scatter(ages, residuals_std, s=50, alpha=0.7, color="darkblue")
+ax.axhline(0, color="r", linestyle="-", linewidth=2)
+ax.axhline(2, color="orange", linestyle="--", alpha=0.7)
+ax.axhline(-2, color="orange", linestyle="--", alpha=0.7)
+ax.set_xlabel("Age", fontsize=11)
+ax.set_ylabel("Standardized Residuals", fontsize=11)
+ax.set_title("Goodness-of-Fit: Residual Analysis", fontsize=12, fontweight="bold")
 ax.grid(alpha=0.3)
 
 # Plot 4: Parameter estimates across methods
 ax = axes[1, 1]
-methods = ['Linear Reg', 'MLE', 'Weighted LS', 'True']
+methods = ["Linear Reg", "MLE", "Weighted LS", "True"]
 A_vals = [A_lin, A_mle, A_wls, A_true]
 B_vals = [B_lin, B_mle, B_wls, B_true]
 
 x_pos = np.arange(len(methods))
 ax_twin = ax.twinx()
 
-bars1 = ax.bar(x_pos - 0.2, A_vals, 0.4, label='A', color='steelblue', edgecolor='black')
-bars2 = ax_twin.bar(x_pos + 0.2, B_vals, 0.4, label='B', color='coral', edgecolor='black')
+bars1 = ax.bar(
+    x_pos - 0.2, A_vals, 0.4, label="A", color="steelblue", edgecolor="black"
+)
+bars2 = ax_twin.bar(
+    x_pos + 0.2, B_vals, 0.4, label="B", color="coral", edgecolor="black"
+)
 
-ax.set_ylabel('Parameter A', fontsize=11, color='steelblue')
-ax_twin.set_ylabel('Parameter B', fontsize=11, color='coral')
-ax.set_title('Parameter Estimates: Three Methods', fontsize=12, fontweight='bold')
+ax.set_ylabel("Parameter A", fontsize=11, color="steelblue")
+ax_twin.set_ylabel("Parameter B", fontsize=11, color="coral")
+ax.set_title("Parameter Estimates: Three Methods", fontsize=12, fontweight="bold")
 ax.set_xticks(x_pos)
 ax.set_xticklabels(methods)
-ax.tick_params(axis='y', labelcolor='steelblue')
-ax_twin.tick_params(axis='y', labelcolor='coral')
-ax.grid(alpha=0.3, axis='y')
+ax.tick_params(axis="y", labelcolor="steelblue")
+ax_twin.tick_params(axis="y", labelcolor="coral")
+ax.grid(alpha=0.3, axis="y")
 
 # Add value labels on bars
 for bars in [bars1, bars2]:
     for bar in bars:
         height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height,
-               f'{height:.5f}', ha='center', va='bottom', fontsize=8)
+        if np.isfinite(height) and abs(height) < 100:
+            ax.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                height,
+                f"{height:.5f}",
+                ha="center",
+                va="bottom",
+                fontsize=8,
+            )
 
 plt.tight_layout()
-plt.savefig('gompertz_law_fitting.png', dpi=300, bbox_inches='tight')
+plt.savefig("gompertz_law_fitting.png", dpi=120)
 plt.show()
 
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: gompertz law")

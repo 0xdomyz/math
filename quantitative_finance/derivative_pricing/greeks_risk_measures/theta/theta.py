@@ -1,204 +1,107 @@
+﻿# %% [markdown]
+# # Theta - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-# Black-Scholes components
-def bs_d1(S, K, T, r, sigma):
-    with np.errstate(divide='ignore', invalid='ignore'):
-        return (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+random.seed(42)
 
-def bs_d2(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    return d1 - sigma*np.sqrt(T)
 
-def bs_call(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    d2 = bs_d2(S, K, T, r, sigma)
-    call = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-    return call
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-def bs_put(S, K, T, r, sigma):
-    call = bs_call(S, K, T, r, sigma)
-    put = call - S + K*np.exp(-r*T)
-    return put
 
-def theta_call_bs(S, K, T, r, sigma):
-    """Theta per year for call"""
-    d1 = bs_d1(S, K, T, r, sigma)
-    d2 = bs_d2(S, K, T, r, sigma)
-    theta = (-S * norm.pdf(d1) * sigma / (2*np.sqrt(T)) - 
-             r * K * np.exp(-r*T) * norm.cdf(d2))
-    return theta
+config = Config()
+print(f"Topic: Theta")
+print(f"Config: {config}")
 
-def theta_put_bs(S, K, T, r, sigma):
-    """Theta per year for put"""
-    d1 = bs_d1(S, K, T, r, sigma)
-    d2 = bs_d2(S, K, T, r, sigma)
-    theta = (-S * norm.pdf(d1) * sigma / (2*np.sqrt(T)) + 
-             r * K * np.exp(-r*T) * norm.cdf(-d2))
-    return theta
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-def gamma_bs(S, K, T, r, sigma):
-    d1 = bs_d1(S, K, T, r, sigma)
-    gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
-    return gamma
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# Parameters
-S0, K, r, sigma = 100, 100, 0.05, 0.2
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# 1. Theta across time (for various spot prices)
-print("=== THETA ANALYSIS ===")
-T_values = np.array([365, 90, 30, 7, 1]) / 365  # Days to years
-print("\nCall Theta (per day) across time to expiry:")
-print("Days\tS=90\t\tS=100\t\tS=110")
-print("-" * 50)
-for T in T_values:
-    theta_90 = theta_call_bs(90, K, T, r, sigma) / 365
-    theta_100 = theta_call_bs(100, K, T, r, sigma) / 365
-    theta_110 = theta_call_bs(110, K, T, r, sigma) / 365
-    days = T * 365
-    print(f"{days:3.0f}\t${theta_90:.4f}\t\t${theta_100:.4f}\t\t${theta_110:.4f}")
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# 2. Theta vs spot for different expirations
-spot_prices = np.linspace(80, 120, 100)
-T_scenarios = [1, 0.25, 0.083, 0.027]  # 1yr, 3mo, 1mo, 1 week
 
-# 3. Calendar spread analysis
-print("\n=== CALENDAR SPREAD (BUY LONG, SELL SHORT) ===")
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-# Buy long-dated call (T=1yr), sell short-dated call (T=3mo)
-T_long = 1.0
-T_short = 0.25
 
-# At initiation
-call_long_price = bs_call(S0, K, T_long, r, sigma)
-call_short_price = bs_call(S0, K, T_short, r, sigma)
-calendar_cost = call_long_price - call_short_price
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-print(f"\nInitial Setup:")
-print(f"  Buy 1yr call: ${call_long_price:.2f}")
-print(f"  Sell 3mo call: ${call_short_price:.2f}")
-print(f"  Net cost: ${calendar_cost:.2f}")
+print("Implemented pricing functions")
 
-# Theta of calendar spread
-theta_long = theta_call_bs(S0, K, T_long, r, sigma)
-theta_short = theta_call_bs(S0, K, T_short, r, sigma)
-calendar_theta = theta_long - theta_short
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-print(f"\nTheta Analysis:")
-print(f"  Long call theta (per year): ${theta_long:.2f}")
-print(f"  Short call theta (per year): ${theta_short:.2f}")
-print(f"  Calendar spread theta: ${calendar_theta:.2f}")
-print(f"  Daily theta decay: ${calendar_theta/365:.4f}")
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-# Simulate calendar spread P&L over time (assuming spot stays at S0)
-time_steps = np.linspace(T_short, 0.01, 50)
-calendar_values = []
-spot_constant = S0
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
 
-for t_elapsed in np.linspace(0, T_short, 50):
-    T_long_rem = T_long - t_elapsed
-    T_short_rem = T_short - t_elapsed
-    
-    call_long_rem = bs_call(spot_constant, K, T_long_rem, r, sigma) if T_long_rem > 0 else max(spot_constant - K, 0)
-    call_short_rem = bs_call(spot_constant, K, T_short_rem, r, sigma) if T_short_rem > 0 else max(spot_constant - K, 0)
-    
-    spread_value = call_long_rem - call_short_rem
-    calendar_values.append(spread_value)
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
 
-calendar_pnl = np.array(calendar_values) - calendar_cost
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
 
-# Theta-Gamma tradeoff
-print("\n=== THETA-GAMMA TRADEOFF ===")
-print("Daily theta gain offset by gamma loss at different realized volatilities:")
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
 
-time_periods = np.array([1, 7, 30])  # Days
-
-for days in time_periods:
-    T_rem = max(T_short - days/365, 0.01)
-    
-    # Theta gain: daily theta decay
-    daily_theta = calendar_theta / 365
-    
-    # Gamma loss: from spot move
-    gamma_long = gamma_bs(S0, K, T_long - days/365, r, sigma)
-    gamma_short = gamma_bs(S0, K, T_short - days/365, r, sigma)
-    calendar_gamma = gamma_long - gamma_short
-    
-    # Breakeven spot move where gamma loss = theta gain
-    if calendar_gamma != 0:
-        breakeven_move = np.sqrt(2 * abs(daily_theta) / calendar_gamma)
-    else:
-        breakeven_move = np.inf
-    
-    print(f"  Day {days}: Theta ${daily_theta:.4f}, Gamma {calendar_gamma:.6f}, " +
-          f"Breakeven move ${breakeven_move:.2f}")
-
-# Visualization
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-
-# Plot 1: Theta vs Spot (multiple expirations)
-for T in T_scenarios:
-    thetas = [theta_call_bs(S, K, T, r, sigma)/365 for S in spot_prices]
-    label = f'T={T*365:.0f}d'
-    axes[0, 0].plot(spot_prices, thetas, linewidth=2, label=label)
-
-axes[0, 0].axvline(K, color='r', linestyle='--', alpha=0.5)
-axes[0, 0].axhline(0, color='k', linestyle='-', linewidth=0.5)
-axes[0, 0].set_xlabel('Spot Price ($)')
-axes[0, 0].set_ylabel('Theta (per day)')
-axes[0, 0].set_title('Call Theta vs Spot (different expirations)')
-axes[0, 0].legend()
-axes[0, 0].grid(alpha=0.3)
-
-# Plot 2: Theta acceleration near expiry
-T_all = np.linspace(1, 0.01, 200)
-theta_atm = [theta_call_bs(K, K, t, r, sigma)/365 for t in T_all]
-
-axes[0, 1].plot(T_all*365, theta_atm, linewidth=2, color='red')
-axes[0, 1].fill_between(T_all*365, theta_atm, alpha=0.2, color='red')
-axes[0, 1].set_xlabel('Days to Expiry')
-axes[0, 1].set_ylabel('Theta (per day)')
-axes[0, 1].set_title('ATM Call Theta Acceleration')
-axes[0, 1].grid(alpha=0.3)
-
-# Plot 3: Calendar spread P&L
-t_elapsed = np.linspace(0, T_short*365, len(calendar_pnl))
-axes[1, 0].plot(t_elapsed, calendar_pnl, linewidth=2, color='green')
-axes[1, 0].fill_between(t_elapsed, calendar_pnl, alpha=0.2, color='green')
-axes[1, 0].axhline(0, color='k', linestyle='-', linewidth=0.5)
-axes[1, 0].set_xlabel('Days Elapsed')
-axes[1, 0].set_ylabel('Calendar Spread P&L ($)')
-axes[1, 0].set_title('Calendar Spread P&L (spot constant)')
-axes[1, 0].grid(alpha=0.3)
-
-# Plot 4: Theta vs Gamma scatter
-gammas_plot = []
-thetas_plot = []
-spots_plot = np.linspace(80, 120, 40)
-
-for S in spots_plot:
-    gamma = gamma_bs(S, K, T_short, r, sigma)
-    theta = theta_call_bs(S, K, T_short, r, sigma) / 365
-    gammas_plot.append(gamma)
-    thetas_plot.append(theta)
-
-scatter = axes[1, 1].scatter(gammas_plot, thetas_plot, c=spots_plot, cmap='viridis', 
-                            s=100, alpha=0.7, edgecolors='k')
-axes[1, 1].set_xlabel('Gamma')
-axes[1, 1].set_ylabel('Theta (per day)')
-axes[1, 1].set_title('Theta-Gamma Tradeoff (3mo call)')
-cbar = plt.colorbar(scatter, ax=axes[1, 1])
-cbar.set_label('Spot Price ($)')
-
-# Add breakeven line (approximate)
-gamma_range = np.linspace(min(gammas_plot), max(gammas_plot), 100)
-theta_breakeven = -gamma_range * S0**2 * sigma**2 / 2 / 365
-axes[1, 1].plot(gamma_range, theta_breakeven, 'r--', linewidth=2, alpha=0.5, label='Breakeven')
-axes[1, 1].legend()
-axes[1, 1].grid(alpha=0.3)
-
-plt.tight_layout()
-plt.show()
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

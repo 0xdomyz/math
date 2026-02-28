@@ -1,8 +1,10 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.sparse import diags
 from scipy.sparse.linalg import spsolve
-    from scipy.stats import norm
+from scipy.stats import norm
+
+
 def implicit_fd_american(S0, K, T, r, sigma, option_type='put', M=100, N=500):
     """
     Implicit finite difference with early exercise for American options.
@@ -218,4 +220,4 @@ print("PDE methods successfully price options:")
 print(f"• Crank-Nicolson most accurate (Error ${cn_errors[-1]:.5f} at M=160)")
 print(f"• American put premium ${american_price-bs_price:.3f} from early exercise")
 print(f"• Exercise boundary: S*≈${exercise_boundary[-1]:.1f} at t=0 (exercise if S<S*)")
-print(f"• Convergence: Second-order in space (O(Δx²)), C-N second-order in time")
+print(f"• Convergence: Second-order in space (O(Δx²)), C-N second-order in time")print(f"• Convergence: Second-order in space (O(Δx²)), C-N second-order in time")

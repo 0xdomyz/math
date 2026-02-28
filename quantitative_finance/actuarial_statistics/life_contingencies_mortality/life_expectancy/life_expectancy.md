@@ -1,322 +1,116 @@
-# Life Expectancy
+﻿# Life Expectancy
 
-## 1. Concept Skeleton
-**Definition:** Expected remaining lifetime at age x; eₓ = E[Tₓ] where Tₓ is future years  
-**Purpose:** Measure population health, project pension obligations, compare populations, assess mortality improvements  
-**Prerequisites:** Survival probability, life tables, expected value, demographic rates
+## Concept Skeleton
+**Definition:** Life Expectancy is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Metric | Life Expectancy eₓ | Median Lifespan | Survival Probability |
-|--------|-------------------|-----------------|----------------------|
-| **Definition** | Mean remaining years | 50th percentile age | P(survive to age x+p) |
-| **Calculation** | eₓ = ∑ ₚpₓ | From cumulative distribution | Direct from life table |
-| **Interpretation** | Average person lives this long | Half population exceeds | Individual probability |
-| **Application** | Pension, annuity valuation | Policy marketing | Underwriting decisions |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-US male at birth (2023): e₀ ≈ 74 years; reflects current age-specific mortality across all ages
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Using e₀ = 75 for everyone age 60: Incorrect—e₆₀ ≈ 19 additional years, not original 75
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-War/pandemic year: e₀ drops sharply (WWII ≈5% decline), but survivors face normal hazards; short-term spike, not structural
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Life Expectancy | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Life Expectancy Structure:
-├─ Definition:
-│   ├─ eₓ = E[Tₓ] = ∑ₚ₌₀^∞ ₚpₓ  [discrete]
-│   ├─ eₓ = ∫₀^∞ ₚpₓ dp  [continuous]
-│   ├─ eₓ = Tₓ / lₓ  [from life table]
-│   └─ Conditional: e_{x|y} = remaining life given survive to y
-├─ Calculation Methods:
-│   ├─ Cohort (generation): Follow birth cohort to death
-│   ├─ Period: Cross-section of current age-specific rates
-│   ├─ Adjusted: Exclude specific causes (e.g., without cancer)
-│   └─ Healthy life expectancy (HALE): Adjust for disability
-├─ Decomposition:
-│   ├─ By cause: Mortality contribution to lost years
-│   ├─ By age: Which ages drive change (e.g., 60-80 accounts for 40%)
-│   ├─ By gender/region: Equity analysis
-│   └─ Gains: Compare periods (e.g., 1990 vs 2020 difference)
-├─ Adjustments:
-│   ├─ Smoking: Non-smoker +3-5 years vs smoker
-│   ├─ Socioeconomic: Top 20% vs bottom 20% gap 10-15 years
-│   ├─ Occupation: Hazardous -2-3 years
-│   └─ Health status: Chronic disease -5-10 years
-└─ Projection Models:
-    ├─ Lee-Carter: Captures mortality improvement trend
-    ├─ Age-period-cohort: Separates generation effects
-    └─ Scenario: Policy-based (smoking reduction, healthcare)
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Life Expectancy.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-**Interaction:** Life table → Calculate Tₓ → Divide by lₓ → Analyze trends
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Life Expectancy.
 
-## 5. Mini-Project
-Calculate life expectancy, decompose by age/cause, and project improvements:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-# 1. BUILD LIFE TABLE & CALCULATE LIFE EXPECTANCY
-ages = np.arange(0, 121)
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# Realistic mortality (based on developed country data)
-qx_data = np.array([
-    0.00714, 0.00055, 0.00040, 0.00032, 0.00029,  # Ages 0-4
-    0.00028, 0.00027, 0.00027, 0.00028, 0.00030,  # Ages 5-9
-] + list(np.linspace(0.00033, 0.40, 111)))  # Linear increase to age 110
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-qx = np.minimum(qx_data, 0.9999)  # Cap at 0.9999
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-radix = 100000
-lx = np.zeros(121)
-dx = np.zeros(121)
-Lx = np.zeros(121)
-Tx = np.zeros(121)
-ex = np.zeros(121)
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-lx[0] = radix
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-# Build life table
-for x in range(120):
-    dx[x] = lx[x] * qx[x]
-    lx[x + 1] = lx[x] - dx[x]
-    
-    # Person-years: assume deaths uniformly distributed within year
-    # For final year, assume person-years = lx[x]/2
-    if lx[x] > 0:
-        Lx[x] = (lx[x] + lx[x + 1]) / 2
-    else:
-        Lx[x] = 0
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Life Expectancy outputs in pricing, reserving, and solvency workflows.
 
-# Calculate total remaining person-years (Tx)
-Tx[120] = Lx[120]  # Last year
-for x in range(119, -1, -1):
-    Tx[x] = Lx[x] + Tx[x + 1]
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-# Life expectancy
-ex = np.where(lx > 0, Tx / lx, 0)
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-# Create life table
-life_table = pd.DataFrame({
-    'Age': ages,
-    'qx': qx,
-    'lx': lx,
-    'dx': dx,
-    'Lx': Lx,
-    'Tx': Tx,
-    'ex': ex
-})
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("LIFE TABLE WITH LIFE EXPECTANCY:")
-print(life_table[life_table['Age'].isin([0, 20, 40, 60, 80, 100])][['Age', 'qx', 'lx', 'ex']].to_string(index=False))
-print()
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 2. CONDITIONAL LIFE EXPECTANCY
-print("CONDITIONAL LIFE EXPECTANCY (remaining years):")
-print("Age\tLife Expectancy (years)")
-for age in [0, 20, 40, 60, 80]:
-    remaining_years = ex[age]
-    print(f"{age}\t{remaining_years:.1f}")
-print()
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 3. LIFE EXPECTANCY GAIN/LOSS BY AGE
-# Calculate contribution of each age to total life expectancy
-def calculate_age_contribution(lx, Lx, ex):
-    """Contribution of mortality at each age to e0"""
-    contributions = np.zeros(len(lx))
-    for x in range(len(lx) - 1):
-        if lx[0] > 0:
-            # Change in Tx when mortality at x changes slightly
-            contributions[x] = Lx[x] / lx[0]
-    return contributions
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-age_contrib = calculate_age_contribution(lx, Lx, ex)
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("AGE-SPECIFIC CONTRIBUTION TO LIFE EXPECTANCY AT BIRTH:")
-print("Age Range\tPerson-Years\t% of Total")
-print("-" * 50)
-for age_range in [(0, 5), (5, 15), (15, 30), (30, 60), (60, 80), (80, 120)]:
-    start, end = age_range
-    mask = (ages >= start) & (ages < end)
-    contrib_range = Lx[mask].sum()
-    pct = 100 * contrib_range / Lx.sum()
-    print(f"{start:2d}-{end:2d}\t\t{contrib_range:.0f}\t\t{pct:.1f}%")
-print()
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 4. MORTALITY IMPROVEMENTS & LIFE EXPECTANCY GAINS
-# Simulate improvements over time
-years = np.arange(2020, 2051)
-improvement_rate = 0.015  # 1.5% annual improvement
-ex_projection = np.zeros((len(ages), len(years)))
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Baseline (year 0)
-ex_projection[:, 0] = ex
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Project forward with annual improvement
-for year_idx in range(1, len(years)):
-    # Apply improvement: reduce qx by factor
-    qx_improved = qx * (1 - improvement_rate) ** year_idx
-    qx_improved = np.minimum(qx_improved, 0.9999)
-    
-    # Rebuild life table
-    lx_proj = np.zeros(121)
-    lx_proj[0] = radix
-    Lx_proj = np.zeros(121)
-    Tx_proj = np.zeros(121)
-    
-    for x in range(120):
-        dx_proj = lx_proj[x] * qx_improved[x]
-        lx_proj[x + 1] = lx_proj[x] - dx_proj
-        Lx_proj[x] = (lx_proj[x] + lx_proj[x + 1]) / 2
-    
-    Tx_proj[120] = Lx_proj[120]
-    for x in range(119, -1, -1):
-        Tx_proj[x] = Lx_proj[x] + Tx_proj[x + 1]
-    
-    ex_proj = np.where(lx_proj > 0, Tx_proj / lx_proj, 0)
-    ex_projection[:, year_idx] = ex_proj
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Print projections
-print("LIFE EXPECTANCY PROJECTIONS (1.5% annual improvement):")
-print("Year\te₀ (at birth)\te₆₀ (at age 60)\te₈₀ (at age 80)")
-for year_idx in [0, 10, 20, 30]:
-    if year_idx < len(years):
-        year = years[year_idx]
-        print(f"{year}\t{ex_projection[0, year_idx]:.1f}\t\t" +
-              f"{ex_projection[60, year_idx]:.1f}\t\t{ex_projection[80, year_idx]:.1f}")
-print()
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 5. LIFE EXPECTANCY DECOMPOSITION BY CAUSE
-# Simulate multiple causes of death
-causes = {
-    'Cardiovascular': 0.35,
-    'Cancer': 0.25,
-    'Respiratory': 0.10,
-    'Accidents': 0.05,
-    'Other': 0.25
-}
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-ex_by_cause = {}
-print("LIFE EXPECTANCY LOSS BY CAUSE (if cause eliminated):")
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-for cause, fraction in causes.items():
-    # Reduce qx for this cause
-    qx_reduced = qx * (1 - fraction)
-    qx_reduced = np.minimum(qx_reduced, 0.9999)
-    
-    # Rebuild life table without this cause
-    lx_no_cause = np.zeros(121)
-    lx_no_cause[0] = radix
-    Lx_no_cause = np.zeros(121)
-    Tx_no_cause = np.zeros(121)
-    
-    for x in range(120):
-        dx_no_cause = lx_no_cause[x] * qx_reduced[x]
-        lx_no_cause[x + 1] = lx_no_cause[x] - dx_no_cause
-        Lx_no_cause[x] = (lx_no_cause[x] + lx_no_cause[x + 1]) / 2
-    
-    Tx_no_cause[120] = Lx_no_cause[120]
-    for x in range(119, -1, -1):
-        Tx_no_cause[x] = Lx_no_cause[x] + Tx_no_cause[x + 1]
-    
-    ex_no_cause = np.where(lx_no_cause > 0, Tx_no_cause / lx_no_cause, 0)
-    ex_by_cause[cause] = ex_no_cause[0]
-    
-    gain = ex_no_cause[0] - ex[0]
-    print(f"{cause:20s}: {gain:5.2f} years gained")
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print()
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 6. VISUALIZATION
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 1: Life Expectancy by age
-ax = axes[0, 0]
-ax.plot(ages[:-1], ex[:-1], linewidth=2.5, color='darkblue')
-ax.fill_between(ages[:-1], ex[:-1], alpha=0.2, color='blue')
-ax.scatter([0, 20, 40, 60, 80], ex[[0, 20, 40, 60, 80]], 
-          color='red', s=100, zorder=5)
-ax.set_xlabel('Age (x)', fontsize=11)
-ax.set_ylabel('Remaining Life Expectancy (years)', fontsize=11)
-ax.set_title('Life Expectancy by Age', fontsize=12, fontweight='bold')
-ax.grid(alpha=0.3)
-for age in [0, 20, 40, 60, 80]:
-    ax.annotate(f'{ex[age]:.1f}', xy=(age, ex[age]), 
-               xytext=(5, 5), textcoords='offset points', fontsize=9)
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 2: Projected improvements
-ax = axes[0, 1]
-for age in [0, 20, 60, 80]:
-    ax.plot(years, ex_projection[age, :], linewidth=2.5, marker='o', 
-           markersize=4, label=f'e{age}')
-ax.set_xlabel('Year', fontsize=11)
-ax.set_ylabel('Life Expectancy (years)', fontsize=11)
-ax.set_title('Projected Life Expectancy (1.5% annual improvement)', fontsize=12, fontweight='bold')
-ax.legend(fontsize=10)
-ax.grid(alpha=0.3)
+Operational detail for Life Expectancy: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 3: Person-years contribution by age
-ax = axes[1, 0]
-age_groups = ['0-5', '5-15', '15-30', '30-60', '60-80', '80+']
-age_ranges = [(0, 5), (5, 15), (15, 30), (30, 60), (60, 80), (80, 121)]
-person_years = []
-for start, end in age_ranges:
-    mask = (ages >= start) & (ages < end)
-    person_years.append(Lx[mask].sum())
-
-colors = plt.cm.viridis(np.linspace(0, 1, len(age_groups)))
-bars = ax.bar(age_groups, person_years, color=colors, edgecolor='black', linewidth=1.5)
-ax.set_ylabel('Person-Years in Cohort', fontsize=11)
-ax.set_title('Life Table: Person-Years by Age Group', fontsize=12, fontweight='bold')
-ax.grid(alpha=0.3, axis='y')
-
-# Add values on bars
-for bar in bars:
-    height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2., height,
-           f'{height:.0f}', ha='center', va='bottom', fontsize=9)
-
-# Plot 4: Life expectancy gains by cause
-ax = axes[1, 1]
-causes_sorted = sorted(ex_by_cause.items(), 
-                      key=lambda x: x[1] - ex[0], reverse=True)
-causes_names = [c[0] for c in causes_sorted]
-gains = [c[1] - ex[0] for c in causes_sorted]
-
-colors = plt.cm.RdYlGn(np.linspace(0.2, 0.8, len(causes_names)))
-bars = ax.barh(causes_names, gains, color=colors, edgecolor='black', linewidth=1.5)
-ax.set_xlabel('Years of Life Expectancy Gained', fontsize=11)
-ax.set_title('Impact of Eliminating Each Cause of Death', fontsize=12, fontweight='bold')
-ax.grid(alpha=0.3, axis='x')
-
-for i, (bar, gain) in enumerate(zip(bars, gains)):
-    ax.text(gain, bar.get_y() + bar.get_height()/2.,
-           f' {gain:.2f}y', va='center', fontsize=9)
-
-plt.tight_layout()
-plt.savefig('life_expectancy_analysis.png', dpi=300, bbox_inches='tight')
-plt.show()
-```
-
-## 6. Challenge Round
-When life expectancy misleads:
-- **Averaging fallacy**: e₀ = 75 doesn't mean "most people die at 75"; bimodal distribution hides child/elder survival
-- **Selection bias**: Life insurance applicant pool has e₀ ≈ 5-10 years higher than population
-- **Aging cohort**: Population ages → e₀ stays flat despite mortality improvements (period effect masking)
-- **Projection hubris**: Assuming 1.5% annual improvement forever; historical shocks unpredictable
-- **Cause elimination unrealistic**: Eliminating cancer might shift deaths to another cause; not pure gain
-
-## 7. Key References
-- [Human Mortality Database](https://www.mortality.org/) - International life expectancy data
-- [Life Table Construction (Actuarial Mathematics by Bowers et al.)](https://www.soa.org/) - Technical methods
-- [WHO Global Health Observatory](https://www.who.int/data/gho) - Health life expectancy (HALE)
-
----
-**Status:** Key demographic metric | **Complements:** Mortality Tables, Survival Probability, Pension Valuation

@@ -1,302 +1,116 @@
-# Survival Probability
+﻿# Survival Probability
 
-## 1. Concept Skeleton
-**Definition:** Probability ₚₓ that person age x survives p additional years; cumulative survival measure  
-**Purpose:** Quantify longevity risk, price life insurance and annuities, project life expectancy, assess population health  
-**Prerequisites:** Force of mortality, life tables, conditional probability, survival functions
+## Concept Skeleton
+**Definition:** Survival Probability is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Measure | Survival ₚₓ | Mortality qₓ | Force μₓ |
-|---------|------------|-------------|---------|
-| **Definition** | P(live x→x+p) | P(death in [x, x+p)) | Instantaneous death rate |
-| **Relationship** | ₚₓ + ₚqₓ = 1 | ₚqₓ = 1 - ₚₓ | ₚₓ = exp(-∫₀ᵖ μ_{x+t} dt) |
-| **Domain** | [0, 1]; increasing in p | [0, 1]; increasing in p | ℝ₊; usually increasing with age |
-| **Typical Use** | Annuity pricing, life expectancy | Insurance premium, reserve | Mortality model fitting |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-Male age 30: ₁₀p₃₀ = 0.99 (99% chance of reaching 40); applies to life insurance underwriting
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Assuming constant survival ₚₓ = 0.95 across all ages: Reality shows ₚₓ drops sharply after age 75; constant assumption causes mispricing
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-Truncated life table (data only to age 110): ₚₓ = 0 for x > 110; forces assumption of ultimate rate for projections beyond table
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Survival Probability | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Survival Probability Structure:
-├─ Definition & Axioms:
-│   ├─ ₚₓ = P(Tₓ > p) where Tₓ = remaining lifetime
-│   ├─ ₀pₓ = 1 (always survive 0 years)
-│   ├─ ₘ₊ₙpₓ = ₘpₓ · ₙp_{x+m} (chain rule)
-│   └─ ₚₓ + ₚqₓ = 1 (exhaustive)
-├─ Relationship to Other Functions:
-│   ├─ From qₓ: ₚₓ = ∏ᵢ₌₀^{p-1} (1 - q_{x+i})  [discrete]
-│   ├─ From μₓ: ₚₓ = exp(-∫₀ᵖ μ_{x+t} dt)  [continuous]
-│   ├─ Life table: ₚₓ = l_{x+p} / lₓ
-│   └─ Survival curve: Sₓ(p) = ₚₓ
-├─ Empirical Calculation:
-│   ├─ 1. Obtain life table: lₓ at each age
-│   ├─ 2. Compute p-year survival: ₚₓ = l_{x+p} / lₓ
-│   ├─ 3. Interpolate for fractional ages (Karup-King, Beers)
-│   └─ 4. Aggregate for cohorts/groups (stratified survival)
-├─ Adjustment Factors:
-│   ├─ Health status: Non-smoker surcharge ↑ 5-10% vs smoker
-│   ├─ Occupation: Hazardous jobs ↓ 2-5% mortality loading
-│   ├─ Underwriting class: Preferred/standard/substandard
-│   └─ Impairment ratings: Individual health conditions adjust table rates
-└─ Parametric Models:
-    ├─ Gompertz: ₚₓ = exp[-B/C · (e^{C(x+p)} - e^{Cx})]
-    ├─ Weibull: ₚₓ = exp[-(λ(x+p))^k + (λx)^k]
-    └─ Lee-Carter: ₚₓ(t) parametrized by stochastic κₜ
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Survival Probability.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-**Interaction:** Life table → Calculate ₚₓ → Apply adjustments → Price products
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Survival Probability.
 
-## 5. Mini-Project
-Calculate survival probabilities, life expectancy, and cohort survival tables:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-# 1. CREATE LIFE TABLE from qx
-# Using realistic mortality rates (US male-like)
-ages = np.arange(0, 121)
-qx_base = np.array([
-    0.00714, 0.00055, 0.00040, 0.00032, 0.00029,  # Ages 0-4
-    0.00028, 0.00027, 0.00027, 0.00028, 0.00030,  # Ages 5-9
-    0.00033, 0.00038, 0.00048, 0.00065, 0.00090,  # Ages 10-14
-    0.00124, 0.00166, 0.00214, 0.00261, 0.00297,  # Ages 15-19
-    0.00311, 0.00311, 0.00307, 0.00301, 0.00295,  # Ages 20-24
-] + list(np.linspace(0.00295, 0.05, 96)))  # Extend to age 120
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# Pad to 121 ages
-qx = np.zeros(121)
-qx[:len(qx_base)] = qx_base
-qx[len(qx_base):] = 0.99999  # Force death by ultimate age
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-radix = 100000  # Starting population
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-# Build life table
-lx = np.zeros(121)
-dx = np.zeros(121)
-px = np.zeros(120)  # p-year survival (one-year for simplicity)
-Lx = np.zeros(121)  # Person-years lived
-Tx = np.zeros(121)  # Total remaining person-years
-ex = np.zeros(121)  # Life expectancy
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-lx[0] = radix
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-for x in range(120):
-    dx[x] = lx[x] * qx[x]
-    lx[x + 1] = lx[x] - dx[x]
-    px[x] = lx[x + 1] / lx[x]
-    
-    # Approximate person-years (assume deaths occur mid-year)
-    Lx[x] = (lx[x] + lx[x + 1]) / 2
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Survival Probability outputs in pricing, reserving, and solvency workflows.
 
-lx[120] = 0
-Lx[120] = 0
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-# Calculate Tx (cumulative person-years)
-Tx = np.zeros(121)
-for x in range(119, -1, -1):
-    Tx[x] = Lx[x] + Tx[x + 1]
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-# Life expectancy
-ex = np.where(lx > 0, Tx / lx, 0)
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Create life table DataFrame
-life_table = pd.DataFrame({
-    'Age': ages,
-    'lx': lx,
-    'dx': dx,
-    'qx': qx,
-    'px': np.concatenate([px, [0]]),
-    'Lx': Lx,
-    'Tx': Tx,
-    'ex': ex
-})
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("LIFE TABLE (sample ages):")
-print(life_table[life_table['Age'].isin([0, 20, 40, 60, 80, 100])].to_string(index=False))
-print()
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 2. MULTI-YEAR SURVIVAL PROBABILITIES
-def calculate_px(start_age, years, px_single):
-    """Calculate p-year survival using chain rule"""
-    prob = 1.0
-    for year in range(years):
-        if start_age + year < len(px_single):
-            prob *= px_single[start_age + year]
-        else:
-            prob = 0
-            break
-    return prob
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Create matrix of p-year survival
-max_p = 50
-px_matrix = np.zeros((len(ages), max_p))
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-for x in range(len(ages) - max_p):
-    for p in range(max_p):
-        px_matrix[x, p] = calculate_px(x, p, px)
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("MULTI-YEAR SURVIVAL (selected ages):")
-print("Age\t1-Year\t5-Year\t10-Year\t25-Year\t50-Year")
-for age in [20, 40, 60, 80]:
-    print(f"{age}\t{px_matrix[age, 1]:.4f}\t{px_matrix[age, 5]:.4f}\t" +
-          f"{px_matrix[age, 10]:.4f}\t{px_matrix[age, 25]:.4f}\t{px_matrix[age, 50]:.4f}")
-print()
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 3. ADJUSTMENT FOR HEALTH STATUS / MORTALITY CLASS
-# Define mortality multipliers for different groups
-adjustments = {
-    'Preferred Non-Smoker': 0.85,   # 15% lower mortality
-    'Standard Non-Smoker': 1.00,    # Baseline
-    'Standard Smoker': 1.30,        # 30% higher mortality
-    'Substandard': 1.50             # 50% higher mortality
-}
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Apply to survival probabilities
-px_adjusted = {}
-for group, factor in adjustments.items():
-    # Adjusted qx = min(1, factor * qx)
-    qx_adj = np.minimum(1.0, factor * qx)
-    px_group = np.zeros(120)
-    for x in range(120):
-        px_group[x] = 1 - qx_adj[x]
-    px_adjusted[group] = px_group
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Calculate 10-year survival for each group at age 40
-print("IMPACT OF MORTALITY CLASS (10-year survival from age 40):")
-for group, px_group in px_adjusted.items():
-    survival_10yr = calculate_px(40, 10, px_group)
-    print(f"{group:30s}: {survival_10yr:.4f}")
-print()
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 4. COHORT ANALYSIS
-# Track specific birth cohort through time
-birth_cohort_1950 = life_table[life_table['Age'] == 0]['ex'].values[0]
-cohort_ages = ages[:101]
-cohort_survival = lx[:101] / radix
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"COHORT ANALYSIS (Birth Cohort 1950):")
-print(f"Life expectancy at birth: {birth_cohort_1950:.1f} years")
-print(f"Probability of reaching:")
-for target_age in [25, 50, 75, 100]:
-    surv_prob = lx[target_age] / radix
-    print(f"  Age {target_age}: {surv_prob:.4f} ({surv_prob*100:.2f}%)")
-print()
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 5. INTERPOLATION FOR FRACTIONAL AGES
-# Using Karup-King formula for smooth interpolation
-def karup_king_interpolation(x_int, lx_table):
-    """Karup-King formula for fractional age interpolation"""
-    x_lower = int(x_int)
-    frac = x_int - x_lower
-    
-    if x_lower < 0 or x_lower + 3 >= len(lx_table):
-        return np.nan
-    
-    l0, l1, l2, l3 = lx_table[x_lower:x_lower+4]
-    
-    # Karup-King interpolation formula
-    coeff = (frac * (frac - 1) * (frac - 2)) / 6
-    lx_frac = l1 + frac * (l2 - l1) + coeff * (l3 - l0 + 3*l1 - 3*l2)
-    return lx_frac
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Calculate survival for fractional ages
-fractional_ages = np.array([40.0, 40.25, 40.5, 40.75, 41.0])
-print("FRACTIONAL AGE SURVIVAL (Karup-King interpolation):")
-print("Age\t\tlx\t\tpx")
-for frac_age in fractional_ages:
-    lx_frac = karup_king_interpolation(frac_age, lx)
-    px_frac = karup_king_interpolation(frac_age + 1, lx) / lx_frac if lx_frac > 0 else 0
-    print(f"{frac_age:.2f}\t\t{lx_frac:.0f}\t\t{px_frac:.6f}")
-print()
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 6. VISUALIZATION
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 1: Life table curves
-ax = axes[0, 0]
-ax.plot(ages, lx/radix, linewidth=2.5, color='darkblue', label='lx / radix')
-ax.fill_between(ages, 0, lx/radix, alpha=0.2, color='blue')
-ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Proportion Surviving', fontsize=11)
-ax.set_title('Life Table: Survivors by Age', fontsize=12, fontweight='bold')
-ax.grid(alpha=0.3)
-ax.legend(fontsize=10)
-ax.set_ylim([0, 1.05])
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 2: Mortality and survival rates
-ax = axes[0, 1]
-ax_dual = ax.twinx()
-ax.semilogy(ages[:-1], qx[:-1], 'r-', linewidth=2, label='qx (mortality)')
-ax_dual.plot(ages[:-1], px, 'b-', linewidth=2, label='px (survival)')
-ax.set_xlabel('Age', fontsize=11)
-ax.set_ylabel('Mortality qx (log scale)', fontsize=11, color='r')
-ax_dual.set_ylabel('Survival px', fontsize=11, color='b')
-ax.set_title('Mortality vs Survival Rates', fontsize=12, fontweight='bold')
-ax.tick_params(axis='y', labelcolor='r')
-ax_dual.tick_params(axis='y', labelcolor='b')
-ax.grid(alpha=0.3)
-ax.set_ylim([1e-4, 1])
+Operational detail for Survival Probability: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 3: Multi-year survival heatmap
-ax = axes[1, 0]
-im = ax.imshow(px_matrix[::5, :30].T, aspect='auto', cmap='RdYlGn', origin='lower')
-ax.set_xlabel('Age (every 5 years)', fontsize=11)
-ax.set_ylabel('Years Ahead (p)', fontsize=11)
-ax.set_title('Survival Probability Heatmap (pₓ)', fontsize=12, fontweight='bold')
-cbar = plt.colorbar(im, ax=ax)
-cbar.set_label('Probability', fontsize=10)
-
-# Plot 4: Mortality class comparison
-ax = axes[1, 1]
-base_ages = ages[40:101]
-for group in ['Preferred Non-Smoker', 'Standard Non-Smoker', 'Standard Smoker', 'Substandard']:
-    survival_curve = []
-    for p in range(1, 61):
-        surv_p = calculate_px(40, p, px_adjusted[group])
-        survival_curve.append(surv_p)
-    ax.plot(base_ages[:60], survival_curve, linewidth=2.5, marker='o', 
-            markersize=3, alpha=0.7, label=group)
-
-ax.set_xlabel('Age at evaluation: 40 + years ahead', fontsize=11)
-ax.set_ylabel('Cumulative Survival Probability', fontsize=11)
-ax.set_title('Impact of Mortality Class on Survival', fontsize=12, fontweight='bold')
-ax.legend(fontsize=9, loc='upper right')
-ax.grid(alpha=0.3)
-
-plt.tight_layout()
-plt.savefig('survival_probability_analysis.png', dpi=300, bbox_inches='tight')
-plt.show()
-
-# 7. LIFE EXPECTANCY DECOMPOSITION
-print("LIFE EXPECTANCY BY AGE:")
-print("Age\tLife Expectancy (years)")
-for age in [0, 20, 40, 60, 80]:
-    print(f"{age}\t{ex[age]:.1f}")
-```
-
-## 6. Challenge Round
-When survival probabilities are unreliable:
-- **Selection bias**: Insurance applicants healthier than general population; table rates too pessimistic
-- **Mortality improvements**: Historical data shows 1-2% annual improvement; static table ages poorly
-- **Pandemic/crisis**: 2020 COVID spikes broke all historical models; use dynamic scenario analysis
-- **Small populations**: Few deaths in subgroup (smokers <30); high estimation error; credibility weighting needed
-- **Competing risks**: Person-years lost to migration/lapse affects denominator; use multi-decrement tables
-
-## 7. Key References
-- [Life Table Construction (Human Mortality Database)](https://www.mortality.org/) - Empirical survival data
-- [Survival Analysis Fundamentals (Kleinbaum & Klein)](https://www.springer.com/) - Statistical methods
-- [Kaplan-Meier Estimator (Wikipedia)](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator) - Non-parametric survival
-
----
-**Status:** Foundational actuarial metric | **Complements:** Life Expectancy, Mortality Tables, Life Insurance Pricing

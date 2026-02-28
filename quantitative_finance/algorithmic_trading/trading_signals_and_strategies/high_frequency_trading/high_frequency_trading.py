@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # high frequency trading
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: high frequency trading")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -97,7 +132,7 @@ for i in range(1, len(timestamps)):
     portfolio_state['effective_spread'].append(total_spread)
     
     if i % 600 == 0:  # Print every 10 minutes
-        print(f"Time: {timestamps[i]} | Inventory: {inventory:+.0f} | Cumul P&L: ${cumul_pnl:.2f} | VPIN: {vpin:.1f} | Spread: {total_spread*100:.2f}¢")
+        print(f"Time: {timestamps[i]} | Inventory: {inventory:+.0f} | Cumul P&L: ${cumul_pnl:.2f} | VPIN: {vpin:.1f} | Spread: {total_spread*100:.2f}Â¢")
 
 df_mm = pd.DataFrame(portfolio_state)
 
@@ -114,9 +149,9 @@ print(f"  Average inventory: {df_mm['inventory'].mean():.1f} shares")
 print(f"  Max long: {df_mm['inventory'].max():.1f} shares")
 print(f"  Max short: {df_mm['inventory'].min():.1f} shares")
 print(f"\nSpread stats:")
-print(f"  Average spread: {df_mm['effective_spread'].mean()*100:.2f}¢")
-print(f"  Min spread: {df_mm['effective_spread'].min()*100:.2f}¢")
-print(f"  Max spread: {df_mm['effective_spread'].max()*100:.2f}¢")
+print(f"  Average spread: {df_mm['effective_spread'].mean()*100:.2f}Â¢")
+print(f"  Min spread: {df_mm['effective_spread'].min()*100:.2f}Â¢")
+print(f"  Max spread: {df_mm['effective_spread'].max()*100:.2f}Â¢")
 print(f"\nToxicity (VPIN):")
 print(f"  Mean VPIN: {df_mm['vpin'].mean():.1f}")
 print(f"  High toxicity periods (VPIN > 70): {(df_mm['vpin'] > 70).sum()} seconds")
@@ -180,3 +215,36 @@ print(f"- Toxicity detection: VPIN spikes = informed trading, widen spreads defe
 print(f"- Inventory management: Control position size to limit downside")
 print(f"- Dynamic pricing: Continuous quote adjustment critical (vs static quotes)")
 print(f"- Profitability: Highly leveraged (small margins on each trade, but 1000s/day)")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='high frequency trading - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

@@ -1,302 +1,114 @@
-# Force of Mortality
+﻿# Force Of Mortality
 
-## 1. Concept Skeleton
-**Definition:** Instantaneous rate of death μₓ at age x; continuous hazard function measuring force per unit time  
-**Purpose:** Model age-dependent death intensity, fit parametric mortality laws, project future survival probabilities  
-**Prerequisites:** Survival functions, probability density, hazard rates, continuous distributions
+## Concept Skeleton
+**Definition:** Force Of Mortality is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Approach | Force of Mortality (μₓ) | Probability qₓ | Survival Sₓ |
-|----------|-------------------------|----------------|------------|
-| **Definition** | Instantaneous death rate | Probability of death in [x, x+1) | Cumulative survival to x |
-| **Domain** | Continuous; per year infinitesimal | Discrete; annual probability | Cumulative 0→x |
-| **Relationship** | μₓ = -d(ln Sₓ)/dx | qₓ ≈ μₓ (for small intervals) | Sₓ = exp(-∫μₜdt) |
-| **Use Case** | Analytical mortality models | Life table calculation | Age-specific survival |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-Gompertz law μₓ = 0.0001·1.1^x fits human mortality well; force increases exponentially with age
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Constant force μₓ = 0.05 (unrealistic): Predicts same death rate at age 20 and 80; doesn't capture age structure
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-Makeham law μₓ = A + B·C^x: Small constant A captures accidents/random deaths (independent of age), exponential BC^x for senescence
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Force Of Mortality | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Force of Mortality Structure:
-├─ Definition & Relationships:
-│   ├─ μₓ = lim(Δt→0) q_{x,Δt} / Δt
-│   ├─ Sₓ(t) = exp(-∫₀^t μ_{x+u} du)
-│   ├─ qₓ = 1 - exp(-∫₀^1 μ_{x+u} du)
-│   └─ ₚₓ = exp(-∫₀^p μ_{x+u} du)  [survival p years]
-├─ Parametric Models:
-│   ├─ Exponential: μₓ = λ (constant, unrealistic)
-│   ├─ Gompertz: μₓ = Ae^{Bx} (best fit adult mortality)
-│   ├─ Makeham: μₓ = A + Be^{Cx} (adds accident rate A)
-│   ├─ Weibull: μₓ = λk(x)^{k-1} (flexible shape)
-│   └─ Lee-Carter: μₓ(t) = e^{αₓ + βₓκₜ} (stochastic trend)
-├─ Estimation:
-│   ├─ Maximum Likelihood: From life table deaths dₓ, exposures Eₓ
-│   ├─ Graduation: Smooth empirical ₚₓ to parametric curve
-│   ├─ Whittaker-Henderson: Penalized likelihood with smoothness
-│   └─ Kernel Smoothing: Non-parametric local averaging
-└─ Validation:
-    ├─ Goodness-of-Fit: Chi-square on observed vs expected deaths
-    ├─ Residual Analysis: Age-standardized deviations
-    └─ Forecasting Backtests: Compare 5-year-ahead predictions to actual
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Force Of Mortality.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-**Interaction:** Life table dₓ → Estimate μₓ → Fit curve → Project future → Validate forecast
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Force Of Mortality.
 
-## 5. Mini-Project
-Estimate force of mortality using parametric and non-parametric methods:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.optimize import minimize
-from scipy.interpolate import interp1d
-from scipy.stats import chi2
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-# Simulated life table data (ages 0-100)
-ages = np.arange(0, 101)
-# Use Gompertz-Makeham parameters for realistic mortality
-A = 0.0001  # Accident component
-B = 0.00035  # Senescence coefficient
-C = 1.075   # Age factor
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# True force of mortality
-mu_true = A + B * np.exp(C * ages)
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-# Generate life table: Start with 100,000 and apply force
-lx = np.zeros(101)
-lx[0] = 100000
-dx = np.zeros(101)
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-for x in range(100):
-    # Approximate qx from mu using: qx ≈ mu_x for small values
-    # More accurate: qx = 1 - exp(-mu_x)
-    qx = 1 - np.exp(-mu_true[x])
-    dx[x] = lx[x] * qx
-    lx[x+1] = lx[x] - dx[x]
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-# Calculate empirical qx
-qx_empirical = dx[:-1] / lx[:-1]
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-# Convert to empirical mu (force of mortality)
-mu_empirical = -np.log(1 - qx_empirical)
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Force Of Mortality outputs in pricing, reserving, and solvency workflows.
 
-# 1. PARAMETRIC FITTING: Gompertz-Makeham
-def gompertz_makeham(x, params):
-    A, B, C = params
-    return A + B * np.exp(C * x)
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-def negative_likelihood_gm(params, ages_data, dx_data, lx_data):
-    """Negative log-likelihood for Gompertz-Makeham"""
-    A, B, C = params
-    
-    # Avoid invalid parameters
-    if A < 0 or B < 0 or C < 0 or A + B > 1:
-        return 1e10
-    
-    mu = A + B * np.exp(C * ages_data)
-    qx = 1 - np.exp(-mu)
-    
-    # Ensure qx is in (0, 1)
-    qx = np.clip(qx, 1e-10, 1-1e-10)
-    
-    # Log-likelihood: deaths follow binomial
-    ll = np.sum(dx_data * np.log(qx) + (lx_data - dx_data) * np.log(1 - qx))
-    return -ll
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-# Fit on ages 20-95 (avoid extreme ages with sparse data)
-mask = (ages >= 20) & (ages <= 95)
-ages_fit = ages[mask]
-dx_fit = dx[mask]
-lx_fit = lx[mask]
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Initial guess
-p0 = [0.0001, 0.0002, 1.07]
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-result_gm = minimize(negative_likelihood_gm, p0, 
-                     args=(ages_fit, dx_fit, lx_fit),
-                     method='Nelder-Mead')
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-params_gm = result_gm.x
-A_est, B_est, C_est = params_gm
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-mu_gm_fitted = gompertz_makeham(ages, params_gm)
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("GOMPERTZ-MAKEHAM PARAMETER ESTIMATES:")
-print(f"A (accident rate): {A_est:.6f} (true: {A:.6f})")
-print(f"B (senescence coeff): {B_est:.6f} (true: {B:.6f})")
-print(f"C (age factor): {C_est:.6f} (true: {C:.6f})")
-print(f"Negative Log-Likelihood: {result_gm.fun:.2f}\n")
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 2. PARAMETRIC FITTING: Gompertz only (2 parameters)
-def gompertz(x, params):
-    B, C = params
-    return B * np.exp(C * x)
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-def negative_likelihood_g(params, ages_data, dx_data, lx_data):
-    """Negative log-likelihood for Gompertz"""
-    B, C = params
-    
-    if B < 0 or C < 0 or B > 1:
-        return 1e10
-    
-    mu = B * np.exp(C * ages_data)
-    qx = 1 - np.exp(-mu)
-    qx = np.clip(qx, 1e-10, 1-1e-10)
-    
-    ll = np.sum(dx_data * np.log(qx) + (lx_data - dx_data) * np.log(1 - qx))
-    return -ll
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-p0_g = [0.0002, 1.07]
-result_g = minimize(negative_likelihood_g, p0_g,
-                   args=(ages_fit, dx_fit, lx_fit),
-                   method='Nelder-Mead')
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-params_g = result_g.x
-mu_g_fitted = gompertz(ages, params_g)
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("GOMPERTZ PARAMETER ESTIMATES (2-param):")
-print(f"B (coeff): {params_g[0]:.6f} (true B: {B:.6f})")
-print(f"C (factor): {params_g[1]:.6f} (true C: {C:.6f})")
-print(f"Negative Log-Likelihood: {result_g.fun:.2f}\n")
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 3. NON-PARAMETRIC: Kernel smoothing (Epanechnikov kernel)
-def kernel_smooth_mu(ages, mu_empirical, bandwidth=3):
-    """Non-parametric smoothing of force of mortality"""
-    mu_smooth = np.zeros_like(ages, dtype=float)
-    
-    for i, x in enumerate(ages):
-        # Epanechnikov kernel: K(u) = 0.75(1 - u²) for |u| ≤ 1
-        distances = np.abs(ages - x)
-        u = distances / bandwidth
-        
-        # Apply kernel
-        kernel_weights = np.where(u <= 1, 0.75 * (1 - u**2), 0)
-        kernel_weights /= kernel_weights.sum()  # Normalize
-        
-        mu_smooth[i] = np.sum(kernel_weights * mu_empirical)
-    
-    return mu_smooth
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-mu_kernel = kernel_smooth_mu(ages, mu_empirical, bandwidth=3)
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 4. GOODNESS-OF-FIT TEST
-def chi_square_gof(observed, expected):
-    """Chi-square goodness-of-fit test"""
-    # Combine small expected cells
-    chi2_stat = np.sum((observed - expected)**2 / np.maximum(expected, 1))
-    df = len(observed) - 1
-    p_value = 1 - chi2.cdf(chi2_stat, df)
-    return chi2_stat, p_value, df
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Expected deaths under fitted model
-qx_gm_fitted = 1 - np.exp(-mu_gm_fitted)
-dx_gm_expected = lx * qx_gm_fitted
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Chi-square (on ages 20-95)
-mask_chi2 = (ages >= 20) & (ages <= 95)
-obs = dx[mask_chi2]
-exp = dx_gm_expected[mask_chi2]
-chi2_stat, p_val, df = chi_square_gof(obs, exp)
+Operational detail for Force Of Mortality: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"GOODNESS-OF-FIT TEST (Gompertz-Makeham):")
-print(f"Chi-square statistic: {chi2_stat:.2f}")
-print(f"Degrees of freedom: {df}")
-print(f"P-value: {p_val:.4f}")
-print(f"Conclusion: {'Good fit' if p_val > 0.05 else 'Poor fit'}\n")
-
-# 5. VISUALIZATION
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-
-# Plot 1: Force of mortality curves
-ax = axes[0, 0]
-ax.plot(ages, mu_true, 'k--', linewidth=2.5, label='True (Gompertz-Makeham)')
-ax.plot(ages, mu_empirical, 'o', markersize=4, alpha=0.5, label='Empirical (from qx)')
-ax.plot(ages, mu_gm_fitted, 'r-', linewidth=2, label='Fitted Gompertz-Makeham')
-ax.plot(ages, mu_g_fitted, 'b-', linewidth=2, label='Fitted Gompertz')
-ax.plot(ages, mu_kernel, 'g--', linewidth=2, label='Kernel Smoothing')
-ax.set_xlabel('Age (x)', fontsize=11)
-ax.set_ylabel('Force of Mortality μₓ', fontsize=11)
-ax.set_title('Force of Mortality: True vs Fitted', fontsize=12, fontweight='bold')
-ax.set_ylim([0, 0.3])
-ax.legend(fontsize=9)
-ax.grid(alpha=0.3)
-
-# Plot 2: Log scale (better visualization)
-ax = axes[0, 1]
-ax.semilogy(ages, mu_true, 'k--', linewidth=2.5, label='True')
-ax.semilogy(ages, mu_empirical, 'o', markersize=4, alpha=0.5, label='Empirical')
-ax.semilogy(ages, mu_gm_fitted, 'r-', linewidth=2, label='Gompertz-Makeham')
-ax.semilogy(ages, mu_kernel, 'g--', linewidth=2, label='Kernel')
-ax.set_xlabel('Age (x)', fontsize=11)
-ax.set_ylabel('Force of Mortality μₓ (log scale)', fontsize=11)
-ax.set_title('Force of Mortality (Log Scale)', fontsize=12, fontweight='bold')
-ax.legend(fontsize=9)
-ax.grid(alpha=0.3, which='both')
-
-# Plot 3: Residuals (observed - expected deaths)
-ax = axes[1, 0]
-residuals = dx - dx_gm_expected
-residuals_std = residuals / np.sqrt(np.maximum(dx_gm_expected, 1))
-ax.scatter(ages[mask_chi2], residuals_std[mask_chi2], alpha=0.6, s=40)
-ax.axhline(0, color='r', linestyle='--', linewidth=2)
-ax.axhline(2, color='orange', linestyle=':', linewidth=1.5, alpha=0.7, label='±2 SD')
-ax.axhline(-2, color='orange', linestyle=':', linewidth=1.5, alpha=0.7)
-ax.set_xlabel('Age (x)', fontsize=11)
-ax.set_ylabel('Standardized Residuals', fontsize=11)
-ax.set_title('Goodness-of-Fit: Residual Analysis', fontsize=12, fontweight='bold')
-ax.legend(fontsize=9)
-ax.grid(alpha=0.3)
-
-# Plot 4: Survival probability (derived from μ)
-ax = axes[1, 1]
-# Calculate survival from fitted models
-Sx_true = np.exp(-np.cumsum(mu_true))
-Sx_gm = np.exp(-np.cumsum(mu_gm_fitted))
-Sx_kernel = np.exp(-np.cumsum(mu_kernel))
-
-ax.plot(ages, Sx_true, 'k--', linewidth=2.5, label='True survival')
-ax.plot(ages, Sx_gm, 'r-', linewidth=2, label='From GM fitted μ')
-ax.plot(ages, Sx_kernel, 'g--', linewidth=2, label='From kernel μ')
-ax.set_xlabel('Age (x)', fontsize=11)
-ax.set_ylabel('Survival Probability Sₓ', fontsize=11)
-ax.set_title('Derived Survival Curves', fontsize=12, fontweight='bold')
-ax.legend(fontsize=9)
-ax.grid(alpha=0.3)
-
-plt.tight_layout()
-plt.savefig('force_of_mortality_analysis.png', dpi=300, bbox_inches='tight')
-plt.show()
-
-# 6. PROJECTION DEMONSTRATION
-print("MORTALITY PROJECTION (5 years forward):")
-print("Age\tTrue μₓ\tEstimated μₓ\tError")
-print("-" * 50)
-for age in [30, 50, 70, 90]:
-    idx = age
-    print(f"{age}\t{mu_true[idx]:.5f}\t{mu_gm_fitted[idx]:.5f}\t{abs(mu_true[idx] - mu_gm_fitted[idx]):.5f}")
-```
-
-## 6. Challenge Round
-When force of mortality models fail:
-- **Cohort effects**: Gompertz-Makeham ignores generation-specific mortality improvements; use Lee-Carter or stochastic models
-- **Young ages**: Infant/juvenile mortality has U-shape (Heligman-Pollard needed), not monotonic
-- **Pandemic/war**: Force spikes unpredictably; historical data useless, scenario analysis required
-- **Very old ages (95+)**: Sparse data, selection bias (healthy survivors); bootstrap confidence intervals wider
-- **Heterogeneity**: Smokers, non-smokers different hazards; need stratified models or frailty terms
-
-## 7. Key References
-- [Actuarial Mathematics (Bowers et al.)](https://www.soa.org/) - Life contingencies fundamentals
-- [Gompertz-Makeham Law (Wikipedia)](https://en.wikipedia.org/wiki/Gompertz%E2%80%93Makeham_law_of_mortality) - Parametric models
-- [Lee-Carter Model (CMI Longevity)](https://www.cmi.ac.uk/) - Stochastic mortality projection
-
----
-**Status:** Foundational actuarial model | **Complements:** Survival Analysis, Life Tables, Mortality Laws

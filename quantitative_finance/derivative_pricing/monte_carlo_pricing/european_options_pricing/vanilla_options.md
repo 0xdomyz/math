@@ -1,12 +1,11 @@
-# Vanilla Options
+﻿# Vanilla Options
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Standard European and American call and put options with simple linear payoff functions, representing the most liquid and widely-traded derivative instruments in global markets.  
 **Purpose:** Hedge price risk, speculate on directional moves, implement spread strategies, foundational building blocks for structured products, primary benchmarks for model validation  
 **Prerequisites:** Option payoff functions, moneyness concepts, call-put parity, exercise styles, market conventions
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Characteristic | European Call | European Put | American Call | American Put |
 |---|---|---|---|---|
 | **Exercise Timing** | At T only | At T only | Any time ≤ T | Any time ≤ T |
@@ -18,8 +17,7 @@
 | **Bid-Ask Spread** | $0.01-0.05 | $0.01-0.05 | $0.05-0.20 | $0.05-0.20 |
 | **Market Size** | Trillions | Trillions | Billions | Billions |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Long Call Strategy**  
 Buy call: K=100, premium C=$5. Scenarios at maturity:
 - S_T = 90: Payoff = 0, Loss = -$5 (premium)
@@ -32,8 +30,7 @@ Sell call: K=100, receive $5 premium. Obligated to deliver stock at 100 even if 
 **Edge Case: At-the-Money (ATM) Options**  
 S = K: Both call and put have maximum time value (peak theta decay). ATM options are most sensitive to volatility changes (gamma highest here). Traders use ATM options for volatility plays; selling ATM strangles (sell call + put) profits if realized vol < implied vol.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Vanilla Options Framework:
 ├─ Market Structure:
@@ -92,8 +89,7 @@ Vanilla Options Framework:
 
 **Interaction:** Vanilla option value driven by (S, K, T, σ, r, q); Greeks describe sensitivities; market prices determine implied vol surface.
 
-## 5. Mini-Project
-
+## Challenge Round
 Analyze vanilla options across strikes and strategies; price, Greeks, portfolio construction:
 
 ```python
@@ -376,8 +372,7 @@ print("\n\nPlot saved: vanilla_options_analysis.png")
 - **Greeks:** Call delta increases with strikes; gamma peaks ATM (highest sensitivity)
 - **Smile:** IV varies by K; important for portfolio pricing accuracy
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why are vanilla equity options the most liquid financial instruments after bonds and FX?**  
 A: (1) **Standardized contracts**: listed exchanges (CBOE) guarantee settlement, enable clearing. (2) **High leverage**: small premium controls large notional (attract speculators). (3) **Two-sided market**: hedgers (downside insurance) meet speculators (directional bets); supply/demand balanced. (4) **Foundation for complex products**: structured notes, exotics all built from vanilla vanilla pricing models. (5) **Risk management essential**: every equity trader hedges with options. Volume: ~100M contracts/day on CBOE alone (notional $100B+).
 
@@ -396,8 +391,7 @@ A: **Equity skew pattern**: OTM puts (downside) have higher IV than ATM, which h
 **Q6: Why are American vanilla options rarely exercised before expiry, but American vanilla puts sometimes are?**  
 A: **American calls**: Early exercise only if dividend benefit > time value cost. Most stocks pay low dividends; time value too high. Exception: deep ITM calls on high-dividend stocks (10%+ yield). **American puts**: Early exercise rational when (a) deep ITM (intrinsic >> time value), (b) high interest rates (early receipt of K @ compound benefit), (c) low time value remaining (close to expiry). Example: put K=100, S=60, r=10%, T=10 days. Immediate exercise: receive $100 (invest @ 10% → $100 * e^{0.1*10/365} ≈ $100.27). Waiting: risk stock rises (less than $100 payoff). Arbitrage-free premium boundary: American put value ≥ max(K - S, BS_european_put).
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Vanilla Option](https://en.wikipedia.org/wiki/Vanilla_option) — Definition, types, examples, market structure
 - [CBOE: Options Education](https://www.cboe.com/trading-learn/options-education/) — Market data, strategies, tools
 - [Wikipedia: Call Option](https://en.wikipedia.org/wiki/Call_option) & [Put Option](https://en.wikipedia.org/wiki/Put_option) — Definitions, payoffs, valuation

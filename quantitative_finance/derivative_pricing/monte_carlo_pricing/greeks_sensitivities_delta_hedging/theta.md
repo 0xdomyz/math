@@ -1,12 +1,11 @@
-# Theta
+﻿# Theta
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** The first derivative of option price with respect to time (θ = ∂C/∂t or -∂C/∂τ where τ is time-to-maturity), measuring the rate of decay of option value as expiration approaches.  
 **Purpose:** Quantify time decay effects, optimize holding periods for options, profit from time decay without market moves, measure daily P&L from calendar effects, balance theta income vs gamma loss in hedged portfolios  
 **Prerequisites:** Option pricing, time value concepts, extrinsic value decay, option strategies, portfolio rebalancing
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Long Call/Put | Short Call/Put | Long Straddle | Short Straddle | Out-of-Money | At-the-Money | In-the-Money |
 |--------|---------------|----------------|---------------|----------------|--------------|--------------|--------------|
 | **Theta** | θ < 0 (decay) | θ > 0 (benefit) | θ < 0 | θ > 0 | Lower \|θ\| | Peak \|θ\| | Lower \|θ\| |
@@ -15,8 +14,7 @@
 | **Rebalancing Need** | Frequent (gamma) | Frequent (gamma) | High (gamma swing) | High | Low | High (ATM sensitivity) | Low |
 | **Breakeven Move** | Large | Small (premium) | Large (collect decay) | Small | Likely out-of-money | 50/50 chance | Likely in-money |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Theta Decay**  
 Long call: K=100, S=100, T=1 day, σ=20%, r=5%, q=0. BS price ≈ $0.60 (mostly time value). Next day (T → 0): price → max(S - K, 0) = $0 if S ≤ K (entire $0.60 premium lost to theta). Even if S stays at 100, option worthless; theta = -$0.60/day. Loss crystallized purely from time passage.
 
@@ -26,8 +24,7 @@ Buy straddle (call + put): K=100, T=1month, premium = $5. Plan: "market will mov
 **Edge Case: Theta Inversion**  
 OTM call deep: S=80, K=100, T=1day. Theta minimal (option likely worthless, small decay). ITM call deep: S=120, K=100, T=1day. Theta also small (option is stock-like, time value minimal). Peak theta: ATM with ~30 days left → balance between rapid expiry and meaningful time value.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Theta Framework:
 ├─ Definition & Interpretation:
@@ -111,8 +108,7 @@ Theta Framework:
 
 **Interaction:** Theta benefits short positions (collect decay); conflicts with gamma (rehedging losses outweigh theta on large moves); interacts with dividends and rates.
 
-## 5. Mini-Project
-
+## Challenge Round
 Analyze theta decay; simulate covered call strategy; compare theta profiles:
 
 ```python
@@ -290,8 +286,7 @@ print("\nPlot saved: theta_analysis.png")
 - **Theta Peak:** ATM has maximum theta; wings negligible
 - **Acceleration:** Daily decay accelerates non-linearly as expiry approaches
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Call theta is typically negative, but put theta can be positive. Why does this asymmetry exist?**  
 A: Call theta formula: θ_C = -S σ e^{-qT} n(d1) / (2√T) + r K e^{-rT} N(d2) - q S e^{-qT} N(d1). First term (vol decay) always negative. Second term (discount rate benefit): positive for calls (K paid in future, discounted benefit increases as T shrinks). Third term (dividend drag): negative if q > 0. For ATM calls, vol decay dominates; for OTM calls, discount rate effect negligible. For puts, all three terms often balance; put theta often positive (especially for OTM puts) because discount rate effect benefits payers (sellers receive K now in put-put-forward).
 
@@ -310,8 +305,7 @@ A: Call theta includes dividend drag term: -q S e^{-qT} N(d1) < 0. Higher q → 
 **Q6: A calendar spread (long 1-month, short 1-week, same strike) is long theta. Explain the P&L.**  
 A: Short 1-week theta ≈ -$0.10/day (decays rapidly). Long 1-month theta ≈ -$0.03/day (slower decay). Net theta: short ≈ -$0.07/day (initially short, profile inverts as weeks pass). But 1-week expires first → short leg falls off, leaving long 1-month naked (now long theta if market moves). P&L: (1) first week: collect |−$0.07|=+$0.07/day theta (positive), (2) post-week-1: rebalance or close short leg, recalibrate. Max profit: same strike, both legs expire simultaneously (rare). Gamma risk: asymmetric; long-dated leg has low gamma, short-dated has high gamma → rehedging needed for directional moves.
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Theta (Finance)](https://en.wikipedia.org/wiki/Theta_(finance)) — Time decay definition, formulas
 - [Wikipedia: Greeks (Finance)](https://en.wikipedia.org/wiki/Greeks_(finance)) — Theta in context
 - Hull: *Options, Futures & Derivatives* (Chapter 19) — Greeks, theta profile, strategies

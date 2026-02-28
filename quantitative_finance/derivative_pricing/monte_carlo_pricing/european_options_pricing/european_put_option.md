@@ -1,12 +1,11 @@
-# European Put Option
+﻿# European Put Option
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** A financial derivative giving the holder the right, but not the obligation, to sell an underlying asset at a predetermined strike price K on a fixed expiration date T.  
 **Purpose:** Hedge downside risk (portfolio insurance), speculate on price declines, implement protective/synthetic strategies, shorting without borrowing  
 **Prerequisites:** Call-put parity, intrinsic vs time value, payoff functions, risk-neutral valuation
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | European Put | European Call | American Put | Barrier Put |
 |--------|--------------|---------------|--------------|-------------|
 | **Payoff at T** | max(K - S_T, 0) | max(S_T - K, 0) | Optimal early exercise | max(K - S_T, 0) × I(barrier) |
@@ -15,8 +14,7 @@
 | **Time Decay (θ)** | Typically positive | Typically negative | More positive (early ex) | Varies |
 | **Dividend Impact** | Increases value | Decreases value | Increases early ex incentive | Model-dependent |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 European put with K=100, S₀=100, T=1yr, σ=20%, r=5%:  
 - If S_T = 90: payoff = 10 (profit: exercise, sell at 100)
@@ -28,8 +26,7 @@ Hedging portfolio with out-of-the-money puts (K < S) on significant price drops.
 **Edge Case:**  
 Zero-dividend-paying bond (cash) put: As T → 0, European put value → max(K - S_T, 0) but American put can be exercised immediately for max(K - S_0, 0). European value < American value significantly near maturity when S near K.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 European Put Option Framework:
 ├─ Specification:
@@ -70,8 +67,7 @@ European Put Option Framework:
 
 **Interaction:** Put value increases with K and σ, decreases with S and r. Time decay reversed (θ often positive) due to insurance value. Optimal early exercise for American puts when deep ITM + high rates.
 
-## 5. Mini-Project
-
+## Challenge Round
 Price a European put using Black-Scholes and Monte Carlo; compare put-call parity:
 
 ```python
@@ -281,8 +277,7 @@ print("\nPlot saved: european_put_analysis.png")
 - **Parity Check:** Call - Put = S e^{-qT} - K e^{-rT} verified; useful for arbitrage detection
 - **Theta:** Often positive (time decay favors holder), especially for OTM puts
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why is the European put value always at least max(Ke^{-rT} - S, 0)?**  
 A: Lower bound from arbitrage. If P < max(Ke^{-rT} - S, 0), buy put and stock, borrow K at rate r. At maturity: exercise put (sell at K), repay Ke^{rT}. If S_T ≥ K: receive K, pay Ke^{rT}, loss = Ke^{rT} - K < 0 (violates if P near 0). If S_T < K: receive K, pay S_T on open market, net = K - S_T (captured by put payoff). Arbitrage condition forces P ≥ max(Ke^{-rT} - S, 0).
 
@@ -301,8 +296,7 @@ A: Treat bond as underlying asset S (price moves based on interest rates). If bo
 **Q6: Explain why American puts are often exercised early, but American calls rarely are.**  
 A: For puts: early exercise captures the strike price K immediately (earning r × time value on K). If stock crashes, put is deep ITM, interest earned on K dominates time decay. For calls: early exercise forgoes dividends + time value optionality; investor owns stock (receives dividends but delayed capital gains). Only exercised if dividend yield q very high (early exercise captures upcoming dividend), rare in practice. American put value = European put value + early exercise premium (typically 0-15%).
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Put Option](https://en.wikipedia.org/wiki/Put_option) — Definition, payoff, protective strategies
 - [Wikipedia: Put-Call Parity](https://en.wikipedia.org/wiki/Put%E2%80%93call_parity) — Arbitrage-free relationship, replication
 - [Hull: Options, Futures & Derivatives](https://www-2.rotman.utoronto.ca/~hull) — Chapter 13-14: Puts, portfolio insurance

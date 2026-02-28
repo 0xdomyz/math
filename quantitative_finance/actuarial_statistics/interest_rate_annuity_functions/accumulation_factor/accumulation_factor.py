@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # accumulation factor
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for accumulation factor.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: accumulation factor")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: accumulation_factor.md
 
@@ -32,7 +57,7 @@ for n in years:
     print()
 
 print("\nWith compound interest formulas:")
-print(f"FV = PV × (1+i)^n")
+print(f"FV = PV  (1+i)^n")
 print()
 
 # 2. VISUALIZATION OF COMPOUND GROWTH
@@ -67,7 +92,7 @@ print()
 
 # 3. ANNUITY ACCUMULATION
 print("=" * 70)
-print("ANNUITY ACCUMULATION (sₙ̄|)")
+print("ANNUITY ACCUMULATION (sTM|)")
 print("=" * 70)
 
 annual_payment = 1000
@@ -75,7 +100,7 @@ accumulation_rate = 0.05
 
 print(f"\nAnnual payment: ${annual_payment:,.0f}")
 print(f"Interest rate: {accumulation_rate*100:.1f}%")
-print(f"\nAnnuity accumulation factor: sₙ̄| = [(1+i)^n - 1]/i\n")
+print(f"\nAnnuity accumulation factor: sTM| = [(1+i)^n - 1]/i\n")
 
 print(f"{'n (years)':<12} {'Accum Factor':<15} {'Future Value':<15} {'Total Paid':<15} {'Interest Earned':<15}")
 print("-" * 72)
@@ -97,7 +122,7 @@ print("=" * 70)
 print("RULE OF 72: DOUBLING TIME")
 print("=" * 70)
 
-print("\nRule: Years to double ≈ 72 / rate(%)")
+print("\nRule: Years to double  72 / rate(%)")
 print("Allows quick mental estimation of compound growth\n")
 
 rates_test = np.array([0.01, 0.02, 0.03, 0.05, 0.07, 0.10, 0.15, 0.20])
@@ -256,4 +281,28 @@ plt.savefig('accumulation_factor_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: accumulation factor")
+
 

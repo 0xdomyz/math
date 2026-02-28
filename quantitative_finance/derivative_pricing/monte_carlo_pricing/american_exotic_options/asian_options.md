@@ -1,12 +1,11 @@
-# Asian Options
+﻿# Asian Options
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Path-dependent options with payoff based on average price over observation period (arithmetic/geometric mean), reducing volatility impact and manipulation risk compared to European spot-price settlement.  
 **Purpose:** Hedge average exposure (commodities, FX); reduce settlement manipulation; lower premium than European; corporate hedging (average monthly prices); reduce gamma risk.  
 **Prerequisites:** European option pricing, pathwise simulation, law of large numbers, control variate methods, covariance analysis
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Arithmetic Asian | Geometric Asian | European Option | Lookback Option |
 |--------|-----------------|-----------------|-----------------|-----------------|
 | **Payoff Basis** | Arithmetic mean Ā | Geometric mean G | Final spot S_T | Max/Min over path |
@@ -17,8 +16,7 @@
 | **Use Cases** | Commodity hedging, FX | Theoretical | Speculation | Exotic strategies |
 | **MC Efficiency** | Standard | Use geometric control | Standard | Requires monitoring |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Arithmetic Asian Call**  
 Stock starts S₀=$100, observed monthly for T=1yr (12 observations). Path: $100→$105→$110→$95→$98→$105→$108→$112→$115→$110→$108→$120. Arithmetic average: Ā = Σ S_i / 12 = $1,286/12 = $107.17. Strike K=$100. Payoff: max(Ā-K, 0) = max($107.17-$100, 0) = $7.17. European call (same path): max(S_T-K, 0) = max($120-$100, 0) = $20. Asian captures average → lower payoff, lower premium (~50-60% of European).
 
@@ -28,8 +26,7 @@ Asian call with T=1yr but only 2 observations (start and end). Path: S₀=$100, 
 **Edge Case: Geometric Asian Closed-Form Pricing**  
 Geometric Asian uses G = (Π S_i)^{1/n} instead of Ā = (Σ S_i)/n. Under GBM, geometric mean of lognormals → lognormal → closed-form Black-Scholes-like formula. Parameters adjusted: σ_adj = σ/√3, r_adj = (r + σ²/6)/2. Price G_Asian ≈ 60-70% of European (empirical). Advantage: exact pricing, use as control variate for arithmetic Asian (highly correlated). Disadvantage: geometric mean < arithmetic mean → even lower payoff → less practical.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Asian Option Framework:
 ├─ Payoff Definitions:
@@ -119,8 +116,7 @@ Asian Option Framework:
 
 **Interaction:** Path generation → Averaging → Payoff calculation → Control variate adjustment → Asian value
 
-## 5. Mini-Project
-
+## Challenge Round
 Price arithmetic Asian call using MC; implement geometric control variate:
 
 ```python
@@ -454,8 +450,7 @@ print("="*80)
 - **Control variate:** 30-50% variance reduction (3-5× faster convergence)
 - **More observations:** Lower Asian value (smoother average → less volatility → cheaper option)
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why is arithmetic Asian call worth ~55% of European call (same parameters)?**  
 A: Averaging reduces effective volatility. European payoff max(S_T-K,0) depends on single terminal spot → full σ volatility. Asian payoff max(Ā-K,0) depends on average → effective vol ≈ σ/√n (n observations). Example: σ=20%, n=12 → σ_eff ≈ 20%/√12 = 5.8%. Lower vol → lower option value. Intuition: Path averaging smooths swings → less extreme payoffs → cheaper premium. Empirical: 12 observations → 50-60% discount, 52 observations → 35-45% discount.
 
@@ -474,8 +469,7 @@ A: Current average (3 obs): Ā₃ = ($120+$110+$100)/3 = $110. For ITM at expiry
 **Q6: Why do commodity producers prefer Asian options over European for hedging annual production?**  
 A: Production occurs continuously (monthly/weekly sales) → exposed to average price, not spot at one date. European put hedges S_T (single point) → mismatch with revenue stream. Asian put hedges Ā (average over production period) → perfect match with cash flows. Example: Oil producer sells 100k barrels/month × 12 months → revenue = Ā × 1.2M barrels. Asian put (K=$60/bbl) guarantees floor: min revenue = $60×1.2M = $72M. Cost advantage: Asian 50-60% cheaper → better budget fit. No manipulation risk: average harder to manipulate than single-day settlement.
 
-## 7. Key References
-
+## Key References
 - Kemna & Vorst (1990): "Pricing Method for Options Based on Average Asset Values" — Geometric Asian closed-form
 - [Wikipedia: Asian Option](https://en.wikipedia.org/wiki/Asian_option) — Path-dependency, averaging mechanics
 - Rogers & Shi (1995): "Value of Asian Option" — Control variate methods, variance reduction

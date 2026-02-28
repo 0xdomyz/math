@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # mortality tables
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for mortality tables.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: mortality tables")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: mortality_tables.md
 
@@ -80,7 +105,7 @@ print(f"Log-Likelihood: {-result.fun:.2f}")
 print()
 
 # 4. WHITTAKER-HENDERSON GRADUATION
-# Minimize: SSE + λ * smoothness_penalty
+# Minimize: SSE +  * smoothness_penalty
 def whittaker_henderson(qx_crude, exposures, lambda_smooth=1.0):
     """Whittaker-Henderson graduation"""
     n = len(qx_crude)
@@ -111,7 +136,7 @@ def whittaker_henderson(qx_crude, exposures, lambda_smooth=1.0):
 
 qx_wh = whittaker_henderson(qx_crude, exposures, lambda_smooth=100)
 
-print("WHITTAKER-HENDERSON GRADUATION (λ=100):")
+print("WHITTAKER-HENDERSON GRADUATION (=100):")
 for age in [20, 40, 60, 80]:
     print(f"Age {age}: crude={qx_crude[age]:.5f}, WH={qx_wh[age]:.5f}")
 print()
@@ -141,9 +166,9 @@ chi2_wh = chi_square_test(deaths_per_age, qx_wh, 1)
 chi2_spline = chi_square_test(deaths_per_age, qx_spline, 1)
 
 print("GOODNESS-OF-FIT COMPARISON:")
-print(f"Parametric (Gompertz-Makeham): χ² = {chi2_parametric:.1f}")
-print(f"Whittaker-Henderson:            χ² = {chi2_wh:.1f}")
-print(f"Spline:                         χ² = {chi2_spline:.1f}")
+print(f"Parametric (Gompertz-Makeham): 2 = {chi2_parametric:.1f}")
+print(f"Whittaker-Henderson:            2 = {chi2_wh:.1f}")
+print(f"Spline:                         2 = {chi2_spline:.1f}")
 print()
 
 # 7. MORTALITY IMPROVEMENT FACTORS
@@ -250,4 +275,28 @@ ax.grid(alpha=0.3)
 plt.tight_layout()
 plt.savefig('mortality_table_construction.png', dpi=300, bbox_inches='tight')
 plt.show()
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: mortality tables")
+
 

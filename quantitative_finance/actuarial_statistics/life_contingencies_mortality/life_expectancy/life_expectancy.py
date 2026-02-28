@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # life expectancy
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for life expectancy.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: life expectancy")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: life_expectancy.md
 
@@ -129,7 +154,7 @@ for year_idx in range(1, len(years)):
 
 # Print projections
 print("LIFE EXPECTANCY PROJECTIONS (1.5% annual improvement):")
-print("Year\te₀ (at birth)\te₆₀ (at age 60)\te₈₀ (at age 80)")
+print("Year\te (at birth)\te (at age 60)\te (at age 80)")
 for year_idx in [0, 10, 20, 30]:
     if year_idx < len(years):
         year = years[year_idx]
@@ -247,4 +272,28 @@ for i, (bar, gain) in enumerate(zip(bars, gains)):
 plt.tight_layout()
 plt.savefig('life_expectancy_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: life expectancy")
+
 

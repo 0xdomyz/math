@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # net premium
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for net premium.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: net premium")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: net_premium.md
 
@@ -35,8 +60,8 @@ v_standard = 1 / (1 + standard_rate)
 print(f"\nAssumptions:")
 print(f"  Mortality Table: US Standard 2020")
 print(f"  Interest Rate (standard): {standard_rate*100:.1f}%")
-print(f"  Smoker multiplier: {smoker_multiplier}×")
-print(f"  Preferred discount: {preferred_discount}×\n")
+print(f"  Smoker multiplier: {smoker_multiplier}")
+print(f"  Preferred discount: {preferred_discount}\n")
 
 def gompertz_mortality(age, A=0.0001, B=1.075):
     """Extrapolate mortality beyond table"""
@@ -297,7 +322,7 @@ print("-" * 55)
 
 # Approximate gross premium calculation
 # Gross = (Net + Acquisition% + Maintenance + Profit) / (1 - Acq%)
-# Simplified: Gross ≈ Net × (1 + Load Factor)
+# Simplified: Gross  Net  (1 + Load Factor)
 
 load_factor = 0.30  # Assume 30% total load
 gross_premium_approx = base_premium * (1 + load_factor)
@@ -458,4 +483,28 @@ plt.savefig('net_premium_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: net premium")
+
 

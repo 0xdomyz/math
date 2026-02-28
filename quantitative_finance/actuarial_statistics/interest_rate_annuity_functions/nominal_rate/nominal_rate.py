@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # nominal rate
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for nominal rate.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: nominal rate")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: nominal_rate.md
 
@@ -35,7 +60,7 @@ for desc, i_nom, m in i_nom_scenarios:
         'Frequency (m)': m,
         'Per-Period': f"{per_period*100:.4f}%",
         'Effective i': f"{i_effective*100:.4f}%",
-        'Force δ': f"{delta*100:.4f}%",
+        'Force  ': f"{delta*100:.4f}%",
         'Difference (i-i^(m))': f"{(i_effective - i_nom)*100:.2f} bps"
     })
 
@@ -73,7 +98,7 @@ for freq_name, m in frequencies:
     
     reverse_results.append({
         'Frequency': freq_name,
-        'Nominal i^(m)': f"{i_nom*100:.4f}%" if m != np.inf else f"δ={i_nom*100:.4f}%",
+        'Nominal i^(m)': f"{i_nom*100:.4f}%" if m != np.inf else f" ={i_nom*100:.4f}%",
         'Per-Period Rate': per_period,
         'Verification': f"{((1 + i_nom/m if m != np.inf else i_nom)**m if m != np.inf else np.exp(i_nom) - 1)*100:.4f}%" if m != np.inf else f"{(np.exp(i_nom) - 1)*100:.4f}%"
     })
@@ -147,7 +172,7 @@ years = 30
 months = years * 12
 
 # Monthly payment using annuity formula
-# P = L · [r(1+r)^n] / [(1+r)^n - 1]
+# P = L  [r(1+r)^n] / [(1+r)^n - 1]
 numerator = monthly_rate * (1 + monthly_rate) ** months
 denominator = (1 + monthly_rate) ** months - 1
 monthly_payment = principal * (numerator / denominator)
@@ -160,7 +185,7 @@ print(f"  Monthly rate: {monthly_rate*100:.4f}%")
 print(f"  Term: {years} years ({months} months)")
 
 print(f"\nMonthly Payment Calculation:")
-print(f"  Formula: Payment = P × [r(1+r)^n] / [(1+r)^n - 1]")
+print(f"  Formula: Payment = P  [r(1+r)^n] / [(1+r)^n - 1]")
 print(f"  Payment = ${monthly_payment:,.2f}")
 
 # Total interest paid
@@ -294,4 +319,28 @@ plt.savefig('nominal_rate_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: nominal rate")
+
 

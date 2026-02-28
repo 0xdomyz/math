@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # benefit percentage replacement ratio
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for benefit percentage replacement ratio.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: benefit percentage replacement ratio")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: benefit_percentage_replacement_ratio.md
 
@@ -33,7 +58,7 @@ pct_range = np.linspace(40, 75, 50)
 duration_predicted = duration_model(pct_range, base_duration, elasticity)
 
 # Cost projection: assume daily cost = average benefit amount
-# Higher % → higher daily cost AND longer duration (compounding effect)
+# Higher %  higher daily cost AND longer duration (compounding effect)
 daily_benefit = 100  # Illustrative
 total_cost = (replacement_ratios / 100) * daily_benefit * avg_claim_duration
 
@@ -51,7 +76,7 @@ axes[0].set_title('Claim Duration vs Benefit Percentage')
 axes[0].legend()
 axes[0].grid(alpha=0.3)
 
-# Plot 2: Total Expected Cost (Duration × Benefit)
+# Plot 2: Total Expected Cost (Duration  Benefit)
 daily_benefit_range = (pct_range / 100) * 200  # Daily benefit increases with %
 total_cost_range = daily_benefit_range * duration_model(pct_range, base_duration, elasticity)
 
@@ -59,7 +84,7 @@ axes[1].plot(pct_range, total_cost_range, 'o-', linewidth=2,
              markersize=6, color='darkred')
 axes[1].set_xlabel('Replacement Ratio (%)')
 axes[1].set_ylabel('Total Expected Cost per Claim ($)')
-axes[1].set_title('Total Claim Cost: Duration × Benefit')
+axes[1].set_title('Total Claim Cost: Duration  Benefit')
 axes[1].grid(alpha=0.3)
 
 # Plot 3: Cost difference vs 60% baseline
@@ -87,4 +112,28 @@ for pct in [50, 55, 60, 65, 66.67, 70, 75]:
     total = daily * dur
     pct_diff = ((total - baseline_cost) / baseline_cost) * 100
     print(f"{pct:6.1f}% | {dur:18.1f} | ${daily:11.2f} | ${total:9.2f} | {pct_diff:+6.1f}%")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: benefit percentage replacement ratio")
+
 

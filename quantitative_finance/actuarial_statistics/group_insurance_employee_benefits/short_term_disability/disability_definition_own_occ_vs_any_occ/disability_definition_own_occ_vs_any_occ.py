@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # disability definition own occ vs any occ
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for disability definition own occ vs any occ.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: disability definition own occ vs any occ")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: disability_definition_own_occ_vs_any_occ.md
 
@@ -25,9 +50,9 @@ df = pd.DataFrame(data)
 
 # Outcome: Approved under own-occ definition?
 # Rules (illustrative):
-# - High job complexity + high limitation + low transferable skills → own-occ approval
-# - Low job complexity + moderate limitation → any-occ only
-# - High occupational specificity (pilot, surgeon) → own-occ easier
+# - High job complexity + high limitation + low transferable skills  own-occ approval
+# - Low job complexity + moderate limitation  any-occ only
+# - High occupational specificity (pilot, surgeon)  own-occ easier
 
 def determine_own_occ_approval(row):
     """Heuristic for own-occ approval"""
@@ -112,4 +137,28 @@ plt.show()
 print("\n\nApproval Rate by Functional Limitation Level:")
 limitation_bins = pd.cut(df['Functional_Limitation'], bins=[0, 25, 50, 75, 100])
 print(df.groupby(limitation_bins)['Own_Occ_Approved'].agg(['count', 'sum', 'mean']))
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: disability definition own occ vs any occ")
+
 

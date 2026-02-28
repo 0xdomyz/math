@@ -1,0 +1,156 @@
+﻿[
+    {
+        "Topic":  "bayesian_econometrics",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "classical_linear_regression",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "financial_econometrics",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "instrumental_variables_causal_inference",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "limited_dependent_variables",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "maximum_likelihood_estimation",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "model_selection_validation",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "nonparametric_semiparametric_methods",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "panel_data_methods",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "regularization_machine_learning",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "spatial_econometrics",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "time_series_econometrics",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "treatment_effects_program_evaluation",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    },
+    {
+        "Topic":  "violations_classical_assumptions",
+        "MdExists":  true,
+        "PyExists":  true,
+        "TitleOk":  true,
+        "MissingMdSections":  "",
+        "SectionOrderOk":  true,
+        "PyInteractive":  true,
+        "PyHasMarkdownCells":  true,
+        "MissingPySections":  ""
+    }
+]

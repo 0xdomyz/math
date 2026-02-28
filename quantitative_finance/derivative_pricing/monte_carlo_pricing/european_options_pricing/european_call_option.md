@@ -1,12 +1,11 @@
-# European Call Option
+﻿# European Call Option
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** A financial derivative giving the holder the right, but not the obligation, to purchase an underlying asset at a predetermined strike price K on a fixed expiration date T.  
 **Purpose:** Hedge downside risk, speculate on price increases, implement spread strategies, synthetic replication of forward contracts  
 **Prerequisites:** Options basics, payoff diagrams, risk-neutral valuation, continuous-time stochastic processes
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | European Call | American Call | Barrier Call | Digital Call |
 |--------|---------------|---------------|--------------|--------------|
 | **Exercise** | At maturity T only | Any time ≤ T | At T if barrier not hit | At T if S_T > K |
@@ -14,8 +13,7 @@
 | **Value** | Lower | Higher (early exercise option) | Lower (barrier constraint) | Binary: discrete |
 | **Computation** | Black-Scholes, MC | Binomial, LSM | MC with monitoring | Closed-form for BS |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 European call with K=100, S₀=100, T=1yr, σ=20%, r=5%:  
 - If S_T = 110: payoff = 10 (profit after discounting vs cost of premium)
@@ -27,8 +25,7 @@ Assuming constant volatility when market exhibits volatility smile: Underprices 
 **Edge Case:**  
 Dividend payments before T: reduces call value (forward price drops when ex-dividend occurs). Standard BS assumes no dividends; adjust S₀ → S₀ exp(-qT) where q = dividend yield.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 European Call Option Framework:
 ├─ Specification:
@@ -63,8 +60,7 @@ European Call Option Framework:
 
 **Interaction:** Call value increases with S, σ, T, r; decreases with K, q. Delta hedge requires rebalancing as S and σ change.
 
-## 5. Mini-Project
-
+## Challenge Round
 Price a European call using Black-Scholes and Monte Carlo; visualize convergence:
 
 ```python
@@ -248,8 +244,7 @@ print("Plot saved: european_call_analysis.png")
 - **Convergence:** MC prices cluster around BS as N increases; 95% CI shrinks as O(1/√N)
 - **Greeks:** Delta approaches 1 as S >> K; Gamma peaks ATM (highest sensitivity); Vega linear in time value
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why is the call value always at least as large as max(S - Ke^{-rT}, 0)?**  
 A: This is the lower bound from arbitrage-free pricing. If C < max(S - Ke^{-rT}, 0), buy call and sell stock, invest K at rate r. At maturity: receive S_T from short stock, pay max(S_T - K, 0) to exercise, withdraw Ke^{rT}. For S_T ≥ K: profit = Ke^{rT} - K > 0 (arbitrage). For S_T < K: profit = S_T + Ke^{rT} - S_T = Ke^{rT} - K > 0 (locked-in arbitrage).
 
@@ -268,8 +263,7 @@ A: Short call P&L = C_premium_received - C_current_market. If σ drops, BS price
 **Q6: How would you price a European call with time-varying interest rates r(t)?**  
 A: Replace discount factor e^{-rT} with discount bond price P(0, T) = exp(-∫₀ᵀ r(t) dt). Under instantaneous rate models (Vasicek, CIR), forward price F = S_0 exp(∫₀ᵀ [r(t) - q] dt). For MC: use stochastic rate process (e.g., Vasicek) correlated with equity; simulate (S_t, r_t) pairs, discount each path using realized r(t). BS no longer applies; use MC or PDE.
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Call Option](https://en.wikipedia.org/wiki/Call_option) — Definition, payoff diagram, valuation basics
 - [Wikipedia: Black–Scholes Model](https://en.wikipedia.org/wiki/Black%E2%80%93Scholes_model) — Closed-form formula, Greeks, assumptions
 - [Hull: Options, Futures & Derivatives](https://www-2.rotman.utoronto.ca/~hull) — Comprehensive derivatives textbook; Chapter 13: Option pricing

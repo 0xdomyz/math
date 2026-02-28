@@ -1,0 +1,12 @@
+﻿Total topics audited: 37
+Markdown section/order failures: 0
+Markdown word-count failures (2000-3000): 0
+Comparative table shape failures: 0
+Examples subsection failures: 0
+Layer breakdown structural failures: 37
+Challenge round count failures: 0
+Key references count failures: 0
+Python missing/non-interactive failures: 0
+Python section-order failures: 0
+Python markdown-cell count (<6) failures: 0
+Python setup/import/print/viz heuristic failures: 0

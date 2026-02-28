@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # linear vs power law models
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: linear vs power law models")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -29,17 +64,17 @@ df = pd.DataFrame({
     'impact': impact_observed,
 })
 
-print(f"Trade data: {len(df)} trades, size range {df['order_pct'].min():.2f}–{df['order_pct'].max():.2f}% of volume\n")
+print(f"Trade data: {len(df)} trades, size range {df['order_pct'].min():.2f}â€“{df['order_pct'].max():.2f}% of volume\n")
 
 # Model 1: Linear regression
-# I = α + β × V
+# I = Î± + Î² Ã— V
 X_linear = np.column_stack([np.ones(n_trades), order_pct])
 coeffs_linear = np.linalg.lstsq(X_linear, impact_observed, rcond=None)[0]
 alpha_linear, beta_linear = coeffs_linear
 impact_pred_linear = alpha_linear + beta_linear * order_pct
 
 # Model 2: Power-law (via log-log)
-# log(I) = log(α) + λ × log(V)
+# log(I) = log(Î±) + Î» Ã— log(V)
 log_order = np.log(order_pct)
 log_impact = np.log(impact_observed)
 X_powerlaw = np.column_stack([np.ones(n_trades), log_order])
@@ -49,8 +84,8 @@ alpha_powerlaw = np.exp(log_alpha)
 impact_pred_powerlaw = alpha_powerlaw * (order_pct ** lambda_fit)
 
 # Model 3: Kinked model
-# Low tier: V < 0.5% → β₁
-# High tier: V ≥ 0.5% → β₂
+# Low tier: V < 0.5% â†’ Î²â‚
+# High tier: V â‰¥ 0.5% â†’ Î²â‚‚
 kink_threshold = 0.5
 low_tier_mask = order_pct < kink_threshold
 high_tier_mask = order_pct >= kink_threshold
@@ -79,7 +114,7 @@ for name, pred in models.items():
     
     metrics.append({
         'Model': name,
-        'R²': r2,
+        'RÂ²': r2,
         'RMSE': rmse,
         'MAE': mae,
     })
@@ -90,10 +125,10 @@ print(metrics_df.to_string(index=False))
 
 # Parameters
 print(f"\n\nMODEL PARAMETERS:")
-print(f"Linear:     α = {alpha_linear:.4f}, β = {beta_linear:.4f}")
-print(f"Power-Law:  α = {alpha_powerlaw:.4f}, λ = {lambda_fit:.4f}")
-print(f"Kinked:     Low (V<{kink_threshold}%): β₁={beta_low:.4f}")
-print(f"            High (V≥{kink_threshold}%): β₂={beta_high:.4f}")
+print(f"Linear:     Î± = {alpha_linear:.4f}, Î² = {beta_linear:.4f}")
+print(f"Power-Law:  Î± = {alpha_powerlaw:.4f}, Î» = {lambda_fit:.4f}")
+print(f"Kinked:     Low (V<{kink_threshold}%): Î²â‚={beta_low:.4f}")
+print(f"            High (Vâ‰¥{kink_threshold}%): Î²â‚‚={beta_high:.4f}")
 
 # Visualization
 fig, axes = plt.subplots(2, 2, figsize=(15, 12))
@@ -101,9 +136,9 @@ fig, axes = plt.subplots(2, 2, figsize=(15, 12))
 # Plot 1: Data and model fits (linear scale)
 ax = axes[0, 0]
 ax.scatter(order_pct, impact_observed, alpha=0.6, s=40, label='Observed', color='black')
-ax.plot(order_pct, impact_pred_linear, linewidth=2, label=f'Linear (R²={r2_score(impact_observed, impact_pred_linear):.3f})', color='blue')
-ax.plot(order_pct, impact_pred_powerlaw, linewidth=2, label=f'Power-Law (R²={r2_score(impact_observed, impact_pred_powerlaw):.3f})', color='red')
-ax.plot(order_pct, impact_pred_kinked, linewidth=2, label=f'Kinked (R²={r2_score(impact_observed, impact_pred_kinked):.3f})', color='green', linestyle='--')
+ax.plot(order_pct, impact_pred_linear, linewidth=2, label=f'Linear (RÂ²={r2_score(impact_observed, impact_pred_linear):.3f})', color='blue')
+ax.plot(order_pct, impact_pred_powerlaw, linewidth=2, label=f'Power-Law (RÂ²={r2_score(impact_observed, impact_pred_powerlaw):.3f})', color='red')
+ax.plot(order_pct, impact_pred_kinked, linewidth=2, label=f'Kinked (RÂ²={r2_score(impact_observed, impact_pred_kinked):.3f})', color='green', linestyle='--')
 ax.axvline(kink_threshold, color='gray', linestyle=':', alpha=0.5, label=f'Kink at {kink_threshold}%')
 ax.set_xlabel('Order Size (% of daily volume)')
 ax.set_ylabel('Market Impact (bps)')
@@ -114,7 +149,7 @@ ax.grid(alpha=0.3)
 # Plot 2: Log-log plot (power-law visibility)
 ax = axes[0, 1]
 ax.loglog(order_pct, impact_observed, 'o', alpha=0.6, markersize=6, label='Observed', color='black')
-ax.loglog(order_pct, impact_pred_powerlaw, linewidth=2, label=f'Power-Law: I={alpha_powerlaw:.3f}×V^{lambda_fit:.2f}', color='red')
+ax.loglog(order_pct, impact_pred_powerlaw, linewidth=2, label=f'Power-Law: I={alpha_powerlaw:.3f}Ã—V^{lambda_fit:.2f}', color='red')
 # Linear on log-log appears as curved line
 order_range = np.logspace(np.log10(order_pct.min()), np.log10(order_pct.max()), 100)
 ax.loglog(order_range, alpha_linear + beta_linear * order_range, linewidth=2, label='Linear', color='blue', linestyle='--')
@@ -158,5 +193,38 @@ for size in test_sizes:
     ratio = linear_pred / powerlaw_pred if powerlaw_pred > 0 else np.inf
     print(f"{size:16.2f} | {linear_pred:12.3f} | {powerlaw_pred:14.3f} | {ratio:6.2f}x")
 
-print("\n→ Key insight: At large sizes, linear significantly overstates impact")
+print("\nâ†’ Key insight: At large sizes, linear significantly overstates impact")
 print(f"  (power-law more conservative at {test_sizes[-1]}% volume)")
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='linear vs power law models - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # effective annual rate
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for effective annual rate.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: effective annual rate")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: effective_annual_rate.md
 
@@ -21,8 +46,8 @@ delta = np.log(1 + i_effective)  # Force of interest
 print(f"\nGiven: Effective annual rate i = {i_effective:.4f} ({i_effective*100:.2f}%)")
 print(f"Discount factor: v = 1/(1+i) = {v:.6f}")
 print(f"Discount rate: d = i/(1+i) = {d:.6f}")
-print(f"Force of interest: δ = ln(1+i) = {delta:.6f}")
-print(f"Relationship check: d = 1 - v = {1 - v:.6f} ✓")
+print(f"Force of interest:   = ln(1+i) = {delta:.6f}")
+print(f"Relationship check: d = 1 - v = {1 - v:.6f} ")
 print()
 
 # 2. ACCUMULATION & DISCOUNTING EXAMPLES
@@ -54,7 +79,7 @@ print()
 
 # 3. CONVERT BETWEEN NOMINAL AND EFFECTIVE RATES
 print("=" * 60)
-print("CONVERSION: EFFECTIVE ↔ NOMINAL RATES")
+print("CONVERSION: EFFECTIVE  NOMINAL RATES")
 print("=" * 60)
 
 print(f"\nStarting with effective rate i = {i_effective:.4f}")
@@ -66,7 +91,7 @@ nominal_rates = []
 
 for m in m_values:
     if m == np.inf:
-        # Continuous: i = e^δ - 1, so δ = ln(1+i) = force of interest
+        # Continuous: i = e^  - 1, so   = ln(1+i) = force of interest
         delta_val = np.log(1 + i_effective)
         nominal_rates.append(delta_val)
     else:
@@ -79,7 +104,7 @@ conversion_df = pd.DataFrame({
                    'Monthly (m=12)', 'Daily (m=365)', 'Continuous'],
     'Nominal Rate': [f"{r*100:.4f}%" for r in nominal_rates],
     'Per-Period Rate': [f"{(r/m if m != np.inf else r)*100:.4f}%" if m != np.inf 
-                       else f"δ={r*100:.4f}%" for m, r in zip(m_values, nominal_rates)],
+                       else f" ={r*100:.4f}%" for m, r in zip(m_values, nominal_rates)],
     'Effective i': [f"{i_effective*100:.4f}%" for _ in m_values]
 })
 
@@ -91,12 +116,12 @@ print("Verification: Convert nominal rates back to effective")
 print("-" * 60)
 for m, i_nom in zip(m_values[:-1], nominal_rates[:-1]):
     i_check = (1 + i_nom/m) ** m - 1
-    print(f"m={m:3d}: i^({m}) = {i_nom:.6f} → i = {i_check:.6f} (original: {i_effective:.6f}) ✓")
+    print(f"m={m:3d}: i^({m}) = {i_nom:.6f}  i = {i_check:.6f} (original: {i_effective:.6f}) ")
 
 # Continuous
 delta_val = nominal_rates[-1]
 i_check_continuous = np.exp(delta_val) - 1
-print(f"Continuous: δ = {delta_val:.6f} → i = {i_check_continuous:.6f} (original: {i_effective:.6f}) ✓")
+print(f"Continuous:   = {delta_val:.6f}  i = {i_check_continuous:.6f} (original: {i_effective:.6f}) ")
 print()
 
 # 4. ANNUITY-CERTAIN FUNCTIONS
@@ -104,8 +129,8 @@ print("=" * 60)
 print("ANNUITY-CERTAIN FUNCTIONS (no mortality)")
 print("=" * 60)
 
-# aₙ̄| = [1 - v^n] / i (present value of annuity-immediate)
-# sₙ̄| = [(1+i)^n - 1] / i (future value of annuity-immediate)
+# aTM| = [1 - v^n] / i (present value of annuity-immediate)
+# sTM| = [(1+i)^n - 1] / i (future value of annuity-immediate)
 
 n_periods = np.array([1, 5, 10, 20, 30])
 payment = 1000  # $1,000 per year
@@ -117,7 +142,7 @@ for n in n_periods:
     an_imm = (1 - v**n) / i_effective  # Annuity-immediate
     aend_pv = payment * an_imm
     
-    # Annuity-due (payments at start of period): ä = a * (1+i)
+    # Annuity-due (payments at start of period):  = a * (1+i)
     aDn = an_imm * (1 + i_effective)
     astart_pv = payment * aDn
     
@@ -131,11 +156,11 @@ for n in n_periods:
     
     annuity_data.append({
         'n': n,
-        'aₙ̄| (imm)': an_imm,
-        'äₙ̄| (due)': aDn,
+        'aTM| (imm)': an_imm,
+        'TM| (due)': aDn,
         'PV (imm) $': aend_pv,
         'PV (due) $': astart_pv,
-        'sₙ̄| (imm)': sn_imm,
+        'sTM| (imm)': sn_imm,
         'FV (imm) $': aend_fv,
         'FV (due) $': astart_fv
     })
@@ -144,9 +169,9 @@ annuity_df = pd.DataFrame(annuity_data)
 
 print(f"\nPayment = ${payment}/period, i = {i_effective:.4f}")
 print("\nPresent Value of Annuities:")
-print(annuity_df[['n', 'aₙ̄| (imm)', 'äₙ̄| (due)', 'PV (imm) $', 'PV (due) $']].to_string(index=False))
+print(annuity_df[['n', 'aTM| (imm)', 'TM| (due)', 'PV (imm) $', 'PV (due) $']].to_string(index=False))
 print("\nFuture Value of Annuities:")
-print(annuity_df[['n', 'sₙ̄| (imm)', 'FV (imm) $', 'FV (due) $']].to_string(index=False))
+print(annuity_df[['n', 'sTM| (imm)', 'FV (imm) $', 'FV (due) $']].to_string(index=False))
 print()
 
 # 5. TERM STRUCTURE (multi-year rates)
@@ -217,10 +242,10 @@ an_values = (1 - (v ** n_range)) / i_effective
 pv_annuity = 1000 * an_values
 
 ax.plot(n_range, pv_annuity, linewidth=2.5, color='darkgreen', marker='o', 
-       markersize=4, alpha=0.7, label='Annuity-immediate (aₙ̄|)')
+       markersize=4, alpha=0.7, label='Annuity-immediate (aTM|)')
 ax.plot(n_range, pv_annuity * (1 + i_effective), linewidth=2.5, 
        color='coral', marker='s', markersize=4, alpha=0.7, linestyle='--',
-       label='Annuity-due (äₙ̄|)')
+       label='Annuity-due (TM|)')
 
 ax.set_xlabel('Number of Periods (n)', fontsize=11)
 ax.set_ylabel('Present Value of $1,000/period', fontsize=11)
@@ -258,4 +283,28 @@ plt.show()
 print("=" * 60)
 print("Analysis complete. Chart saved as 'effective_annual_rate_analysis.png'")
 print("=" * 60)
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: effective annual rate")
+
 

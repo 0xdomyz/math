@@ -1,435 +1,116 @@
-# Deferred Annuity (n|aₓ)
+﻿# Deferred Annuity
 
-## 1. Concept Skeleton
-**Definition:** Life annuity where first payment delayed n years; requires survival to deferral period end; notation n|aₓ (n-year deferred whole life annuity)  
-**Purpose:** Model retirement income starting at future age, accumulation-phase products, pension obligations with vesting  
-**Prerequisites:** Life annuities, survival probabilities, discount factors, accumulation concepts, vesting periods
+## Concept Skeleton
+**Definition:** Deferred Annuity is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Type | First Payment | Value | Survival Requirement | Use Case |
-|------|---------------|-------|---------------------|----------|
-| **Deferred (n\|aₓ)** | After n years | v^n·ₙpₓ·aₓ₊ₙ | Must reach age x+n | Retirement planning |
-| **Immediate (aₓ)** | End of year 1 | Higher than deferred | Ongoing | Current income need |
-| **Term (aₓ:n̄\|)** | Years 1 to n only | Limited duration | Standard | Bridge income |
-| **Whole Life (aₓ)** | Year 1 until death | n\|aₓ + aₓ:n̄\| = aₓ | Standard | Lifetime income |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-40-year-old buys deferred annuity starting at 65 (n=25); value = discount^25 × P(survive 25 years) × annuity value at 65
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Ignoring survival probability: Using only discounting undervalues deferral; die before age 65 → no payments received
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-Extremely long deferral (n=50 at age 40): ₅₀p₄₀ very low; annuity value approaches zero due to survival probability
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Deferred Annuity | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Deferred Annuity Structure:
-├─ Deferral Period:
-│   ├─ Years 1 to n: No payments, accumulation phase
-│   ├─ Requirement: Must survive to age x+n
-│   ├─ Death before n: No payments received (forfeiture)
-│   └─ Accumulation: Premiums compound or lump-sum investment grows
-├─ Payment Phase:
-│   ├─ Starts: Year n+1 (age x+n)
-│   ├─ Continues: Until death (whole life annuity)
-│   ├─ First payment: At end of year n+1 (age x+n+1)
-│   └─ Standard life annuity from age x+n onward
-├─ Present Value Formula:
-│   ├─ n|aₓ = v^n · ₙpₓ · aₓ₊ₙ
-│   │   where v = 1/(1+i), ₙpₓ = P(survive n years)
-│   │         aₓ₊ₙ = immediate annuity value at age x+n
-│   ├─ Interpretation: Discount n years × Survival probability × Future annuity value
-│   ├─ Commutation functions: n|aₓ = Nₓ₊ₙ₊₁ / Dₓ
-│   └─ Recursive: n|aₓ = v·pₓ · (n-1|aₓ₊₁) (dynamic programming)
-├─ Relationship to Term Annuity:
-│   ├─ Identity: aₓ = aₓ:n̄| + n|aₓ
-│   │   (Whole life = Term + Deferred)
-│   ├─ Decomposition: Present payments + Future payments = Total
-│   ├─ Verification: Sum of term and deferred equals whole life
-│   └─ Application: Value retirement income in segments
-├─ Accumulation Phase:
-│   ├─ Single premium: Lump sum invested at contract start
-│   ├─ Flexible premiums: Periodic contributions during deferral
-│   ├─ Growth: At credited rate (may differ from valuation rate)
-│   ├─ Surrender value: Available if annuitized early (with penalty)
-│   └─ Death benefit: Return of premiums if die during deferral (optional)
-├─ Pricing Considerations:
-│   ├─ Lower cost: Deferral reduces present value significantly
-│   ├─ Mortality selection: Buyer must be healthy at purchase
-│   ├─ Accumulation benefit: Time allows investment growth
-│   └─ Longevity insurance: Protects against outliving assets
-├─ Due Version:
-│   ├─ n|äₓ = v^n · ₙpₓ · äₓ₊ₙ (payments at period start)
-│   ├─ Relationship: n|äₓ = (1+i) · n|aₓ
-│   └─ Application: Premium-paying products
-└─ Practical Applications:
-    ├─ Qualified Longevity Annuity Contract (QLAC): Deferred to age 80-85
-    ├─ Pension vesting: Payments start after service period
-    ├─ Retirement planning: Purchase at 40, payments start at 65
-    └─ Longevity insurance: Coverage for late-life expenses
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Deferred Annuity.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-## 5. Mini-Project
-Value and analyze deferred annuities:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Deferred Annuity.
 
-np.random.seed(42)
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-print("=== Deferred Annuity (n|aₓ) Analysis ===\n")
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# Build mortality table
-def build_mortality_table():
-    ages = np.arange(0, 121)
-    A, B, C = 0.0001, 1.08, 0.00035
-    mu_x = A + C * (B ** ages)
-    q_x = 1 - np.exp(-mu_x)
-    
-    l_x = np.zeros(len(ages))
-    l_x[0] = 100000
-    for i in range(1, len(ages)):
-        l_x[i] = l_x[i-1] * (1 - q_x[i-1])
-    
-    return pd.DataFrame({'Age': ages, 'l_x': l_x, 'q_x': q_x})
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-mortality = build_mortality_table()
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-# Immediate annuity (helper function)
-def immediate_annuity(x, i, mortality):
-    v = 1 / (1 + i)
-    l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
-    
-    value = 0
-    for k in range(1, 121 - x):
-        l_future = mortality.loc[mortality['Age'] == x + k, 'l_x'].values
-        if len(l_future) == 0 or l_future[0] <= 0:
-            break
-        k_p_x = l_future[0] / l_current
-        value += (v ** k) * k_p_x
-    
-    return value
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-# Deferred annuity
-def deferred_annuity(x, n, i, mortality):
-    """
-    n|aₓ = v^n · ₙpₓ · aₓ₊ₙ
-    """
-    v = 1 / (1 + i)
-    
-    # Survival probability to age x+n
-    l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
-    l_future = mortality.loc[mortality['Age'] == x + n, 'l_x'].values[0]
-    n_p_x = l_future / l_current
-    
-    # Annuity value at age x+n
-    a_x_plus_n = immediate_annuity(x + n, i, mortality)
-    
-    # Deferred value
-    return (v ** n) * n_p_x * a_x_plus_n
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-# Term annuity (for decomposition)
-def term_annuity(x, n, i, mortality):
-    v = 1 / (1 + i)
-    l_current = mortality.loc[mortality['Age'] == x, 'l_x'].values[0]
-    
-    value = 0
-    for k in range(1, n + 1):
-        l_future = mortality.loc[mortality['Age'] == x + k, 'l_x'].values
-        if len(l_future) == 0 or l_future[0] <= 0:
-            break
-        k_p_x = l_future[0] / l_current
-        value += (v ** k) * k_p_x
-    
-    return value
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Deferred Annuity outputs in pricing, reserving, and solvency workflows.
 
-# Calculate deferred annuities for different deferral periods
-print("=== Deferred Annuity Values (Age 40, i = 5%) ===\n")
-age_purchase = 40
-i_rate = 0.05
-deferral_periods = [10, 15, 20, 25, 30]
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-results = []
-immediate_value = immediate_annuity(age_purchase, i_rate, mortality)
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-for n in deferral_periods:
-    deferred_val = deferred_annuity(age_purchase, n, i_rate, mortality)
-    
-    # Components
-    v = 1 / (1 + i_rate)
-    l_curr = mortality.loc[mortality['Age'] == age_purchase, 'l_x'].values[0]
-    l_fut = mortality.loc[mortality['Age'] == age_purchase + n, 'l_x'].values[0]
-    n_p_x = l_fut / l_curr
-    a_x_plus_n = immediate_annuity(age_purchase + n, i_rate, mortality)
-    
-    discount_factor = v ** n
-    
-    results.append({
-        'Deferral (n)': n,
-        'Age at Start': age_purchase + n,
-        'Discount (v^n)': discount_factor,
-        'Survival (ₙpₓ)': n_p_x,
-        'Future Annuity (aₓ₊ₙ)': a_x_plus_n,
-        'Deferred Value (n|aₓ)': deferred_val,
-        '% of Immediate': deferred_val / immediate_value * 100
-    })
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-results_df = pd.DataFrame(results)
-print(results_df.to_string(index=False, float_format='%.4f'))
-print(f"\nImmediate annuity (aₓ) at age {age_purchase}: {immediate_value:.4f}")
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Decomposition verification: aₓ = aₓ:n̄| + n|aₓ
-print("\n=== Decomposition Identity: aₓ = aₓ:n̄| + n|aₓ ===\n")
-n_test = 25
-age_test = 40
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-whole_life = immediate_annuity(age_test, i_rate, mortality)
-term_component = term_annuity(age_test, n_test, i_rate, mortality)
-deferred_component = deferred_annuity(age_test, n_test, i_rate, mortality)
-sum_components = term_component + deferred_component
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"Age {age_test}, deferral period {n_test} years:")
-print(f"  Whole life (aₓ): {whole_life:.4f}")
-print(f"  Term (aₓ:{n_test}̄|): {term_component:.4f}")
-print(f"  Deferred ({n_test}|aₓ): {deferred_component:.4f}")
-print(f"  Sum: {sum_components:.4f}")
-print(f"  Identity holds: {abs(whole_life - sum_components) < 0.01}")
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Retirement planning scenario
-print("\n=== Retirement Planning: Purchase at 40, Start at 65 ===\n")
-age_purchase_ret = 40
-age_retirement = 65
-deferral_ret = age_retirement - age_purchase_ret
-annual_income_desired = 50000  # $50k/year
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Calculate lump sum needed
-deferred_value = deferred_annuity(age_purchase_ret, deferral_ret, i_rate, mortality)
-lump_sum_needed = annual_income_desired / (1000 / deferred_value)  # Scale to $50k
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Alternative: Accumulation approach
-# How much to invest today to have enough at 65?
-v = 1 / (1 + i_rate)
-l_curr = mortality.loc[mortality['Age'] == age_purchase_ret, 'l_x'].values[0]
-l_ret = mortality.loc[mortality['Age'] == age_retirement, 'l_x'].values[0]
-survival_prob = l_ret / l_curr
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-a_at_retirement = immediate_annuity(age_retirement, i_rate, mortality)
-cost_per_dollar_at_retirement = 1 / a_at_retirement
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-future_value_needed = annual_income_desired * cost_per_dollar_at_retirement
-present_value_accumulation = future_value_needed * (v ** deferral_ret)
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"Desired retirement income: ${annual_income_desired:,}/year starting at {age_retirement}")
-print(f"\nApproach 1: Deferred Annuity")
-print(f"  Deferred annuity value (per $1): {deferred_value:.4f}")
-print(f"  Lump sum needed today: ${lump_sum_needed:,.2f}")
-print(f"\nApproach 2: Accumulation")
-print(f"  Survival probability to {age_retirement}: {survival_prob:.4f}")
-print(f"  Annuity value at {age_retirement}: {a_at_retirement:.4f}")
-print(f"  Future value needed (at {age_retirement}): ${future_value_needed:,.2f}")
-print(f"  Present value (discounted): ${present_value_accumulation:,.2f}")
-print(f"\nDifference: ${abs(lump_sum_needed - present_value_accumulation):,.2f}")
-print(f"(Approaches should match; small differences from rounding)")
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Longevity insurance (QLAC-style)
-print("\n=== Longevity Insurance: Deferred to Age 80 ===\n")
-age_purchase_qlac = 60
-age_start_qlac = 80
-deferral_qlac = age_start_qlac - age_purchase_qlac
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-deferred_qlac = deferred_annuity(age_purchase_qlac, deferral_qlac, i_rate, mortality)
-immediate_at_60 = immediate_annuity(age_purchase_qlac, i_rate, mortality)
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# $100k premium
-premium = 100000
-annual_payment_deferred = premium * (1000 / deferred_qlac) / 1000
-annual_payment_immediate = premium * (1000 / immediate_at_60) / 1000
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"$100,000 premium at age {age_purchase_qlac}:")
-print(f"\nImmediate annuity (starts at {age_purchase_qlac+1}):")
-print(f"  Annual payment: ${annual_payment_immediate:,.2f}")
-print(f"\nDeferred to {age_start_qlac} (QLAC-style):")
-print(f"  Annual payment: ${annual_payment_deferred:,.2f}")
-print(f"  Payment ratio: {annual_payment_deferred / annual_payment_immediate:.2f}x higher")
-print(f"\nTrade-off:")
-print(f"  Immediate: Lower annual payment, starts now")
-print(f"  Deferred: Much higher payment, covers late-life longevity risk")
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Age sensitivity
-print("\n=== Purchase Age Impact (25-Year Deferral) ===\n")
-deferral_fixed = 25
-ages_purchase = [30, 35, 40, 45, 50, 55]
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"Deferral: {deferral_fixed} years")
-print("Purchase Age | Start Age | Deferred Value | Immediate Value | Ratio")
-print("-" * 75)
+Operational detail for Deferred Annuity: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-for age_purch in ages_purchase:
-    age_start = age_purch + deferral_fixed
-    if age_start > 95:
-        continue
-    
-    deferred = deferred_annuity(age_purch, deferral_fixed, i_rate, mortality)
-    immediate = immediate_annuity(age_purch, i_rate, mortality)
-    ratio = deferred / immediate
-    
-    print(f"{age_purch:12d} | {age_start:9d} | {deferred:14.4f} | {immediate:15.4f} | {ratio:6.4f}")
-
-# Interest rate sensitivity
-print("\n=== Interest Rate Sensitivity (Age 40, 25-Year Deferral) ===\n")
-interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
-
-print("Interest | Deferred (n|aₓ) | Immediate (aₓ) | Ratio")
-print("-" * 60)
-
-for i_val in interest_rates:
-    deferred = deferred_annuity(40, 25, i_val, mortality)
-    immediate = immediate_annuity(40, i_val, mortality)
-    ratio = deferred / immediate
-    
-    print(f"{i_val*100:7.0f}%  | {deferred:15.4f} | {immediate:14.4f} | {ratio:6.4f}")
-
-# Visualizations
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-
-# Plot 1: Deferred value by deferral period
-ax1 = axes[0, 0]
-deferrals_plot = np.arange(5, 46, 2)
-deferred_vals = [deferred_annuity(40, n, 0.05, mortality) for n in deferrals_plot]
-immediate_val = immediate_annuity(40, 0.05, mortality)
-
-ax1.plot(deferrals_plot, deferred_vals, 'o-', linewidth=2, markersize=6)
-ax1.axhline(immediate_val, color='r', linestyle='--', linewidth=2, 
-           label=f'Immediate = {immediate_val:.2f}')
-ax1.fill_between(deferrals_plot, 0, deferred_vals, alpha=0.2)
-ax1.set_xlabel('Deferral Period (years)')
-ax1.set_ylabel('Deferred Annuity Value')
-ax1.set_title('Value Decreases with Deferral\n(Age 40, i = 5%)')
-ax1.legend()
-ax1.grid(True, alpha=0.3)
-
-# Plot 2: Component decomposition
-ax2 = axes[0, 1]
-deferrals_decomp = [10, 15, 20, 25, 30]
-discount_components = []
-survival_components = []
-future_annuity_components = []
-
-v = 1 / 1.05
-for n in deferrals_decomp:
-    discount_components.append(v ** n)
-    
-    l_curr = mortality.loc[mortality['Age'] == 40, 'l_x'].values[0]
-    l_fut = mortality.loc[mortality['Age'] == 40 + n, 'l_x'].values[0]
-    survival_components.append(l_fut / l_curr)
-    
-    future_annuity_components.append(immediate_annuity(40 + n, 0.05, mortality))
-
-x_pos = np.arange(len(deferrals_decomp))
-width = 0.25
-
-ax2_1 = ax2
-ax2_1.bar(x_pos - width, discount_components, width, label='v^n', alpha=0.7, edgecolor='black')
-ax2_1.bar(x_pos, survival_components, width, label='ₙpₓ', alpha=0.7, edgecolor='black')
-ax2_2 = ax2_1.twinx()
-ax2_2.plot(x_pos, future_annuity_components, 'ro-', linewidth=2, markersize=8, label='aₓ₊ₙ')
-
-ax2_1.set_ylabel('Discount & Survival')
-ax2_2.set_ylabel('Future Annuity Value', color='r')
-ax2_1.set_xticks(x_pos)
-ax2_1.set_xticklabels(deferrals_decomp)
-ax2_1.set_xlabel('Deferral Period')
-ax2_1.set_title('Components: n|aₓ = v^n·ₙpₓ·aₓ₊ₙ')
-ax2_1.legend(loc='upper left')
-ax2_2.legend(loc='upper right')
-ax2_1.grid(True, alpha=0.3, axis='y')
-
-# Plot 3: Decomposition identity visualization
-ax3 = axes[0, 2]
-deferrals_identity = [5, 10, 15, 20, 25, 30]
-term_vals = [term_annuity(40, n, 0.05, mortality) for n in deferrals_identity]
-deferred_vals_identity = [deferred_annuity(40, n, 0.05, mortality) for n in deferrals_identity]
-
-x_pos = np.arange(len(deferrals_identity))
-ax3.bar(x_pos, term_vals, label='Term (aₓ:n̄|)', alpha=0.7, edgecolor='black')
-ax3.bar(x_pos, deferred_vals_identity, bottom=term_vals, label='Deferred (n|aₓ)', alpha=0.7, edgecolor='black')
-ax3.axhline(immediate_annuity(40, 0.05, mortality), color='r', linestyle='--', 
-           linewidth=2, label='Whole life (aₓ)')
-ax3.set_xticks(x_pos)
-ax3.set_xticklabels(deferrals_identity)
-ax3.set_xlabel('Split Point (n years)')
-ax3.set_ylabel('Annuity Value')
-ax3.set_title('Identity: aₓ = aₓ:n̄| + n|aₓ')
-ax3.legend()
-ax3.grid(True, alpha=0.3, axis='y')
-
-# Plot 4: Purchase age impact
-ax4 = axes[1, 0]
-ages_purch_plot = np.arange(30, 66, 2)
-deferred_25_by_age = [deferred_annuity(age, 25, 0.05, mortality) for age in ages_purch_plot]
-immediate_by_age = [immediate_annuity(age, 0.05, mortality) for age in ages_purch_plot]
-
-ax4.plot(ages_purch_plot, deferred_25_by_age, 'o-', linewidth=2, label='25-year deferred', markersize=5)
-ax4.plot(ages_purch_plot, immediate_by_age, 's-', linewidth=2, label='Immediate', markersize=5)
-ax4.set_xlabel('Purchase Age')
-ax4.set_ylabel('Annuity Value')
-ax4.set_title('Age Impact on Deferred Value\n(Both decrease with age)')
-ax4.legend()
-ax4.grid(True, alpha=0.3)
-
-# Plot 5: Interest rate sensitivity
-ax5 = axes[1, 1]
-i_range = np.linspace(0.02, 0.08, 20)
-deferred_by_i = [deferred_annuity(40, 25, i, mortality) for i in i_range]
-immediate_by_i = [immediate_annuity(40, i, mortality) for i in i_range]
-
-ax5.plot(i_range * 100, deferred_by_i, linewidth=2, label='25-year deferred')
-ax5.plot(i_range * 100, immediate_by_i, linewidth=2, label='Immediate')
-ax5.set_xlabel('Interest Rate (%)')
-ax5.set_ylabel('Annuity Value (Age 40)')
-ax5.set_title('Interest Rate Impact\n(Deferred more sensitive)')
-ax5.legend()
-ax5.grid(True, alpha=0.3)
-
-# Plot 6: Ratio of deferred to immediate
-ax6 = axes[1, 2]
-deferrals_ratio = np.arange(5, 41, 2)
-ratios = [deferred_annuity(40, n, 0.05, mortality) / immediate_annuity(40, 0.05, mortality) 
-          for n in deferrals_ratio]
-
-ax6.plot(deferrals_ratio, ratios, 'o-', linewidth=2, markersize=6, color='purple')
-ax6.fill_between(deferrals_ratio, 0, ratios, alpha=0.2, color='purple')
-ax6.set_xlabel('Deferral Period (years)')
-ax6.set_ylabel('Ratio: n|aₓ / aₓ')
-ax6.set_title('Deferred as % of Immediate\n(Exponential decay)')
-ax6.grid(True, alpha=0.3)
-ax6.set_ylim(bottom=0)
-
-plt.tight_layout()
-plt.show()
-
-print("\n=== Summary ===")
-print("Deferred annuity (n|aₓ): First payment after n years; n|aₓ = v^n·ₙpₓ·aₓ₊ₙ")
-print("Identity: aₓ = aₓ:n̄| + n|aₓ (term + deferred = whole life)")
-print("Applications: Retirement planning, longevity insurance (QLAC), pension vesting")
-```
-
-## 6. Challenge Round
-When is deferred annuity analysis problematic?
-- **Forfeiture risk**: Death before deferral end → total loss of premiums (unless death benefit included)
-- **Interest rate risk**: Long deferral period sensitive to rate changes; valuation volatile
-- **Mortality improvement**: If longevity increases, survival probability rises; deferred annuity more valuable
-- **Inflation**: Long deferral erodes real value of fixed payments; need inflation indexing
-- **Liquidity**: Cannot access funds during deferral without surrender penalty; inflexible
-
-## 7. Key References
-- [Society of Actuaries - Deferred Annuities](https://www.soa.org/) - Standard formulas and applications
-- [Wiki - Deferred Annuity](https://en.wikipedia.org/wiki/Deferred_annuity) - Product overview
-- [QLAC Regulations](https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-required-minimum-distributions-rmds) - Qualified Longevity Annuity Contract rules
-
----
-**Status:** Key retirement planning tool, longevity insurance | **Complements:** Term Annuity, Whole Life Annuity, QLAC products

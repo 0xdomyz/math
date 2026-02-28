@@ -1,12 +1,11 @@
-# Delta Hedging Strategies
+﻿# Delta Hedging Strategies
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Practical frameworks and protocols for maintaining delta-neutral or target delta portfolios through continuous rehedging, addressing transaction costs, market liquidity, discrete time constraints, and regime-specific challenges.  
 **Purpose:** Translate delta theory into trading reality; quantify hedging costs and benefits; optimize rehedging frequency and trade sizing; manage operational risk (execution slippage, liquidity crises); guide portfolio delta policy; implement across market conditions (calm, trending, crisis).  
 **Prerequisites:** Delta concept, delta hedging mechanics, Black-Scholes Greeks, transaction cost models, bid-ask spreads, market microstructure
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Hedging Strategy | Rehedge Frequency | Transaction Costs | Gamma Risk | Implementation | Ideal Scenario |
 |---|---|---|---|---|---|
 | **Daily Delta Hedge** | Every trading day | Moderate (~5-10bp/year) | Low (tight hedge) | Standard, liquid markets | Calm equity market, tight spreads |
@@ -18,8 +17,7 @@
 | **Vega Hedge** | Combined delta + vega hedge | High (two axes hedged) | Very low | Complex (need vol instrument) | Long-dated, high vol uncertainty |
 | **Cluster Hedge** | Rehedge when portfolio delta changes | Very low if holdings stable | Low-moderate | Batch processing | Passive market maker role |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Daily Delta Hedging, Calm Market**  
 Dealer sells 1,000 1-year ATM calls (K=100, S=100). Delta per call = 0.5 → total delta = 500. Hedge: buy 500 shares at $100 = $50,000. Next day: S rises to $100.50. Call delta rises to 0.51 → target delta = 510. Rehedge: buy 10 more shares at $100.50 = $1,005. Transaction cost (spread): 10bp × $1,005 = $1. Daily cost: $1/day × 252 trading days = $252/year. Return from realized vol lower than implied? Profit. Return from realized vol higher than implied? Loss. Outcome: depends on vol bet, not hedging mechanics. Hedging ensures isolated vol bet; doesn't create profit.
 
@@ -32,8 +30,7 @@ Dealer hedges daily but faces bid-ask spread blowout: typical 1bp → 50bp durin
 **Advanced Example: Cost-Optimized Hedging (Almgren-Chriss)**  
 Dealer wants to reduce large position delta gradually over 1 week. Trading too fast: high transaction costs (impact). Trading too slow: high gamma risk. Almgren-Chriss framework: optimize rehedging trajectory to minimize total cost. Result: trade schedule nonlinear (smaller trades early in week, larger trades later as uncertainty decreases). Daily rehedge 50 → 40 → 30 → 15 → 5 → 0 shares. vs. uniform: 50 → 40 → 30 → 20 → 10 → 0. Nonlinear schedule saves ~15% on transaction costs vs. uniform; preferred in practice for large unwinding.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Delta Hedging Strategy Framework:
 ├─ Core Mechanics:
@@ -220,8 +217,7 @@ Delta Hedging Strategy Framework:
             └─ Rationale: Separate vol bet from delta risk management
 ```
 
-## 5. Mini-Project
-
+## Challenge Round
 Implement hedging strategy, compare costs and P&L across regimes:
 
 ```python
@@ -525,8 +521,7 @@ print("="*80)
 - **Crisis Market:** Event-driven hedging optimal (transaction costs spike; reduce frequency to economize)
 - **Tradeoff:** Higher rehedge frequency → lower gamma loss, higher transaction cost; optimization depends on spread environment
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why does a trader use weekly rather than daily delta hedging in calm markets?**  
 A: Daily hedging: transaction cost ~5bp/year, minimal gamma loss (~1-2bp). Weekly hedging: transaction cost ~1bp/year (4-5× fewer trades), gamma loss ~3-5bp (wider rehedge gaps). If realized vol ≈ implied vol, gamma loss dominates; weekly saves net ~3bp vs daily. But if volatility bet is core strategy (expected realized vol > implied), daily hedging captures more gamma profit. Rule: calm market with tight spreads → daily is cheap; very quiet markets with vol bet → weekly acceptable.
 
@@ -545,8 +540,7 @@ A: Negative correlation (typical crisis): stock down → rates down → both low
 **Q6: Explain when a dealer would prefer vega-hedging to delta-hedging in high volatility regimes.**  
 A: High vol environment (crisis): bid-ask spreads wide (50bp+), delta rehedges very expensive. But option vega becomes large (high vol increases option value sensitivity to vol changes). Strategy: sell straddle (delta neutral at inception, but short vega). To hedge vega, buy variance swaps or VIX calls (smaller notional, fewer trades needed). Result: portfolio is vega-hedged (vol-neutral) rather than delta-hedged (directional-neutral). Advantage: fewer rehedges, lower transaction costs. Disadvantage: exposed to directional moves until vega hedges mature. Use case: short-dated exotics in crisis; accept directional exposure, avoid hedging costs by using vol instruments instead.
 
-## 7. Key References
-
+## Key References
 - Almgren, R. & Chriss, N. "Optimal Execution of Portfolio Transactions" (2001) — Cost-optimal rehedging algorithm
 - [Wikipedia: Options Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)) — Delta hedging mechanics
 - Hull: *Options, Futures & Derivatives* (Chapter 19-21) — Hedging strategies, transaction costs

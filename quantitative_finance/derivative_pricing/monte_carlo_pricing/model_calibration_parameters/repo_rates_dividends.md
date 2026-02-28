@@ -1,19 +1,18 @@
-# Repo Rates & Dividends
+﻿# Repo Rates & Dividends
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Financing rate (repo) and cash distributions (dividends) affecting forward prices  
 **Purpose:** Adjust drift and forward price in option pricing and Monte Carlo simulation  
 **Prerequisites:** Forward pricing, carry costs, dividend yield
 
-## 2. Comparative Framing
+## Comparative Framing
 | Input | Repo Rate | Dividend Yield | Risk-Free Rate |
 |---|---|---|---|
 | **Role** | Funding cost | Cash outflow | Discounting |
 | **Impact on Forward** | Lowers carry if higher | Lowers forward | Raises forward |
 | **Typical in** | Equity financing | Equity indices | Discounting |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example:**  
 $S_0=100$, $r=5%$, dividend yield $q=2%$ → $F=S_0 e^{(r-q)T}$.
 
@@ -23,7 +22,7 @@ Ignoring discrete dividends → mispriced short-dated options around ex-dividend
 **Edge Case:**  
 Special dividends (large one-off) can violate smooth yield assumptions.
 
-## 4. Layer Breakdown
+## Layer Breakdown
 ```
 Carry Adjustment:
 ├─ Inputs:
@@ -45,27 +44,7 @@ Carry Adjustment:
 
 **Interaction:** Estimate carry inputs → adjust forward and drift → price options
 
-## 5. Mini-Project
-Price forward with discrete dividends:
-```python
-import numpy as np
-
-S0 = 100
-r = 0.05
-T = 1.0
-
-# Discrete dividends (time, cash)
-dividends = [(0.25, 1.0), (0.75, 1.0)]
-
-pv_div = sum(cash * np.exp(-r*t) for t, cash in dividends)
-F = (S0 - pv_div) * np.exp(r*T)
-
-print(f"PV dividends: {pv_div:.4f}")
-print(f"Forward price: {F:.4f}")
-```
-
-## 6. Challenge Round
-
+## Challenge Round
 **Q1:** Why does dividend yield reduce call prices?  
 **A1:** Dividends lower forward prices and reduce expected terminal spot, decreasing call value.
 
@@ -78,7 +57,7 @@ print(f"Forward price: {F:.4f}")
 **Q4:** Can dividend yield be negative?  
 **A4:** Effective negative yield can occur with short rebates or special financing conditions.
 
-## 7. Key References
+## Key References
 - [Dividend yield](https://en.wikipedia.org/wiki/Dividend_yield)  
 - [Forward price](https://en.wikipedia.org/wiki/Forward_price)
 

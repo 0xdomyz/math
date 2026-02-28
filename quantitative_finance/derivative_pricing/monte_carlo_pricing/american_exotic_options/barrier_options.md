@@ -1,12 +1,11 @@
-# Barrier Options
+﻿# Barrier Options
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** Path-dependent options activated (knock-in) or extinguished (knock-out) when underlying asset price crosses predetermined barrier level H during option life, offering cheaper hedging but discontinuous payoff risk.  
 **Purpose:** Reduce premium cost (50-70% of vanilla); express directional views; manage knock-out risk; hedge structured products; exploit volatility smile; corporate cost-effective hedging.  
 **Prerequisites:** European option pricing, path simulation, continuous monitoring, reflection principle, rebate valuation, first-passage time distributions
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Aspect | Down-and-Out Call | Up-and-Out Put | Knock-In Barrier | European Option | Double Barrier |
 |--------|-------------------|----------------|------------------|-----------------|----------------|
 | **Barrier Location** | H < S₀ (below spot) | H > S₀ (above spot) | Activates at H | No barrier | Two barriers (H_L, H_U) |
@@ -16,8 +15,7 @@
 | **Monitoring** | Continuous (harder) | Continuous | Continuous | None | Continuous (both) |
 | **Use Case** | Bull view, cost reduction | Bear view, cost reduction | Contrarian bet | Standard hedging | Range-bound strategies |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Down-and-Out Call**  
 S₀=$100, K=$100, H=$90 (barrier below strike), T=1yr. Stock path: $100→$105→$110→$95→$98→$105... never touches $90. At expiry: S_T=$120. Payoff: max($120-$100,0) = $20 (like European call). Premium: ~$6 (vs $10 European) — 40% cheaper. If path had touched $90 at any point → knocked out → payoff=$0 (even if S_T=$120). Trade-off: 40% cost savings vs knock-out risk.
 
@@ -27,8 +25,7 @@ Down-and-out call: S₀=$100, K=$95, H=$92, T=1yr. Stock path: stable $105-$110 
 **Edge Case: Barrier Very Close to Strike (H≈K)**  
 Up-and-out call: S₀=$100, K=$100, H=$101 (barrier 1% above ATM). Tiny room before knock-out. Any small upward move → knocked out. Effective payoff: max(S_T-K,0) if S never > $101 (nearly impossible if stock rises). Premium: ~$1-2 (90% discount vs European $10). Use case: Bet on stock staying flat/down; extremely cheap lottery ticket. Risk: Almost certain knock-out if bullish.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Barrier Option Framework:
 ├─ Barrier Types (8 Standard Variants):
@@ -143,8 +140,7 @@ Barrier Option Framework:
 
 **Interaction:** Path generation → Barrier monitoring → Knock-out/in status → Payoff determination → Discounting
 
-## 5. Mini-Project
-
+## Challenge Round
 Implement down-and-out call with continuous monitoring approximation (Brownian bridge):
 
 ```python
@@ -525,8 +521,7 @@ print("="*80)
 - **Brownian bridge:** Captures 5-10% more knock-outs (continuous approximation)
 - **Parity holds:** DO + DI ≈ European (within MC error)
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Down-and-out call (S₀=$100, K=$100, H=$85) costs $6. European call costs $10. Why 40% discount?**  
 A: Knock-out probability ≈ 20-25% (barrier 15% below spot → material risk of touching in 1 year with σ=25%). When knocked out, payoff=$0 (vs European max(S_T-K,0) > 0). Expected value: 0.75×(European payoff) → price ≈ 0.75×$10 = $7.50 if linear, but option convexity → actually $6 (40% discount). Intuition: Deep OTM barrier touch → lose all time value + intrinsic value → substantial discount.
 
@@ -545,8 +540,7 @@ A: Delta discontinuous at barrier. Far from H: delta ≈ European delta (0.5 for
 **Q6: Bank sells structured note: "Pays 10% coupon if stock stays between $90-$110; else pays 0%." How model this with barriers?**  
 A: Double barrier option (down-and-out at $90, up-and-out at $110). Payoff: $10 coupon if neither barrier touched; $0 if either touched. Equivalent: Sell zero-coupon bond ($100) + long double-knock-out digital call (pays $10 if survives). Pricing: MC with two barrier checks. Knock-out probability ≈ 40-60% (depends on vol, time). Fair coupon ≈ r/(1-P_knockout) → if P_knockout=50%, fair coupon ≈ 10% (matches risk-free rate 5% × 2 adjustment). Bank profits from: (1) selling above fair value, (2) hedging costs lower than implied, (3) correlation/vol surface arbitrage. Risk: Both barriers near spot → high gamma → expensive hedging.
 
-## 7. Key References
-
+## Key References
 - Rubinstein & Reiner (1991): "Unscrambling the Binary Code" — Closed-form barrier formulas, reflection principle
 - [Wikipedia: Barrier Option](https://en.wikipedia.org/wiki/Barrier_option) — Types, monitoring, applications
 - Boyle & Lau (1994): "Bumping Up Against the Barrier" — Brownian bridge correction, continuous monitoring

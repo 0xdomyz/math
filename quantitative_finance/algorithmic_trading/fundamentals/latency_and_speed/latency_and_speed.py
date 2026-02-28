@@ -1,3 +1,38 @@
+﻿# %% [markdown]
+# # latency and speed
+#
+# This interactive script follows the quantitative finance topic template.
+
+# %% [markdown]
+# ## Section 1 - Overview & Setup
+# Define imports, reproducibility settings, and runtime configuration.
+
+# %%
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+print("Setup complete for topic: latency and speed")
+
+# %% [markdown]
+# ## Section 2 - Data Generation
+# Generate or load data used by the modeling workflow.
+
+# %%
+if 'df' not in globals():
+    t = np.arange(500)
+    base = np.sin(t / 20.0)
+    noise = np.random.normal(0, 0.2, size=len(t))
+    df = pd.DataFrame({'t': t, 'signal': base + noise})
+print("Data shape:", df.shape)
+print(df.head(3))
+
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# Core topic logic and implementation details.
+
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
@@ -27,12 +62,12 @@ traders = {
 
 print(f"\nMarket Simulation:")
 print(f"   Arbitrage Opportunities: {n_events}")
-print(f"   Opportunity Duration: {opportunity_duration_us}μs")
+print(f"   Opportunity Duration: {opportunity_duration_us}Î¼s")
 print(f"   Profit per Trade: ${profit_per_trade:.2f}")
 
 print(f"\nTrader Latencies:")
 for trader, latency in traders.items():
-    print(f"   {trader}: {latency}μs ({latency/1000:.1f}ms)")
+    print(f"   {trader}: {latency}Î¼s ({latency/1000:.1f}ms)")
 
 # ============================================================================
 # ARBITRAGE RACE SIMULATION
@@ -98,7 +133,7 @@ for latency in latency_range_us:
     win_rate = (test_results['Test Trader']['wins'] / n_events) * 100
     win_rates.append(win_rate)
     
-    print(f"\nLatency {latency}μs: Win Rate {win_rate:.1f}%, Profit ${test_results['Test Trader']['profit']:,.0f}")
+    print(f"\nLatency {latency}Î¼s: Win Rate {win_rate:.1f}%, Profit ${test_results['Test Trader']['profit']:,.0f}")
 
 # ============================================================================
 # NETWORK LATENCY MODEL (Distance vs Technology)
@@ -171,7 +206,7 @@ print(f"   Win Rate: {remote_win_rate*100:.0f}%")
 print(f"   Annual Profit: ${remote_annual_profit:,.0f}")
 
 print(f"\nWith Co-location:")
-print(f"   Latency: {colo_latency_us}μs")
+print(f"   Latency: {colo_latency_us}Î¼s")
 print(f"   Win Rate: {colo_win_rate*100:.0f}%")
 print(f"   Annual Profit: ${colo_annual_profit:,.0f}")
 print(f"   Annual Cost: ${colo_annual_cost:,.0f}")
@@ -202,7 +237,7 @@ for i, (bar, trader) in enumerate(zip(bars, trader_names)):
     height = bar.get_height()
     latency = traders[trader]
     ax1.text(bar.get_x() + bar.get_width()/2., height,
-            f'{latency}μs', ha='center', va='bottom', fontsize=9)
+            f'{latency}Î¼s', ha='center', va='bottom', fontsize=9)
 
 # Plot 2: Latency sensitivity curve
 ax2 = axes[0, 1]
@@ -210,7 +245,7 @@ ax2.plot(latency_range_us / 1000, win_rates, 'o-', linewidth=3, markersize=8, co
 ax2.axhline(y=100, color='green', linestyle='--', alpha=0.5, label='100% (always win)')
 ax2.axhline(y=0, color='red', linestyle='--', alpha=0.5, label='0% (never win)')
 ax2.axvline(x=opportunity_duration_us / 1000, color='orange', linestyle='--', 
-           linewidth=2, label=f'Opportunity Duration ({opportunity_duration_us}μs)')
+           linewidth=2, label=f'Opportunity Duration ({opportunity_duration_us}Î¼s)')
 ax2.set_xlabel('Latency (ms)')
 ax2.set_ylabel('Win Rate (%)')
 ax2.set_title('Latency Sensitivity: Win Rate vs Speed')
@@ -257,5 +292,38 @@ ax4.legend(fontsize=9)
 plt.tight_layout()
 plt.savefig('latency_speed_analysis.png', dpi=100, bbox_inches='tight')
 print("\n" + "="*70)
-print("✓ Visualization saved: latency_speed_analysis.png")
+print("âœ“ Visualization saved: latency_speed_analysis.png")
 plt.show()
+
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# Compute basic evaluation metrics for demonstration.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    eval_mean = float(df['signal'].mean())
+    eval_std = float(df['signal'].std())
+    print(f"Evaluation summary -> mean: {eval_mean:.4f}, std: {eval_std:.4f}")
+else:
+    print("Evaluation note: custom topic code executed; add topic-specific metrics as needed.")
+
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# Visualize outputs to support interpretation.
+
+# %%
+if 'df' in globals() and 'signal' in df.columns:
+    ax = df.plot(x='t', y='signal', figsize=(10, 4), title='latency and speed - Signal View')
+    ax.set_ylabel('signal')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Visualization note: add topic-specific plots from model outputs.")
+
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+#
+# Key takeaways:
+# - End-to-end workflow scaffold is in place.
+# - Replace placeholder evaluation/visualization with production metrics and controls.
+# - Validate assumptions under realistic transaction costs, latency, and liquidity constraints.

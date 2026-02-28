@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # discount factor
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for discount factor.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: discount factor")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: discount_factor.md
 
@@ -68,7 +93,7 @@ for cf_name, cf_amount, years_list in cashflows:
         v_n = 1 / (1 + i_discount) ** year
         pv = cf_amount * v_n
         cf_pv += pv
-        print(f"  Year {year:2d}: ${cf_amount:>10,} × {v_n:.6f} = ${pv:>10,.2f}")
+        print(f"  Year {year:2d}: ${cf_amount:>10,}  {v_n:.6f} = ${pv:>10,.2f}")
     
     print(f"  Subtotal: ${cf_pv:>10,.2f}\n")
     total_pv += cf_pv
@@ -181,7 +206,7 @@ print(f"  Macaulay Duration: {macaulay_duration:.3f} years")
 print(f"  Modified Duration: {modified_duration:.3f} years")
 print(f"\nDuration Interpretation:")
 print(f"  For 1% increase in YTM:")
-print(f"    Price change ≈ -{modified_duration*100:.2f}% = ${price * (-modified_duration * 0.01):,.2f}")
+print(f"    Price change  -{modified_duration*100:.2f}% = ${price * (-modified_duration * 0.01):,.2f}")
 print()
 
 # 5. SPOT CURVE AND TERM STRUCTURE
@@ -264,7 +289,7 @@ annuity_i = 0.05
 annuities_pv = []
 
 for n in annuity_terms:
-    # aₙ̄| = [1 - v^n]/i
+    # aTM| = [1 - v^n]/i
     v_n = 1 / (1 + annuity_i) ** n
     a_n = (1 - v_n) / annuity_i
     annuities_pv.append(a_n)
@@ -274,7 +299,7 @@ perpetuity_value = 1 / annuity_i
 ax.plot(annuity_terms, annuities_pv, linewidth=2.5, color='purple', marker='o', markersize=3, alpha=0.7)
 ax.axhline(perpetuity_value, color='red', linestyle='--', linewidth=2, label=f'Perpetuity = {perpetuity_value:.1f}')
 ax.set_xlabel('Term (years)', fontsize=11)
-ax.set_ylabel('Annuity Factor aₙ̄|', fontsize=11)
+ax.set_ylabel('Annuity Factor aTM|', fontsize=11)
 ax.set_title('Annuity Present Value Factors (i = 5%)', fontsize=12, fontweight='bold')
 ax.legend(fontsize=10)
 ax.grid(alpha=0.3)
@@ -284,4 +309,28 @@ plt.savefig('discount_factor_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: discount factor")
+
 

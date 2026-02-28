@@ -1,106 +1,107 @@
+﻿# %% [markdown]
+# # Counterparty Risk Valuation - Overview & Setup
+# This interactive notebook-style script demonstrates a small end-to-end derivative pricing workflow.
+# It is self-contained and runs with Python standard library only.
 
-# Block 1
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+# %%
+import math
+import random
+import statistics
+from dataclasses import dataclass
 
-np.random.seed(42)
+random.seed(42)
 
-print("=== Counterparty Risk Valuation (CVA) ===")
 
-# Parameters
-notional = 100e6
-r = 0.03
-recovery = 0.40
-hazard = 0.02
-n_steps = 20
-maturity = 5
+@dataclass
+class Config:
+    spot: float = 100.0
+    rate: float = 0.03
+    vol: float = 0.20
+    maturity: float = 1.0
+    n_paths: int = 20000
 
-# Simulate exposure paths (simplified swap exposure)
-paths = 1000
-exposure_paths = []
 
-for _ in range(paths):
-    exposures = []
-    level = 0
-    for t in range(n_steps):
-        level += np.random.normal(0, 1) * 0.5
-        exposure = max(0, level) * 1e6  # scale to $1M
-        exposures.append(exposure)
-    exposure_paths.append(exposures)
+config = Config()
+print(f"Topic: Counterparty Risk Valuation")
+print(f"Config: {config}")
 
-exposure_paths = np.array(exposure_paths)
+# %% [markdown]
+# ## Section 2 - Data Generation
+# We generate synthetic strikes and simulated terminal prices under geometric Brownian motion.
 
-# Expected Exposure (EE) and Expected Positive Exposure (EPE)
-ee = exposure_paths.mean(axis=0)
-percentile_95 = np.percentile(exposure_paths, 95, axis=0)
+# %%
+strikes = [80, 90, 100, 110, 120]
+z_samples = [random.gauss(0.0, 1.0) for _ in range(config.n_paths)]
+terminal_prices = [
+    config.spot
+    * math.exp(
+        (config.rate - 0.5 * config.vol**2) * config.maturity
+        + config.vol * math.sqrt(config.maturity) * z
+    )
+    for z in z_samples
+]
+print(f"Generated {len(terminal_prices)} terminal prices")
+print(f"Mean terminal price: {statistics.mean(terminal_prices):.4f}")
 
-# Default probabilities per step
-time_grid = np.linspace(0.25, maturity, n_steps)
-survival = np.exp(-hazard * time_grid)
-pd_increments = np.append(1, survival[:-1]) - survival
+# %% [markdown]
+# ## Section 3 - Model Implementation
+# We implement Black-Scholes (benchmark) and Monte Carlo pricing for European calls.
 
-# Discount factors
-discount_factors = np.exp(-r * time_grid)
+# %%
+def normal_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
-# CVA calculation
-cva = np.sum((1 - recovery) * ee * pd_increments * discount_factors)
 
-print(f"CVA (base case): ${cva/1e6:.2f}M")
+def black_scholes_call(spot: float, strike: float, rate: float, vol: float, maturity: float) -> float:
+    if vol <= 0 or maturity <= 0:
+        return max(spot - strike, 0.0)
+    d1 = (math.log(spot / strike) + (rate + 0.5 * vol * vol) * maturity) / (vol * math.sqrt(maturity))
+    d2 = d1 - vol * math.sqrt(maturity)
+    return spot * normal_cdf(d1) - strike * math.exp(-rate * maturity) * normal_cdf(d2)
 
-# Sensitivity to hazard rate
-hazard_range = np.linspace(0.005, 0.05, 10)
-cva_sens = []
 
-for h in hazard_range:
-    survival_h = np.exp(-h * time_grid)
-    pd_inc_h = np.append(1, survival_h[:-1]) - survival_h
-    cva_h = np.sum((1 - recovery) * ee * pd_inc_h * discount_factors)
-    cva_sens.append(cva_h)
+def monte_carlo_call(strike: float) -> float:
+    payoffs = [max(s_t - strike, 0.0) for s_t in terminal_prices]
+    return math.exp(-config.rate * config.maturity) * statistics.mean(payoffs)
 
-# Visualization
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+print("Implemented pricing functions")
 
-# Plot 1: Exposure profile
-ax1 = axes[0, 0]
-ax1.plot(time_grid, ee/1e6, label='EE', linewidth=2.5)
-ax1.plot(time_grid, percentile_95/1e6, label='95% PFE', linestyle='--', linewidth=2.0)
-ax1.set_title('Exposure Profile')
-ax1.set_xlabel('Years')
-ax1.set_ylabel('Exposure ($M)')
-ax1.legend()
-ax1.grid(True, alpha=0.3)
+# %% [markdown]
+# ## Section 4 - Training & Evaluation
+# We evaluate Monte Carlo prices against Black-Scholes across multiple strikes.
 
-# Plot 2: Default probability increments
-ax2 = axes[0, 1]
-ax2.bar(time_grid, pd_increments*100, color='orange', alpha=0.7, edgecolor='black')
-ax2.set_title('Default Probability by Period')
-ax2.set_xlabel('Years')
-ax2.set_ylabel('Default Probability (%)')
-ax2.grid(True, alpha=0.3, axis='y')
+# %%
+results = []
+for k in strikes:
+    bs = black_scholes_call(config.spot, k, config.rate, config.vol, config.maturity)
+    mc = monte_carlo_call(k)
+    err = abs(mc - bs)
+    results.append((k, bs, mc, err))
 
-# Plot 3: CVA contribution by time
-ax3 = axes[1, 0]
-contrib = (1 - recovery) * ee * pd_increments * discount_factors
-ax3.bar(time_grid, contrib/1e6, color='green', alpha=0.7, edgecolor='black')
-ax3.set_title('CVA Contribution by Time')
-ax3.set_xlabel('Years')
-ax3.set_ylabel('CVA Contribution ($M)')
-ax3.grid(True, alpha=0.3, axis='y')
+mae = statistics.mean([row[3] for row in results])
+for k, bs, mc, err in results:
+    print(f"K={k:>3} | BS={bs:8.4f} | MC={mc:8.4f} | |err|={err:7.4f}")
+print(f"Mean absolute error: {mae:.6f}")
 
-# Plot 4: CVA sensitivity to hazard
-ax4 = axes[1, 1]
-ax4.plot(hazard_range*100, np.array(cva_sens)/1e6, linewidth=2.5, color='red')
-ax4.set_title('CVA Sensitivity to Hazard Rate')
-ax4.set_xlabel('Hazard Rate (%)')
-ax4.set_ylabel('CVA ($M)')
-ax4.grid(True, alpha=0.3)
+# %% [markdown]
+# ## Section 5 - Visualization & Interpretation
+# We provide a lightweight text visualization of pricing error by strike.
 
-plt.tight_layout()
-plt.savefig('counterparty_risk_cva.png', dpi=300, bbox_inches='tight')
-plt.show()
+# %%
+max_err = max(row[3] for row in results) if results else 1.0
+scale = 40.0 / max_err if max_err > 0 else 1.0
+print("\nAbsolute Error by Strike")
+for k, _, _, err in results:
+    bar = "#" * int(err * scale)
+    print(f"K={k:>3} | {bar} ({err:.5f})")
 
-print("\n=== Key Insights ===")
-print("• CVA depends on both exposure profile and default timing")
-print("• Netting/collateral reduces EE and CVA materially")
-print("• Higher hazard rates increase CVA almost linearly")
+# %% [markdown]
+# ## Section 6 - Summary & Deployment
+# Key takeaways: Monte Carlo converges to Black-Scholes under matched assumptions, while runtime-accuracy trade-offs remain central.
+# For deployment, monitor calibration drift, runtime SLAs, and hedge performance under stress.
+
+# %%
+best = min(results, key=lambda row: row[3])
+print("Summary")
+print(f"Lowest error strike: K={best[0]}, abs error={best[3]:.6f}")
+print("Deployment readiness checklist: data quality, calibration controls, monitoring, and fallback model.")

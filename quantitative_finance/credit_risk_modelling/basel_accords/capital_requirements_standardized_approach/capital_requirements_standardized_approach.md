@@ -1,4 +1,4 @@
-# Capital Requirements & Standardized Approach (Basel III)
+﻿# Capital Requirements & Standardized Approach (Basel III)
 
 ## 1. Concept Skeleton
 **Definition:** Regulatory framework specifying minimum capital requirements for credit risk, market risk, operational risk; Standardized Approach uses external ratings (AAA-D) for credit risk; Advanced Internal Ratings-Based (IRB) allows bank models (PD/LGD/EAD); Market risk uses expected shortfall instead of VaR  
@@ -8,655 +8,373 @@
 ## 2. Comparative Framing
 | Aspect | Standardized Approach | Foundation IRB | Advanced IRB | Key Tradeoff |
 |--------|---------------------|-----------------|---------------|------------|
-| **Credit Risk RW Source** | External ratings (S&P, Moody's) | Bank estimates PD; regulator provides LGD/EAD | Bank estimates all (PD/LGD/EAD) | Complexity ↔ Risk-sensitivity |
-| **Risk Weight** | 20%-150% by rating | Calculated formula (PD/LGD/EAD dependent) | Calculated formula (bank-specific) | Standardized ↔ Customized |
-| **RWA Formula** | RW × Exposure | 1.06×12.5×(PD×LGD + correlation adj.) | 1.06×12.5×(PD×LGD×EAD + ... - discount) | Simple ↔ Refined |
-| **Capital Requirement** | 8% × RWA | 8% × RWA (or lower if IRB floor) | 8% × RWA (bound by floor) | Easy compliance ↔ Optimized |
-| **Regulatory Approval** | Automatic (published ratings) | Requires IRB model validation | Requires IRB + detailed validation | Fast ↔ Rigorous |
-| **Data Requirements** | External ratings only | Internal default history + rating drift | Historical losses, correlation matrices | Low burden ↔ High burden |
-| **Fit for Asset Class** | Standardized: Large corporates, sovereigns | Mid-market corporates, loans | Large banks (internal data available) | Cost-effective ↔ Accurate |
-| **Game-Ability** | Cliff effects at rating boundaries | Parameter manipulation (PD/LGD underestimation) | Extensive model gaming potential | Transparent ↔ Exploitable |
-| **Output Floor** | Baseline (100%) | 72.5% of SA RWA | 72.5% of SA RWA | —— |
-| **Typical Capital** | 10-12% RWA | 8-11% RWA | 7-10% RWA | Conservative ↔ Efficient |
+| **Credit Risk RW Source** | External ratings (S&P, Moody's) | Bank estimates PD; regulator provides LGD/EAD | Bank estimates all (PD/LGD/EAD) | Complexity â†” Risk-sensitivity |
+| **Risk Weight** | 20%-150% by rating | Calculated formula (PD/LGD/EAD dependent) | Calculated formula (bank-specific) | Standardized â†” Customized |
+| **RWA Formula** | RW Ã— Exposure | 1.06Ã—12.5Ã—(PDÃ—LGD + correlation adj.) | 1.06Ã—12.5Ã—(PDÃ—LGDÃ—EAD + ... - discount) | Simple â†” Refined |
+| **Capital Requirement** | 8% Ã— RWA | 8% Ã— RWA (or lower if IRB floor) | 8% Ã— RWA (bound by floor) | Easy compliance â†” Optimized |
+| **Regulatory Approval** | Automatic (published ratings) | Requires IRB model validation | Requires IRB + detailed validation | Fast â†” Rigorous |
+| **Data Requirements** | External ratings only | Internal default history + rating drift | Historical losses, correlation matrices | Low burden â†” High burden |
+| **Fit for Asset Class** | Standardized: Large corporates, sovereigns | Mid-market corporates, loans | Large banks (internal data available) | Cost-effective â†” Accurate |
+| **Game-Ability** | Cliff effects at rating boundaries | Parameter manipulation (PD/LGD underestimation) | Extensive model gaming potential | Transparent â†” Exploitable |
+| **Output Floor** | Baseline (100%) | 72.5% of SA RWA | 72.5% of SA RWA | â€”â€” |
+| **Typical Capital** | 10-12% RWA | 8-11% RWA | 7-10% RWA | Conservative â†” Efficient |
 
 ## 3. Examples + Counterexamples
 
 **Standardized Approach Example:**  
-Bank holds $100M loan to AAA-rated corporate. Risk weight = 20% (S&P AAA). RWA = 0.20 × $100M = $20M. Capital required = 8% × $20M = $1.6M.  
+Bank holds $100M loan to AAA-rated corporate. Risk weight = 20% (S&P AAA). RWA = 0.20 Ã— $100M = $20M. Capital required = 8% Ã— $20M = $1.6M.  
 Rating downgrade to BBB: RW = 100%, RWA = $100M, capital = $8M (5x increase overnight). Called "cliff risk."
 
 **Foundation IRB Example (Corporates):**  
 Bank uses internal data; PD estimate = 1.5%, LGD = 45% (regulator provides), EAD = $100M.  
-RW formula: 1.06 × 12.5 × [1.5% × 45% + √(correlation) × (default stress)] ≈ 60%.  
-RWA = 0.60 × $100M = $60M, Capital = $4.8M (much lower than SA's $8M for BBB equivalent).
+RW formula: 1.06 Ã— 12.5 Ã— [1.5% Ã— 45% + âˆš(correlation) Ã— (default stress)] â‰ˆ 60%.  
+RWA = 0.60 Ã— $100M = $60M, Capital = $4.8M (much lower than SA's $8M for BBB equivalent).
 
 **Advanced IRB Example (Retail Mortgages):**  
 Bank large mortgage portfolio; internal data shows 0.3% default rate, 30% LGD, 85% EAD (loan loss given default; 15% equity cushion).  
-RW = 1.06 × 12.5 × [0.3% × 30%] ≈ 1.2% (extremely low—retail portfolios are safer).  
-RWA = 0.012 × $500M = $6M, Capital = $0.48M (vs SA's standardized 35% for residential mortgages = $17.5M).  
+RW = 1.06 Ã— 12.5 Ã— [0.3% Ã— 30%] â‰ˆ 1.2% (extremely lowâ€”retail portfolios are safer).  
+RWA = 0.012 Ã— $500M = $6M, Capital = $0.48M (vs SA's standardized 35% for residential mortgages = $17.5M).  
 **Counterexample:** 2008 crisis: Actual mortgage defaults 5%+, LGD 60%+. Advanced IRB models catastrophically underestimated. Lesson: Historical calibration fails in tail risk.
 
 **Market Risk: VaR vs Expected Shortfall (CVaR):**  
 Basel II: VaR(99%, 10-day) = $50M. Bank "99% confident losses won't exceed $50M."  
 Basel III CVaR: ES(99%, 10-day) = $75M (average of losses in tail 1%). Captures tail severity.  
-Result: Basel III capital ≈ 50% higher for trading desks.
+Result: Basel III capital â‰ˆ 50% higher for trading desks.
 
 **Operational Risk: Standardized Approach:**  
-Bank revenue over 3 years: $500M average. OpRisk charge = 12% × $500M = $60M capital required.  
-vs Advanced: Historical loss data, 15% loss ratio, internal models → $40M. Gaming: Shift business to lower-indicator revenue streams.
+Bank revenue over 3 years: $500M average. OpRisk charge = 12% Ã— $500M = $60M capital required.  
+vs Advanced: Historical loss data, 15% loss ratio, internal models â†’ $40M. Gaming: Shift business to lower-indicator revenue streams.
 
 **Leverage Ratio as Binding Floor:**  
 Bank: Tier 1 = $40B, Total Assets = $900B. Leverage ratio = $40B / $900B = 4.44%.  
-RWA-based: If RWA = $300B (33% of assets, "low-risk"), Capital = 8% × $300B = $24B ✓ (easily met).  
-But leverage ratio requires $27B (3% × $900B). Leverage ratio is binding → must hold extra capital.
+RWA-based: If RWA = $300B (33% of assets, "low-risk"), Capital = 8% Ã— $300B = $24B âœ“ (easily met).  
+But leverage ratio requires $27B (3% Ã— $900B). Leverage ratio is binding â†’ must hold extra capital.
 
 **Output Floor (72.5%) Example:**  
 Bank SA RWA = $400B (standardized). IRB model calculates RWA = $250B (37.5% reduction via gaming).  
-Floor: IRB RWA ≥ 72.5% × $400B = $290B. Bank constrained to use $290B.  
+Floor: IRB RWA â‰¥ 72.5% Ã— $400B = $290B. Bank constrained to use $290B.  
 **Effect:** Reduces incentive to game PD/LGD but doesn't eliminate. Floor is partial safeguard.
 
 ## 4. Layer Breakdown
 ```
 Capital Requirement & Risk Calculation Framework:
 
-├─ Credit Risk Capital Calculation
-│  ├─ Standardized Approach (SA)
-│  │   ├─ Asset Classification:
-│  │   │   ├─ Central Government & Central Banks:
-│  │   │   │   ├─ Domestic currency (country): RW = 0% (OeCD member)
-│  │   │   │   ├─ Foreign currency: RW = 0-100% (country risk classification)
-│  │   │   │   └─ Example: US Treasury 0%, Greece 100%+
-│  │   │   ├─ Institutions (Banks, Investment Firms):
-│  │   │   │   ├─ Domestic, central bank's home country: RW = 20%
-│  │   │   │   ├─ AAA-AA rated: RW = 20%
-│  │   │   │   ├─ A-rated: RW = 50%
-│  │   │   │   ├─ BBB-rated: RW = 100%
-│  │   │   │   ├─ Unrated: RW = 100%
-│  │   │   │   └─ BB or below: RW = 150%
-│  │   │   ├─ Corporates (Non-Financial):
-│  │   │   │   ├─ AAA-AA rated: RW = 20%
-│  │   │   │   ├─ A-rated: RW = 50%
-│  │   │   │   ├─ BBB-rated: RW = 100%
-│  │   │   │   ├─ BB-rated: RW = 100%
-│  │   │   │   ├─ B or below: RW = 150%
-│  │   │   │   └─ Unrated: RW = 100%
-│  │   │   ├─ Retail Exposures:
-│  │   │   │   ├─ Residential mortgages (RMBS): RW = 35%
-│  │   │   │   ├─ Qualifying revolving (credit cards): RW = 75%
-│  │   │   │   ├─ Other retail (auto loans, unsecured personal): RW = 75%
-│  │   │   │   └─ All retail pools lower RW (lower individual defaults)
-│  │   │   ├─ Equity Exposures:
-│  │   │   │   ├─ Direct holdings: RW = 100%
-│  │   │   │   ├─ Mutual funds (look-through): RW = rating-dependent 20-1250%
-│  │   │   │   └─ Private equity: RW = 190%
-│  │   │   └─ Off-Balance-Sheet Exposures:
-│  │   │       ├─ Credit commitments: CCF (Credit Conversion Factor) 20%-100%
-│  │   │       ├─ Guarantees: 100% CCF
-│  │   │       └─ Letter of credit: 20%-100% CCF
-│  │   ├─ Credit Risk Mitigation:
-│  │   │   ├─ Collateral Haircuts: Adjust exposure for market fluctuations
-│  │   │   │   ├─ Cash collateral: 0% haircut
-│  │   │   │   ├─ Government bonds (AAA): 0-2% haircut
-│  │   │   │   ├─ Investment-grade corporates: 2-4% haircut
-│  │   │   │   ├─ Equity: 15-50% haircut (high volatility)
-│  │   │   │   └─ Formula: Adjusted Exposure = Exposure - Collateral × (1 - Haircut)
-│  │   │   ├─ Guarantees & Credit Derivatives:
-│  │   │   │   ├─ Third-party guarantee: Risk weight → guarantor's rating
-│  │   │   │   ├─ Example: BBB corporate guaranteed by AAA bank → use 20% RW
-│  │   │   │   ├─ Partial coverage: Proportional risk weighting
-│  │   │   │   └─ Counterparty concentration: Cap at 25% guarantee
-│  │   │   └─ Netting: Reduce gross exposure by collateral/marks
-│  │   └─ Capital Charge: 8% × (Adjusted RWA)
-│  │
-│  ├─ Internal Ratings-Based (IRB) Approach
-│  │   ├─ Foundation IRB (F-IRB):
-│  │   │   ├─ Bank estimates: Probability of Default (PD)
-│  │   │   ├─ Regulator provides: Loss Given Default (LGD), Exposure at Default (EAD)
-│  │   │   ├─ Formula (Corporates):
-│  │   │   │   RW = 1.06 × 12.5 × {PD × LGD + √[R/(1-R)] × σ × N^{-1}(LGD)}
-│  │   │   │   Where:
-│  │   │   │   - N^{-1}(LGD) = inverse normal (portfolio tail stress)
-│  │   │   │   - R = correlation factor (typically 0.12 for corporates, lower for retail)
-│  │   │   │   - σ = asset volatility
-│  │   │   ├─ Result: RW typically 15%-50% for corporates (vs 20%-150% SA)
-│  │   │   ├─ LGD floor: 45% for corporate unsecured, 35% senior secured
-│  │   │   ├─ EAD floor: Minimum 100% of loan balance
-│  │   │   └─ Capital charge: 8% × RWA
-│  │   │
-│  │   ├─ Advanced IRB (A-IRB):
-│  │   │   ├─ Bank estimates all: PD, LGD, EAD
-│  │   │   ├─ Formula (Corporates - identical to F-IRB but bank-derived LGD/EAD):
-│  │   │   │   RW = 1.06 × 12.5 × {PD × LGD + √[R/(1-R)] × σ × N^{-1}(LGD)}
-│  │   │   ├─ LGD Estimation Methods:
-│  │   │   │   ├─ Historical: Average LGD from bank's past defaults
-│  │   │   │   ├─ Market-based: CDS spreads imply recovery rates
-│  │   │   │   ├─ Collateral-adjusted: LGD = [Exposure - Collateral × (1-Haircut)] / Exposure
-│  │   │   │   ├─ Sectoral: Vary by industry/collateral type
-│  │   │   │   ├─ Maturity adjustment: Longer loans → higher LGD (less recovery time)
-│  │   │   │   └─ Typical range: 10% (senior secured real estate) - 80% (unsecured)
-│  │   │   ├─ EAD Estimation Methods:
-│  │   │   │   ├─ Outstanding amount: Current loan balance
-│  │   │   │   ├─ Undrawn commitments: Probability of drawdown (typical 20%-50%)
-│  │   │   │   ├─ Derivative exposure: Current + potential future exposure (CVA methodology)
-│  │   │   │   └─ Formula: EAD = Outstanding + Credit Conversion Factor × Undrawn
-│  │   │   ├─ PD Estimation Methods (see below)
-│  │   │   ├─ Capital charges: Same formula as F-IRB but can be 2-3x lower (if LGD/EAD underestimated)
-│  │   │   └─ Output floor constraint: RWA ≥ 72.5% × SA RWA (prevents gaming)
-│  │   │
-│  │   ├─ PD (Probability of Default) Estimation:
-│  │   │   ├─ Definition: Probability borrower defaults within 1-year horizon
-│  │   │   ├─ Historical Approach:
-│  │   │   │   ├─ Data: 5-10 years of default history
-│  │   │   │   ├─ Calculation: PD = (Number of defaults in year) / (Number of borrowers at start)
-│  │   │   │   ├─ Adjustment: Remove cyclical effects (normalize to "through-the-cycle" PD)
-│  │   │   │   ├─ Example: 100 loans tracked 5 years → 2 defaults → PD = 2% / 5 = 0.4% annual
-│  │   │   │   └─ Downside: Limited history, need stability
-│  │   │   ├─ Rating System Approach:
-│  │   │   │   ├─ Segment portfolio into rating grades (AAA → CCC)
-│  │   │   │   ├─ Assign PD to each grade (based on historical default rates)
-│  │   │   │   ├─ Rating grades defined by financial metrics:
-│  │   │   │   │   ├─ Leverage (Debt/EBITDA): ↑ leverage → ↓ grade → ↑ PD
-│  │   │   │   │   ├─ Profitability (EBITDA/Revenue): ↓ margin → ↓ grade
-│  │   │   │   │   ├─ Interest coverage (EBITDA/Interest): Lower → worse grade
-│  │   │   │   │   └─ Industry/Country: Adjust baseline PD by sector risk
-│  │   │   │   ├─ Typical Mapping (Corporates):
-│  │   │   │   │   ├─ Grade 1 (AAA equivalent): PD = 0.05%
-│  │   │   │   │   ├─ Grade 3 (A equivalent): PD = 0.2%
-│  │   │   │   │   ├─ Grade 5 (BBB equivalent): PD = 0.8%
-│  │   │   │   │   ├─ Grade 7 (B equivalent): PD = 3%
-│  │   │   │   │   └─ Grade 9 (CCC equivalent): PD = 10%+
-│  │   │   │   └─ Validation: Compare grades to external ratings (should correlate)
-│  │   │   ├─ Statistical Models:
-│  │   │   │   ├─ Logistic regression: PD = 1 / (1 + e^{-[intercept + β1×Leverage + β2×ROE + ...]})
-│  │   │   │   ├─ Merton model: Structural approach (firm value vs debt)
-│  │   │   │   │   ├─ Firm equity value = Max(Assets - Debt, 0)
-│  │   │   │   │   ├─ Default when Assets < Debt
-│  │   │   │   │   ├─ PD = N[-DD] (distance to default)
-│  │   │   │   │   └─ DD = [ln(Assets/Debt) + (μ - σ²/2)T] / (σ√T)
-│  │   │   │   ├─ Machine learning: Gradient boosting, neural networks (increasing use)
-│  │   │   │   └─ Advantages: Capture nonlinearities, incorporate many features
-│  │   │   └─ Regulatory Criteria (IRB model approval):
-│  │   │       ├─ At least 5 years historical data
-│  │   │       ├─ Include stress periods (recessions, crises)
-│  │   │       ├─ Testing: Backtesting (actual defaults vs model PD)
-│  │   │       ├─ Stability: PD shouldn't change >50% year-to-year (unless business change)
-│  │   │       ├─ Granularity: Enough observations per grade to be reliable
-│  │   │       └─ Regulatory approval required before use
-│  │   │
-│  │   ├─ Retail IRB (Special treatment):
-│  │   │   ├─ Lower correlation (0.05 vs 0.12 for corporates) → lower RW
-│  │   │   ├─ Typical RW: 5-15% (vs 35%+ SA for mortgages)
-│  │   │   ├─ Rationale: Individual defaults don't correlate highly (diversified pool)
-│  │   │   └─ Constraint: Portfolio effects (recession → all retail defaults spike)
-│  │   │
-│  │   └─ IRB Floors & Output Floor:
-│  │       ├─ IRB floor (pre-2023): Minimum RWA = 75% × SA RWA
-│  │       ├─ Output floor (post-2023): Minimum RWA = 72.5% × SA RWA
-│  │       ├─ Effect: Prevents IRB from reducing RWA >27.5% vs SA
-│  │       ├─ Example: SA RWA = $400B, IRB calculated = $200B → Use $290B (72.5% floor)
-│  │       └─ Phase-in: 72.5% (2023) → 72.5% (permanent after 2028)
-│
-├─ Market Risk Capital
-│  ├─ Basel II Approach (VaR-based, now deprecated):
-│  │   ├─ VaR(99%, 10-day) = 1% probability of loss > this amount
-│  │   ├─ Capital = 3 × VaR + IdiosyncraticRisk + specific risk charge
-│  │   ├─ Criticized: Doesn't capture tail severity (CVaR importance)
-│  │   └─ Status: Phased out (replaced by FRTB)
-│  │
-│  ├─ Basel III/FRTB Approach (Expected Shortfall-based):
-│  │   ├─ Expected Shortfall (CVaR) = Average loss in tail 1%
-│  │   ├─ Calculation Steps:
-│  │   │   ├─ Historical scenarios (250 days, last year of data)
-│  │   │   ├─ Mark portfolio to each scenario
-│  │   │   ├─ Calculate losses
-│  │   │   ├─ Sort, select worst 1% of days
-│  │   │   ├─ Average = ES
-│  │   │   └─ Capital = 3 × ES (provides buffer)
-│  │   ├─ Stressed ES: Same calculation but using pre-crisis market period
-│  │   │   ├─ Captures regime where correlations spike
-│  │   │   ├─ ES from 2008-2009 would be used if that's the worst period
-│  │   │   └─ Capital charge = max(ES_current, ES_stressed)
-│  │   ├─ Modeling Components:
-│  │   │   ├─ Delta (linear sensitivity): ∂P/∂S × S change
-│  │   │   ├─ Gamma (convexity): ½ × ∂²P/∂S² × (ΔS)²
-│  │   │   ├─ Vega (volatility): ∂P/∂σ × Δσ
-│  │   │   ├─ Rho (interest rate): ∂P/∂r × Δr
-│  │   │   └─ Basis risk: Hedge doesn't perfectly offset (e.g., index vs individual stock)
-│  │   └─ Capital charge (FRTB):
-│  │       ├─ Sensitivities method (simplified): Fixed capital per dollar of delta/gamma/vega
-│  │       ├─ Full revaluation (complex): Run model on scenarios
-│  │       └─ Typical: 5-10% of notional for equity portfolios
-│  │
-│  ├─ Interest Rate Risk in Banking Book (IRRBB):
-│  │   ├─ Non-trading positions (deposits, mortgages at fixed rates)
-│  │   ├─ Pillar 2 capital add-on (not formulaic)
-│  │   ├─ Measured as: Loss if rates move ±200 bps
-│  │   ├─ Example: Deposit base $100B at 1%, mortgages $80B at 3.5%
-│  │   │   Rate +200bps: Cost deposits ↑ by $2B, mortgage income ↑ $1.6B → Net loss $0.4B
-│  │   ├─ Counterparty (counterparty risk): Derive exposure value using SA-CCR
-│  │   └─ CVA (Credit Valuation Adjustment): Risk that counterparty defaults
-│  │       ├─ Not just mark-to-market, but future exposure too
-│  │       ├─ Capital charge on derivative portfolio
-│  │       └─ Typically 2-5% of notional for active traders
-│  │
-│  └─ Concentration Risk (New):
-│      ├─ Single counterparty large exposure limit
-│      ├─ Exposure > 10% Tier 1 capital triggers capital charge
-│      ├─ Formula: 0% if < 10%, scales to 100% if very large
-│      ├─ Example: Bank Tier1 = $20B, exposure to client = $5B
-│      │   Limit = 10% × $20B = $2B; $5B exceeds by $3B → capital charge on $3B
-│      └─ Interconnectedness adds surcharge (systemically important counterparties)
-│
-├─ Operational Risk Capital
-│  ├─ Standardized Approach (SA):
-│  │   ├─ Capital Charge = 12% × Indicator (average 3-year)
-│  │   ├─ Indicator typically = Gross revenue (adjusted for business lines)
-│  │   ├─ Calculation:
-│  │   │   ├─ Calculate indicator for each year (past 3 years)
-│  │   │   ├─ Average the 3 years
-│  │   │   ├─ Multiply by 12%
-│  │   │   └─ Result = Capital required
-│  │   ├─ Example:
-│  │   │   ├─ Year 1 revenue: $100M, OpRisk indicator = $100M
-│  │   │   ├─ Year 2 revenue: $120M, OpRisk indicator = $120M
-│  │   │   ├─ Year 3 revenue: $110M, OpRisk indicator = $110M
-│  │   │   ├─ Average = $110M
-│  │   │   ├─ Capital required = 12% × $110M = $13.2M
-│  │   └─ Simplified but pro-cyclical (revenue down in crisis → lower capital)
-│  │
-│  ├─ Advanced Approach (AA):
-│  │   ├─ Used by large systemically important banks
-│  │   ├─ Components:
-│  │   │   ├─ Expected Loss (EL): E[Severity × Frequency]
-│  │   │   │   ├─ Frequency: How many operational events per year (e.g., 5 events)
-│  │   │   │   ├─ Severity: Average loss per event (e.g., $2M average)
-│  │   │   │   └─ EL = 5 × $2M = $10M/year
-│  │   │   ├─ Unexpected Loss (UL): Tail risk charge
-│  │   │   │   ├─ Use CVaR or value-at-risk on loss distribution
-│  │   │   │   ├─ UL = (99.9% VaR - EL) / 8 [convert to capital]
-│  │   │   │   ├─ Typical: $30-50M (tail scenarios, rare large losses)
-│  │   │   │   └─ Example: 0.1% tail = $100M loss, EL = $10M, UL = ($100M - $10M) / 8 = $11.25M
-│  │   │   ├─ Internal Loss Multiplier (ILM): Adjustment for data quality/model risk
-│  │   │   │   ├─ If severe crisis happened recently, data quality increases
-│  │   │   │   ├─ ILM = [1 + (OpRisk events in crisis × weight)] / baseline
-│  │   │   │   ├─ Range: 0.8 - 1.5
-│  │   │   │   └─ Effect: Increase capital charge post-crisis (pro-cyclical tension)
-│  │   │   └─ Diversification: Reduce capital by potential portfolio diversification
-│  │   │       ├─ Different risk categories less than additive
-│  │   │       ├─ Correlation < 1 → portfolio effect
-│  │   │       └─ Divisor typically 1.5 - 2.5
-│  │   ├─ Capital charge: OpRisk = [EL + UL] × ILM × 1/Diversification
-│  │   ├─ Typical: $25-75M for large banks
-│  │   └─ Regulatory approval required (strict model validation)
-│  │
-│  ├─ Loss Event Categories (Basel Operational Risk Framework):
-│  │   ├─ Internal fraud: Employee theft, trade desk misconduct
-│  │   ├─ External fraud: ATM theft, cyber attacks, client fraud
-│  │   ├─ DLOA (Disruption of Business & System Failures): IT outages, power failures
-│  │   ├─ EPCE (Employment Practices & Client Relations): Wrongful termination suits, discrimination
-│  │   ├─ Damage to Physical Assets: Natural disasters, vandalism
-│  │   ├─ Business Disruption & System Failures: Infrastructure failure
-│  │   ├─ Execution, Delivery, Process Management: Trade errors, settlement fails
-│  │   ├─ Client/Product line specific: Model risk, product defects
-│  │   └─ Correlations: Typically low (diversified portfolio)
-│  │
-│  └─ Regulatory Scrutiny:
-│      ├─ Stress scenarios including operational events
-│      ├─ Enhanced monitoring for fraud/cyber risk
-│      ├─ Technology resilience assessments
-│      └─ Third-party risk management (outsourced functions)
-│
-├─ Total Capital Requirement Combination
-│  ├─ Formula: Total Capital = Credit RW + Market RW + OpRisk
-│  │   All converted to capital percentage of RWA
-│  │   Capital = 8% × (Credit RWA + Market RWA + OpRisk RWA)
-│  ├─ Interaction Effects:
-│  │   ├─ Correlated risks: Market downturn + credit defaults + operational stress
-│  │   ├─ Stress testing explicitly models combinations
-│  │   ├─ No diversification benefit (regulatory conservative)
-│  │   └─ Pillar 2 (supervisor) can add if combinations appear dangerous
-│  ├─ Buffers (on top of 8% minimum):
-│  │   ├─ Capital Conservation Buffer (CCB): 2.5%
-│  │   ├─ Countercyclical Buffer (CyCB): 0-2.5%
-│  │   ├─ G-SIB surcharge: 1-3.5%
-│  │   └─ Total effective minimum: 12-17% for large banks
-│  └─ Real Bank Example (Hypothetical Large Bank):
-│      ├─ Credit RWA: $300B (75% of total)
-│      ├─ Market RWA: $80B (20% of total)
-│      ├─ OpRisk RWA: $20B (5% of total)
-│      ├─ Total RWA: $400B
-│      ├─ Minimum capital (8%): $32B
-│      ├─ CCB (2.5%): $10B
-│      ├─ CyCB (1%): $4B
-│      ├─ G-SIB surcharge (2%): $8B
-│      ├─ Total required: $54B (13.5% of RWA)
-│      ├─ Typical buffer: Hold $60-70B (15-17.5%)
-│      └─ Leverage ratio floor (3% of $1.5T assets) = $45B also binding
-│
-├─ Risk Calculation System Architecture
-│  ├─ Data Pipeline:
-│  │   ├─ Market data: Daily prices, rates, volatility (real-time)
-│  │   ├─ Portfolio positions: Securities, derivatives, loans (daily)
-│  │   ├─ Credit data: Ratings, default history, PD models (monthly updates)
-│  │   ├─ Operational data: Loss events, audit reports (annual compilation)
-│  │   └─ Regulatory data: Counterparty exposures, large exposures (monthly)
-│  ├─ Model Components:
-│  │   ├─ Credit risk models: PD/LGD/EAD for each borrower
-│  │   ├─ Market risk models: VaR, ES, Greeks (delta/gamma/vega)
-│  │   ├─ Operational risk models: Frequency/severity, loss events
-│  │   ├─ Correlation models: How risks move together
-│  │   └─ Scenario analysis: Tail events, stress testing
-│  ├─ Computing:
-│  │   ├─ Overnight: Full capital calculation (RWA recalculation)
-│  │   ├─ Intraday: Market VaR updates (key for trading desks)
-│  │   ├─ Monthly: Stress testing, regulatory reporting
-│  │   ├─ Quarterly: Capital forecast, buffer testing
-│  │   └─ Annual: IRB model backtesting, regulatory approval prep
-│  └─ Audit & Governance:
-│      ├─ Model risk management: Independent review of key models
-│      ├─ Backtesting: Compare predicted vs actual losses
-│      ├─ Sensitivity analysis: How capital changes with parameter shifts
-│      ├─ Stress testing: Extreme scenarios
-│      └─ Board oversight: Capital adequacy, strategic implications
+â”œâ”€ Credit Risk Capital Calculation
+â”‚  â”œâ”€ Standardized Approach (SA)
+â”‚  â”‚   â”œâ”€ Asset Classification:
+â”‚  â”‚   â”‚   â”œâ”€ Central Government & Central Banks:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Domestic currency (country): RW = 0% (OeCD member)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Foreign currency: RW = 0-100% (country risk classification)
+â”‚  â”‚   â”‚   â”‚   â””â”€ Example: US Treasury 0%, Greece 100%+
+â”‚  â”‚   â”‚   â”œâ”€ Institutions (Banks, Investment Firms):
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Domestic, central bank's home country: RW = 20%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ AAA-AA rated: RW = 20%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ A-rated: RW = 50%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ BBB-rated: RW = 100%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Unrated: RW = 100%
+â”‚  â”‚   â”‚   â”‚   â””â”€ BB or below: RW = 150%
+â”‚  â”‚   â”‚   â”œâ”€ Corporates (Non-Financial):
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ AAA-AA rated: RW = 20%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ A-rated: RW = 50%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ BBB-rated: RW = 100%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ BB-rated: RW = 100%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ B or below: RW = 150%
+â”‚  â”‚   â”‚   â”‚   â””â”€ Unrated: RW = 100%
+â”‚  â”‚   â”‚   â”œâ”€ Retail Exposures:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Residential mortgages (RMBS): RW = 35%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Qualifying revolving (credit cards): RW = 75%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Other retail (auto loans, unsecured personal): RW = 75%
+â”‚  â”‚   â”‚   â”‚   â””â”€ All retail pools lower RW (lower individual defaults)
+â”‚  â”‚   â”‚   â”œâ”€ Equity Exposures:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Direct holdings: RW = 100%
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Mutual funds (look-through): RW = rating-dependent 20-1250%
+â”‚  â”‚   â”‚   â”‚   â””â”€ Private equity: RW = 190%
+â”‚  â”‚   â”‚   â””â”€ Off-Balance-Sheet Exposures:
+â”‚  â”‚   â”‚       â”œâ”€ Credit commitments: CCF (Credit Conversion Factor) 20%-100%
+â”‚  â”‚   â”‚       â”œâ”€ Guarantees: 100% CCF
+â”‚  â”‚   â”‚       â””â”€ Letter of credit: 20%-100% CCF
+â”‚  â”‚   â”œâ”€ Credit Risk Mitigation:
+â”‚  â”‚   â”‚   â”œâ”€ Collateral Haircuts: Adjust exposure for market fluctuations
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Cash collateral: 0% haircut
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Government bonds (AAA): 0-2% haircut
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Investment-grade corporates: 2-4% haircut
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Equity: 15-50% haircut (high volatility)
+â”‚  â”‚   â”‚   â”‚   â””â”€ Formula: Adjusted Exposure = Exposure - Collateral Ã— (1 - Haircut)
+â”‚  â”‚   â”‚   â”œâ”€ Guarantees & Credit Derivatives:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Third-party guarantee: Risk weight â†’ guarantor's rating
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Example: BBB corporate guaranteed by AAA bank â†’ use 20% RW
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Partial coverage: Proportional risk weighting
+â”‚  â”‚   â”‚   â”‚   â””â”€ Counterparty concentration: Cap at 25% guarantee
+â”‚  â”‚   â”‚   â””â”€ Netting: Reduce gross exposure by collateral/marks
+â”‚  â”‚   â””â”€ Capital Charge: 8% Ã— (Adjusted RWA)
+â”‚  â”‚
+â”‚  â”œâ”€ Internal Ratings-Based (IRB) Approach
+â”‚  â”‚   â”œâ”€ Foundation IRB (F-IRB):
+â”‚  â”‚   â”‚   â”œâ”€ Bank estimates: Probability of Default (PD)
+â”‚  â”‚   â”‚   â”œâ”€ Regulator provides: Loss Given Default (LGD), Exposure at Default (EAD)
+â”‚  â”‚   â”‚   â”œâ”€ Formula (Corporates):
+â”‚  â”‚   â”‚   â”‚   RW = 1.06 Ã— 12.5 Ã— {PD Ã— LGD + âˆš[R/(1-R)] Ã— Ïƒ Ã— N^{-1}(LGD)}
+â”‚  â”‚   â”‚   â”‚   Where:
+â”‚  â”‚   â”‚   â”‚   - N^{-1}(LGD) = inverse normal (portfolio tail stress)
+â”‚  â”‚   â”‚   â”‚   - R = correlation factor (typically 0.12 for corporates, lower for retail)
+â”‚  â”‚   â”‚   â”‚   - Ïƒ = asset volatility
+â”‚  â”‚   â”‚   â”œâ”€ Result: RW typically 15%-50% for corporates (vs 20%-150% SA)
+â”‚  â”‚   â”‚   â”œâ”€ LGD floor: 45% for corporate unsecured, 35% senior secured
+â”‚  â”‚   â”‚   â”œâ”€ EAD floor: Minimum 100% of loan balance
+â”‚  â”‚   â”‚   â””â”€ Capital charge: 8% Ã— RWA
+â”‚  â”‚   â”‚
+â”‚  â”‚   â”œâ”€ Advanced IRB (A-IRB):
+â”‚  â”‚   â”‚   â”œâ”€ Bank estimates all: PD, LGD, EAD
+â”‚  â”‚   â”‚   â”œâ”€ Formula (Corporates - identical to F-IRB but bank-derived LGD/EAD):
+â”‚  â”‚   â”‚   â”‚   RW = 1.06 Ã— 12.5 Ã— {PD Ã— LGD + âˆš[R/(1-R)] Ã— Ïƒ Ã— N^{-1}(LGD)}
+â”‚  â”‚   â”‚   â”œâ”€ LGD Estimation Methods:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Historical: Average LGD from bank's past defaults
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Market-based: CDS spreads imply recovery rates
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Collateral-adjusted: LGD = [Exposure - Collateral Ã— (1-Haircut)] / Exposure
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Sectoral: Vary by industry/collateral type
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Maturity adjustment: Longer loans â†’ higher LGD (less recovery time)
+â”‚  â”‚   â”‚   â”‚   â””â”€ Typical range: 10% (senior secured real estate) - 80% (unsecured)
+â”‚  â”‚   â”‚   â”œâ”€ EAD Estimation Methods:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Outstanding amount: Current loan balance
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Undrawn commitments: Probability of drawdown (typical 20%-50%)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Derivative exposure: Current + potential future exposure (CVA methodology)
+â”‚  â”‚   â”‚   â”‚   â””â”€ Formula: EAD = Outstanding + Credit Conversion Factor Ã— Undrawn
+â”‚  â”‚   â”‚   â”œâ”€ PD Estimation Methods (see below)
+â”‚  â”‚   â”‚   â”œâ”€ Capital charges: Same formula as F-IRB but can be 2-3x lower (if LGD/EAD underestimated)
+â”‚  â”‚   â”‚   â””â”€ Output floor constraint: RWA â‰¥ 72.5% Ã— SA RWA (prevents gaming)
+â”‚  â”‚   â”‚
+â”‚  â”‚   â”œâ”€ PD (Probability of Default) Estimation:
+â”‚  â”‚   â”‚   â”œâ”€ Definition: Probability borrower defaults within 1-year horizon
+â”‚  â”‚   â”‚   â”œâ”€ Historical Approach:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Data: 5-10 years of default history
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Calculation: PD = (Number of defaults in year) / (Number of borrowers at start)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Adjustment: Remove cyclical effects (normalize to "through-the-cycle" PD)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Example: 100 loans tracked 5 years â†’ 2 defaults â†’ PD = 2% / 5 = 0.4% annual
+â”‚  â”‚   â”‚   â”‚   â””â”€ Downside: Limited history, need stability
+â”‚  â”‚   â”‚   â”œâ”€ Rating System Approach:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Segment portfolio into rating grades (AAA â†’ CCC)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Assign PD to each grade (based on historical default rates)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Rating grades defined by financial metrics:
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Leverage (Debt/EBITDA): â†‘ leverage â†’ â†“ grade â†’ â†‘ PD
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Profitability (EBITDA/Revenue): â†“ margin â†’ â†“ grade
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Interest coverage (EBITDA/Interest): Lower â†’ worse grade
+â”‚  â”‚   â”‚   â”‚   â”‚   â””â”€ Industry/Country: Adjust baseline PD by sector risk
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Typical Mapping (Corporates):
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Grade 1 (AAA equivalent): PD = 0.05%
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Grade 3 (A equivalent): PD = 0.2%
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Grade 5 (BBB equivalent): PD = 0.8%
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Grade 7 (B equivalent): PD = 3%
+â”‚  â”‚   â”‚   â”‚   â”‚   â””â”€ Grade 9 (CCC equivalent): PD = 10%+
+â”‚  â”‚   â”‚   â”‚   â””â”€ Validation: Compare grades to external ratings (should correlate)
+â”‚  â”‚   â”‚   â”œâ”€ Statistical Models:
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Logistic regression: PD = 1 / (1 + e^{-[intercept + Î²1Ã—Leverage + Î²2Ã—ROE + ...]})
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Merton model: Structural approach (firm value vs debt)
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Firm equity value = Max(Assets - Debt, 0)
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ Default when Assets < Debt
+â”‚  â”‚   â”‚   â”‚   â”‚   â”œâ”€ PD = N[-DD] (distance to default)
+â”‚  â”‚   â”‚   â”‚   â”‚   â””â”€ DD = [ln(Assets/Debt) + (Î¼ - ÏƒÂ²/2)T] / (ÏƒâˆšT)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Machine learning: Gradient boosting, neural networks (increasing use)
+â”‚  â”‚   â”‚   â”‚   â””â”€ Advantages: Capture nonlinearities, incorporate many features
+â”‚  â”‚   â”‚   â””â”€ Regulatory Criteria (IRB model approval):
+â”‚  â”‚   â”‚       â”œâ”€ At least 5 years historical data
+â”‚  â”‚   â”‚       â”œâ”€ Include stress periods (recessions, crises)
+â”‚  â”‚   â”‚       â”œâ”€ Testing: Backtesting (actual defaults vs model PD)
+â”‚  â”‚   â”‚       â”œâ”€ Stability: PD shouldn't change >50% year-to-year (unless business change)
+â”‚  â”‚   â”‚       â”œâ”€ Granularity: Enough observations per grade to be reliable
+â”‚  â”‚   â”‚       â””â”€ Regulatory approval required before use
+â”‚  â”‚   â”‚
+â”‚  â”‚   â”œâ”€ Retail IRB (Special treatment):
+â”‚  â”‚   â”‚   â”œâ”€ Lower correlation (0.05 vs 0.12 for corporates) â†’ lower RW
+â”‚  â”‚   â”‚   â”œâ”€ Typical RW: 5-15% (vs 35%+ SA for mortgages)
+â”‚  â”‚   â”‚   â”œâ”€ Rationale: Individual defaults don't correlate highly (diversified pool)
+â”‚  â”‚   â”‚   â””â”€ Constraint: Portfolio effects (recession â†’ all retail defaults spike)
+â”‚  â”‚   â”‚
+â”‚  â”‚   â””â”€ IRB Floors & Output Floor:
+â”‚  â”‚       â”œâ”€ IRB floor (pre-2023): Minimum RWA = 75% Ã— SA RWA
+â”‚  â”‚       â”œâ”€ Output floor (post-2023): Minimum RWA = 72.5% Ã— SA RWA
+â”‚  â”‚       â”œâ”€ Effect: Prevents IRB from reducing RWA >27.5% vs SA
+â”‚  â”‚       â”œâ”€ Example: SA RWA = $400B, IRB calculated = $200B â†’ Use $290B (72.5% floor)
+â”‚  â”‚       â””â”€ Phase-in: 72.5% (2023) â†’ 72.5% (permanent after 2028)
+â”‚
+â”œâ”€ Market Risk Capital
+â”‚  â”œâ”€ Basel II Approach (VaR-based, now deprecated):
+â”‚  â”‚   â”œâ”€ VaR(99%, 10-day) = 1% probability of loss > this amount
+â”‚  â”‚   â”œâ”€ Capital = 3 Ã— VaR + IdiosyncraticRisk + specific risk charge
+â”‚  â”‚   â”œâ”€ Criticized: Doesn't capture tail severity (CVaR importance)
+â”‚  â”‚   â””â”€ Status: Phased out (replaced by FRTB)
+â”‚  â”‚
+â”‚  â”œâ”€ Basel III/FRTB Approach (Expected Shortfall-based):
+â”‚  â”‚   â”œâ”€ Expected Shortfall (CVaR) = Average loss in tail 1%
+â”‚  â”‚   â”œâ”€ Calculation Steps:
+â”‚  â”‚   â”‚   â”œâ”€ Historical scenarios (250 days, last year of data)
+â”‚  â”‚   â”‚   â”œâ”€ Mark portfolio to each scenario
+â”‚  â”‚   â”‚   â”œâ”€ Calculate losses
+â”‚  â”‚   â”‚   â”œâ”€ Sort, select worst 1% of days
+â”‚  â”‚   â”‚   â”œâ”€ Average = ES
+â”‚  â”‚   â”‚   â””â”€ Capital = 3 Ã— ES (provides buffer)
+â”‚  â”‚   â”œâ”€ Stressed ES: Same calculation but using pre-crisis market period
+â”‚  â”‚   â”‚   â”œâ”€ Captures regime where correlations spike
+â”‚  â”‚   â”‚   â”œâ”€ ES from 2008-2009 would be used if that's the worst period
+â”‚  â”‚   â”‚   â””â”€ Capital charge = max(ES_current, ES_stressed)
+â”‚  â”‚   â”œâ”€ Modeling Components:
+â”‚  â”‚   â”‚   â”œâ”€ Delta (linear sensitivity): âˆ‚P/âˆ‚S Ã— S change
+â”‚  â”‚   â”‚   â”œâ”€ Gamma (convexity): Â½ Ã— âˆ‚Â²P/âˆ‚SÂ² Ã— (Î”S)Â²
+â”‚  â”‚   â”‚   â”œâ”€ Vega (volatility): âˆ‚P/âˆ‚Ïƒ Ã— Î”Ïƒ
+â”‚  â”‚   â”‚   â”œâ”€ Rho (interest rate): âˆ‚P/âˆ‚r Ã— Î”r
+â”‚  â”‚   â”‚   â””â”€ Basis risk: Hedge doesn't perfectly offset (e.g., index vs individual stock)
+â”‚  â”‚   â””â”€ Capital charge (FRTB):
+â”‚  â”‚       â”œâ”€ Sensitivities method (simplified): Fixed capital per dollar of delta/gamma/vega
+â”‚  â”‚       â”œâ”€ Full revaluation (complex): Run model on scenarios
+â”‚  â”‚       â””â”€ Typical: 5-10% of notional for equity portfolios
+â”‚  â”‚
+â”‚  â”œâ”€ Interest Rate Risk in Banking Book (IRRBB):
+â”‚  â”‚   â”œâ”€ Non-trading positions (deposits, mortgages at fixed rates)
+â”‚  â”‚   â”œâ”€ Pillar 2 capital add-on (not formulaic)
+â”‚  â”‚   â”œâ”€ Measured as: Loss if rates move Â±200 bps
+â”‚  â”‚   â”œâ”€ Example: Deposit base $100B at 1%, mortgages $80B at 3.5%
+â”‚  â”‚   â”‚   Rate +200bps: Cost deposits â†‘ by $2B, mortgage income â†‘ $1.6B â†’ Net loss $0.4B
+â”‚  â”‚   â”œâ”€ Counterparty (counterparty risk): Derive exposure value using SA-CCR
+â”‚  â”‚   â””â”€ CVA (Credit Valuation Adjustment): Risk that counterparty defaults
+â”‚  â”‚       â”œâ”€ Not just mark-to-market, but future exposure too
+â”‚  â”‚       â”œâ”€ Capital charge on derivative portfolio
+â”‚  â”‚       â””â”€ Typically 2-5% of notional for active traders
+â”‚  â”‚
+â”‚  â””â”€ Concentration Risk (New):
+â”‚      â”œâ”€ Single counterparty large exposure limit
+â”‚      â”œâ”€ Exposure > 10% Tier 1 capital triggers capital charge
+â”‚      â”œâ”€ Formula: 0% if < 10%, scales to 100% if very large
+â”‚      â”œâ”€ Example: Bank Tier1 = $20B, exposure to client = $5B
+â”‚      â”‚   Limit = 10% Ã— $20B = $2B; $5B exceeds by $3B â†’ capital charge on $3B
+â”‚      â””â”€ Interconnectedness adds surcharge (systemically important counterparties)
+â”‚
+â”œâ”€ Operational Risk Capital
+â”‚  â”œâ”€ Standardized Approach (SA):
+â”‚  â”‚   â”œâ”€ Capital Charge = 12% Ã— Indicator (average 3-year)
+â”‚  â”‚   â”œâ”€ Indicator typically = Gross revenue (adjusted for business lines)
+â”‚  â”‚   â”œâ”€ Calculation:
+â”‚  â”‚   â”‚   â”œâ”€ Calculate indicator for each year (past 3 years)
+â”‚  â”‚   â”‚   â”œâ”€ Average the 3 years
+â”‚  â”‚   â”‚   â”œâ”€ Multiply by 12%
+â”‚  â”‚   â”‚   â””â”€ Result = Capital required
+â”‚  â”‚   â”œâ”€ Example:
+â”‚  â”‚   â”‚   â”œâ”€ Year 1 revenue: $100M, OpRisk indicator = $100M
+â”‚  â”‚   â”‚   â”œâ”€ Year 2 revenue: $120M, OpRisk indicator = $120M
+â”‚  â”‚   â”‚   â”œâ”€ Year 3 revenue: $110M, OpRisk indicator = $110M
+â”‚  â”‚   â”‚   â”œâ”€ Average = $110M
+â”‚  â”‚   â”‚   â”œâ”€ Capital required = 12% Ã— $110M = $13.2M
+â”‚  â”‚   â””â”€ Simplified but pro-cyclical (revenue down in crisis â†’ lower capital)
+â”‚  â”‚
+â”‚  â”œâ”€ Advanced Approach (AA):
+â”‚  â”‚   â”œâ”€ Used by large systemically important banks
+â”‚  â”‚   â”œâ”€ Components:
+â”‚  â”‚   â”‚   â”œâ”€ Expected Loss (EL): E[Severity Ã— Frequency]
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Frequency: How many operational events per year (e.g., 5 events)
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Severity: Average loss per event (e.g., $2M average)
+â”‚  â”‚   â”‚   â”‚   â””â”€ EL = 5 Ã— $2M = $10M/year
+â”‚  â”‚   â”‚   â”œâ”€ Unexpected Loss (UL): Tail risk charge
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Use CVaR or value-at-risk on loss distribution
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ UL = (99.9% VaR - EL) / 8 [convert to capital]
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Typical: $30-50M (tail scenarios, rare large losses)
+â”‚  â”‚   â”‚   â”‚   â””â”€ Example: 0.1% tail = $100M loss, EL = $10M, UL = ($100M - $10M) / 8 = $11.25M
+â”‚  â”‚   â”‚   â”œâ”€ Internal Loss Multiplier (ILM): Adjustment for data quality/model risk
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ If severe crisis happened recently, data quality increases
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ ILM = [1 + (OpRisk events in crisis Ã— weight)] / baseline
+â”‚  â”‚   â”‚   â”‚   â”œâ”€ Range: 0.8 - 1.5
+â”‚  â”‚   â”‚   â”‚   â””â”€ Effect: Increase capital charge post-crisis (pro-cyclical tension)
+â”‚  â”‚   â”‚   â””â”€ Diversification: Reduce capital by potential portfolio diversification
+â”‚  â”‚   â”‚       â”œâ”€ Different risk categories less than additive
+â”‚  â”‚   â”‚       â”œâ”€ Correlation < 1 â†’ portfolio effect
+â”‚  â”‚   â”‚       â””â”€ Divisor typically 1.5 - 2.5
+â”‚  â”‚   â”œâ”€ Capital charge: OpRisk = [EL + UL] Ã— ILM Ã— 1/Diversification
+â”‚  â”‚   â”œâ”€ Typical: $25-75M for large banks
+â”‚  â”‚   â””â”€ Regulatory approval required (strict model validation)
+â”‚  â”‚
+â”‚  â”œâ”€ Loss Event Categories (Basel Operational Risk Framework):
+â”‚  â”‚   â”œâ”€ Internal fraud: Employee theft, trade desk misconduct
+â”‚  â”‚   â”œâ”€ External fraud: ATM theft, cyber attacks, client fraud
+â”‚  â”‚   â”œâ”€ DLOA (Disruption of Business & System Failures): IT outages, power failures
+â”‚  â”‚   â”œâ”€ EPCE (Employment Practices & Client Relations): Wrongful termination suits, discrimination
+â”‚  â”‚   â”œâ”€ Damage to Physical Assets: Natural disasters, vandalism
+â”‚  â”‚   â”œâ”€ Business Disruption & System Failures: Infrastructure failure
+â”‚  â”‚   â”œâ”€ Execution, Delivery, Process Management: Trade errors, settlement fails
+â”‚  â”‚   â”œâ”€ Client/Product line specific: Model risk, product defects
+â”‚  â”‚   â””â”€ Correlations: Typically low (diversified portfolio)
+â”‚  â”‚
+â”‚  â””â”€ Regulatory Scrutiny:
+â”‚      â”œâ”€ Stress scenarios including operational events
+â”‚      â”œâ”€ Enhanced monitoring for fraud/cyber risk
+â”‚      â”œâ”€ Technology resilience assessments
+â”‚      â””â”€ Third-party risk management (outsourced functions)
+â”‚
+â”œâ”€ Total Capital Requirement Combination
+â”‚  â”œâ”€ Formula: Total Capital = Credit RW + Market RW + OpRisk
+â”‚  â”‚   All converted to capital percentage of RWA
+â”‚  â”‚   Capital = 8% Ã— (Credit RWA + Market RWA + OpRisk RWA)
+â”‚  â”œâ”€ Interaction Effects:
+â”‚  â”‚   â”œâ”€ Correlated risks: Market downturn + credit defaults + operational stress
+â”‚  â”‚   â”œâ”€ Stress testing explicitly models combinations
+â”‚  â”‚   â”œâ”€ No diversification benefit (regulatory conservative)
+â”‚  â”‚   â””â”€ Pillar 2 (supervisor) can add if combinations appear dangerous
+â”‚  â”œâ”€ Buffers (on top of 8% minimum):
+â”‚  â”‚   â”œâ”€ Capital Conservation Buffer (CCB): 2.5%
+â”‚  â”‚   â”œâ”€ Countercyclical Buffer (CyCB): 0-2.5%
+â”‚  â”‚   â”œâ”€ G-SIB surcharge: 1-3.5%
+â”‚  â”‚   â””â”€ Total effective minimum: 12-17% for large banks
+â”‚  â””â”€ Real Bank Example (Hypothetical Large Bank):
+â”‚      â”œâ”€ Credit RWA: $300B (75% of total)
+â”‚      â”œâ”€ Market RWA: $80B (20% of total)
+â”‚      â”œâ”€ OpRisk RWA: $20B (5% of total)
+â”‚      â”œâ”€ Total RWA: $400B
+â”‚      â”œâ”€ Minimum capital (8%): $32B
+â”‚      â”œâ”€ CCB (2.5%): $10B
+â”‚      â”œâ”€ CyCB (1%): $4B
+â”‚      â”œâ”€ G-SIB surcharge (2%): $8B
+â”‚      â”œâ”€ Total required: $54B (13.5% of RWA)
+â”‚      â”œâ”€ Typical buffer: Hold $60-70B (15-17.5%)
+â”‚      â””â”€ Leverage ratio floor (3% of $1.5T assets) = $45B also binding
+â”‚
+â”œâ”€ Risk Calculation System Architecture
+â”‚  â”œâ”€ Data Pipeline:
+â”‚  â”‚   â”œâ”€ Market data: Daily prices, rates, volatility (real-time)
+â”‚  â”‚   â”œâ”€ Portfolio positions: Securities, derivatives, loans (daily)
+â”‚  â”‚   â”œâ”€ Credit data: Ratings, default history, PD models (monthly updates)
+â”‚  â”‚   â”œâ”€ Operational data: Loss events, audit reports (annual compilation)
+â”‚  â”‚   â””â”€ Regulatory data: Counterparty exposures, large exposures (monthly)
+â”‚  â”œâ”€ Model Components:
+â”‚  â”‚   â”œâ”€ Credit risk models: PD/LGD/EAD for each borrower
+â”‚  â”‚   â”œâ”€ Market risk models: VaR, ES, Greeks (delta/gamma/vega)
+â”‚  â”‚   â”œâ”€ Operational risk models: Frequency/severity, loss events
+â”‚  â”‚   â”œâ”€ Correlation models: How risks move together
+â”‚  â”‚   â””â”€ Scenario analysis: Tail events, stress testing
+â”‚  â”œâ”€ Computing:
+â”‚  â”‚   â”œâ”€ Overnight: Full capital calculation (RWA recalculation)
+â”‚  â”‚   â”œâ”€ Intraday: Market VaR updates (key for trading desks)
+â”‚  â”‚   â”œâ”€ Monthly: Stress testing, regulatory reporting
+â”‚  â”‚   â”œâ”€ Quarterly: Capital forecast, buffer testing
+â”‚  â”‚   â””â”€ Annual: IRB model backtesting, regulatory approval prep
+â”‚  â””â”€ Audit & Governance:
+â”‚      â”œâ”€ Model risk management: Independent review of key models
+â”‚      â”œâ”€ Backtesting: Compare predicted vs actual losses
+â”‚      â”œâ”€ Sensitivity analysis: How capital changes with parameter shifts
+â”‚      â”œâ”€ Stress testing: Extreme scenarios
+â”‚      â””â”€ Board oversight: Capital adequacy, strategic implications
 ```
 
 **Interaction Example:**  
-Bank portfolio: $100M in BBB corporate loans. Credit RW (SA) = 100%, RWA = $100M. Market position: Short $20M corporate bonds (hedge). Market RW (FRTB) per 2% ES charge = $0.4M. OpRisk allocated 5% → $5M. Total capital = 8% × ($100M + $0.4M + $5M) = $8.04M + buffers = ~$12M.
+Bank portfolio: $100M in BBB corporate loans. Credit RW (SA) = 100%, RWA = $100M. Market position: Short $20M corporate bonds (hedge). Market RW (FRTB) per 2% ES charge = $0.4M. OpRisk allocated 5% â†’ $5M. Total capital = 8% Ã— ($100M + $0.4M + $5M) = $8.04M + buffers = ~$12M.
 
-## 5. Mini-Project
-Compare Standardized vs Advanced IRB capital requirements:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-
-# Bank corporate loan portfolio
-portfolio = {
-    'AAA': {'exposure': 50, 'rating': 'AAA'},
-    'AA': {'exposure': 100, 'rating': 'AA'},
-    'A': {'exposure': 150, 'rating': 'A'},
-    'BBB': {'exposure': 300, 'rating': 'BBB'},
-    'BB': {'exposure': 200, 'rating': 'BB'},
-    'B': {'exposure': 100, 'rating': 'B'},
-    'CCC': {'exposure': 50, 'rating': 'CCC'},
-}
-
-# 1. STANDARDIZED APPROACH (External ratings)
-print("="*100)
-print("STANDARDIZED APPROACH (SA) - Risk Weighted Assets Calculation")
-print("="*100)
-
-# Risk weights by rating
-sa_rw = {
-    'AAA': 0.20, 'AA': 0.20, 'A': 0.50,
-    'BBB': 1.00, 'BB': 1.00, 'B': 1.50, 'CCC': 1.50,
-}
-
-sa_results = {}
-total_sa_rwa = 0
-
-for loan_type, data in portfolio.items():
-    exposure = data['exposure']
-    rating = data['rating']
-    rw = sa_rw[rating]
-    rwa = exposure * rw
-    total_sa_rwa += rwa
-    sa_results[loan_type] = {'exposure': exposure, 'rw': rw, 'rwa': rwa}
-    print(f"{loan_type} {rating:>5}: ${exposure:>4.0f}M exposure, RW={rw*100:>5.0f}%, RWA=${rwa:>6.1f}M")
-
-sa_capital = 0.08 * total_sa_rwa
-print(f"\nTotal SA RWA: ${total_sa_rwa:.1f}M")
-print(f"SA Capital (8%): ${sa_capital:.1f}M")
-
-# 2. FOUNDATION IRB APPROACH (Bank estimates PD, regulator provides LGD/EAD)
-print(f"\n" + "="*100)
-print("FOUNDATION IRB - Bank-Estimated PD, Regulatory LGD/EAD")
-print("="*100)
-
-# Historical PD by rating (bank's data)
-irb_pd = {
-    'AAA': 0.02, 'AA': 0.05, 'A': 0.10,
-    'BBB': 0.50, 'BB': 2.00, 'B': 5.00, 'CCC': 15.00,
-}
-
-# Regulatory LGD & EAD (foundation fixed)
-irb_lgd = 0.45  # Regulatory floor for unsecured corporate
-irb_ead = 1.00  # Regulatory EAD (100% outstanding)
-
-# IRB formula parameters
-maturity_adj = 1.0  # Assume 3-year loans → maturity adjustment ≈ 1.0
-correlation = 0.12  # Corporate correlation
-
-def calculate_irb_rw(pd, lgd, ead, correlation=0.12, maturity=1.0):
-    """Calculate IRB risk weight using Basel formula."""
-    # N(x) = cumulative normal
-    # N^{-1}(x) = inverse normal
-    
-    pd_norm = norm.ppf(pd / 100)  # Convert PD % to decimal, then inverse normal
-    
-    # Correlation-adjusted maturity factor
-    b = (0.11852 - 0.05478 * np.log(pd / 100)) ** 2
-    maturity_factor = (1 + (maturity - 2.5) * b) / (1 - 1.5 * b)
-    
-    # N(.) calculation
-    numerator = np.log(correlation / (1 - correlation)) + np.sqrt(correlation / (1 - correlation)) * norm.ppf(pd / 100)
-    tail_quantile = norm.ppf(0.999)  # 99.9% confidence
-    
-    n_val = norm.cdf((numerator + np.sqrt(1 - correlation) * tail_quantile) / 
-                     np.sqrt(correlation))
-    
-    # RW formula
-    rw = 1.06 * 12.5 * (pd / 100 * lgd / 100 + np.sqrt(correlation / (1 - correlation)) * 
-                        np.sqrt(1 - correlation) * (norm.ppf(pd / 100) - np.sqrt(correlation) * tail_quantile)) * maturity_factor
-    
-    # Simplified approximation
-    rw_approx = 1.06 * 12.5 * (pd / 100 * lgd / 100)
-    
-    return max(min(rw_approx, 3.25), 0.001)  # Cap at 325%, floor at 0.1%
-
-irb_results = {}
-total_irb_rwa = 0
-
-print(f"Using: LGD = {irb_lgd*100:.0f}%, EAD = {irb_ead*100:.0f}%, Correlation = {correlation*100:.0f}%\n")
-
-for loan_type, data in portfolio.items():
-    exposure = data['exposure']
-    pd = irb_pd[loan_type]
-    rw = calculate_irb_rw(pd, irb_lgd, irb_ead, correlation)
-    rwa = exposure * rw
-    total_irb_rwa += rwa
-    irb_results[loan_type] = {'exposure': exposure, 'pd': pd, 'rw': rw, 'rwa': rwa}
-    print(f"{loan_type} {data['rating']:>5}: PD={pd:>6.2f}%, RW={rw*100:>5.1f}%, RWA=${rwa:>6.1f}M")
-
-irb_capital = 0.08 * total_irb_rwa
-print(f"\nTotal IRB RWA: ${total_irb_rwa:.1f}M")
-print(f"IRB Capital (8%): ${irb_capital:.1f}M")
-
-# 3. ADVANCED IRB (Bank estimates PD, LGD, EAD - lower LGD for collateral)
-print(f"\n" + "="*100)
-print("ADVANCED IRB - Bank-Estimated PD, LGD, EAD (with Collateral)")
-print("="*100)
-
-# Bank estimates with collateral/loan structure
-advanced_lgd = {
-    'AAA': 0.20, 'AA': 0.25, 'A': 0.30,
-    'BBB': 0.40, 'BB': 0.50, 'B': 0.60, 'CCC': 0.70,
-}
-
-# EAD accounts for undrawn commitments (30% drawdown probability)
-advanced_ead_multiple = {
-    'AAA': 0.90, 'AA': 0.92, 'A': 0.95,
-    'BBB': 1.00, 'BB': 1.00, 'B': 1.00, 'CCC': 1.00,
-}
-
-adv_results = {}
-total_adv_rwa = 0
-
-print(f"Using: Collateral-adjusted LGD, Bank EAD estimates\n")
-
-for loan_type, data in portfolio.items():
-    exposure = data['exposure']
-    rating = data['rating']
-    pd = irb_pd[loan_type]
-    lgd = advanced_lgd[rating]
-    ead = advanced_ead_multiple[rating]
-    rw = calculate_irb_rw(pd, lgd, ead, correlation)
-    rwa = exposure * rw * ead
-    total_adv_rwa += rwa
-    adv_results[loan_type] = {'exposure': exposure, 'pd': pd, 'lgd': lgd, 'ead': ead, 'rw': rw, 'rwa': rwa}
-    print(f"{loan_type} {rating:>5}: PD={pd:>6.2f}%, LGD={lgd*100:>5.0f}%, EAD={ead*100:>5.0f}%, RWA=${rwa:>6.1f}M")
-
-adv_capital = 0.08 * total_adv_rwa
-print(f"\nTotal Advanced IRB RWA: ${total_adv_rwa:.1f}M")
-print(f"Advanced IRB Capital (8%): ${adv_capital:.1f}M")
-
-# 4. OUTPUT FLOOR (72.5% of SA RWA)
-print(f"\n" + "="*100)
-print("OUTPUT FLOOR (72.5% constraint)")
-print("="*100)
-
-floor_value = 0.725 * total_sa_rwa
-print(f"SA RWA: ${total_sa_rwa:.1f}M")
-print(f"72.5% Floor: ${floor_value:.1f}M")
-print(f"Advanced IRB RWA: ${total_adv_rwa:.1f}M")
-
-if total_adv_rwa < floor_value:
-    floored_rwa = floor_value
-    print(f"Advanced IRB FLOORED to: ${floored_rwa:.1f}M (binding floor)")
-else:
-    floored_rwa = total_adv_rwa
-    print(f"Advanced IRB above floor (no constraint)")
-
-floored_capital = 0.08 * floored_rwa
-
-# COMPARISON TABLE
-print(f"\n" + "="*100)
-print("CAPITAL REQUIREMENT COMPARISON")
-print("="*100)
-
-comparison = pd.DataFrame({
-    'Approach': ['Standardized (SA)', 'Foundation IRB (F-IRB)', 'Advanced IRB (A-IRB)', 'Advanced IRB (w/ Floor)'],
-    'Total RWA': [f'${total_sa_rwa:.1f}M', f'${total_irb_rwa:.1f}M', f'${total_adv_rwa:.1f}M', f'${floored_rwa:.1f}M'],
-    'Capital (8%)': [f'${sa_capital:.1f}M', f'${irb_capital:.1f}M', f'${adv_capital:.1f}M', f'${floored_capital:.1f}M'],
-    'Capital vs SA': ['Baseline', f'{(irb_capital/sa_capital - 1)*100:+.1f}%', 
-                      f'{(adv_capital/sa_capital - 1)*100:+.1f}%',
-                      f'{(floored_capital/sa_capital - 1)*100:+.1f}%'],
-})
-
-print(comparison.to_string(index=False))
-
-rwa_reduction = (1 - total_adv_rwa / total_sa_rwa) * 100
-print(f"\nAdvanced IRB RWA reduction vs SA: {rwa_reduction:.1f}%")
-print(f"Output floor prevents RWA reduction >27.5% (current: {rwa_reduction:.1f}%)")
-
-# VISUALIZATION
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-
-# Plot 1: RWA by rating and approach
-ax = axes[0, 0]
-ratings = list(portfolio.keys())
-sa_rwas = [sa_results[r]['rwa'] for r in ratings]
-irb_rwas = [irb_results[r]['rwa'] for r in ratings]
-adv_rwas = [adv_results[r]['rwa'] for r in ratings]
-
-x = np.arange(len(ratings))
-width = 0.25
-
-ax.bar(x - width, sa_rwas, width, label='Standardized', alpha=0.8)
-ax.bar(x, irb_rwas, width, label='Foundation IRB', alpha=0.8)
-ax.bar(x + width, adv_rwas, width, label='Advanced IRB', alpha=0.8)
-
-ax.set_ylabel('Risk-Weighted Assets ($M)')
-ax.set_title('RWA by Rating and Approach')
-ax.set_xticks(x)
-ax.set_xticklabels(ratings)
-ax.legend()
-ax.grid(alpha=0.3, axis='y')
-
-# Plot 2: Total capital requirements
-ax = axes[0, 1]
-approaches = ['SA', 'F-IRB', 'A-IRB', 'A-IRB\n(Floored)']
-capitals = [sa_capital, irb_capital, adv_capital, floored_capital]
-colors_cap = ['blue', 'orange', 'green', 'red']
-
-bars = ax.bar(approaches, capitals, color=colors_cap, alpha=0.7)
-ax.set_ylabel('Capital Required ($M)')
-ax.set_title('Total Capital Requirement Comparison')
-ax.grid(alpha=0.3, axis='y')
-
-# Add value labels on bars
-for bar, cap in zip(bars, capitals):
-    height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2., height,
-            f'${cap:.1f}M',
-            ha='center', va='bottom', fontweight='bold')
-
-# Plot 3: RWA breakdown by rating
-ax = axes[1, 0]
-ax.barh(ratings, [adv_results[r]['rwa'] for r in ratings], color='teal', alpha=0.7)
-ax.set_xlabel('RWA ($M)')
-ax.set_title('Advanced IRB RWA Breakdown by Rating')
-ax.grid(alpha=0.3, axis='x')
-
-# Plot 4: Risk weight by rating
-ax = axes[1, 1]
-sa_rws = [sa_results[r]['rw']*100 for r in ratings]
-irb_rws = [irb_results[r]['rw']*100 for r in ratings]
-adv_rws = [adv_results[r]['rw']*100 for r in ratings]
-
-x = np.arange(len(ratings))
-ax.plot(x, sa_rws, 'o-', label='Standardized', linewidth=2, markersize=6)
-ax.plot(x, irb_rws, 's-', label='Foundation IRB', linewidth=2, markersize=6)
-ax.plot(x, adv_rws, '^-', label='Advanced IRB', linewidth=2, markersize=6)
-
-ax.set_ylabel('Risk Weight (%)')
-ax.set_title('Risk Weight Curves by Rating and Approach')
-ax.set_xticks(x)
-ax.set_xticklabels(ratings)
-ax.legend()
-ax.grid(alpha=0.3, axis='y')
-ax.set_yscale('log')
-
-plt.tight_layout()
-plt.show()
-
-# Gaming risk illustration
-print(f"\n" + "="*100)
-print("MODEL GAMING ILLUSTRATION")
-print("="*100)
-print(f"\nWhat if Advanced IRB underestimates LGD by 50%?")
-gamed_lgd = {k: v * 0.5 for k, v in advanced_lgd.items()}
-gamed_rwa = 0
-for loan_type, data in portfolio.items():
-    exposure = data['exposure']
-    rating = data['rating']
-    pd = irb_pd[loan_type]
-    lgd = gamed_lgd[rating]
-    ead = advanced_ead_multiple[rating]
-    rw = calculate_irb_rw(pd, lgd, ead, correlation)
-    rwa = exposure * rw * ead
-    gamed_rwa += rwa
-gamed_capital = 0.08 * gamed_rwa
-gamed_reduction = (1 - gamed_rwa / total_sa_rwa) * 100
-
-print(f"Gamed A-IRB RWA: ${gamed_rwa:.1f}M (reduction: {gamed_reduction:.1f}%)")
-print(f"With 72.5% floor, gamed RWA capped at: ${floor_value:.1f}M")
-print(f"Floor prevents capital arbitrage: ${gamed_capital:.1f}M → ${floored_capital:.1f}M (${floored_capital - gamed_capital:.1f}M difference)")
-```
-
-## 6. Challenge Round
+## 5. Challenge Round
 - Map bank's $500M portfolio to Basel SA risk weights; calculate RWA
 - Design F-IRB PD model for mid-market corporates (regression on financials)
 - Estimate LGD for real estate collateral using historical recovery data
 - Compare leverage ratio floor vs RW-based capital for leverage-heavy portfolio
 - Run output floor test: Is 72.5% constraint binding for your IRB model?
 
-## 7. Key References
-- [BIS, "The Standardized Approach for Credit Risk" (2017)](https://www.bis.org/basel_framework/crossfunctional/output_floor.pdf) — Official regulation
-- [BIS, "Internal Ratings-Based Approach" (2017)](https://www.bis.org/basel_framework/standard/crb.htm) — IRB formula and calibration
-- [Federal Reserve, "CCAR 2024 Stress Test Scenarios"](https://www.federalreserve.gov/banking/ccar-capital-planning.htm) — Implementation example (US)
-- [Gordy, "A Comparative Anatomy of Credit Risk Models" (2000), JFQA](https://www.jstor.org/) — Theoretical foundation
+## 6. Key References
+- [BIS, "The Standardized Approach for Credit Risk" (2017)](https://www.bis.org/basel_framework/crossfunctional/output_floor.pdf) â€” Official regulation
+- [BIS, "Internal Ratings-Based Approach" (2017)](https://www.bis.org/basel_framework/standard/crb.htm) â€” IRB formula and calibration
+- [Federal Reserve, "CCAR 2024 Stress Test Scenarios"](https://www.federalreserve.gov/banking/ccar-capital-planning.htm) â€” Implementation example (US)
+- [Gordy, "A Comparative Anatomy of Credit Risk Models" (2000), JFQA](https://www.jstor.org/) â€” Theoretical foundation
 
 ---
 **Status:** Core regulatory framework (2008-present, continuously refined) | **Complements:** Basel III Framework, Liquidity Risk, Stress Testing, Market Risk

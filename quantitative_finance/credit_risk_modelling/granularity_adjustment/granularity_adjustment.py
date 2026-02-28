@@ -1,13 +1,6 @@
-"""
-Granularity Adjustment (Pg) - Basel III Capital Add-on
-
-Capital add-on accounting for finite portfolio effects; adjusts from infinite (granular) 
-portfolio assumption to realistic finite portfolio with large exposures.
-
-References:
-- Basel III IRB pg Formula: https://www.bis.org/basel_framework/chapter/CRE/20.htm
-- Granularity Effect Theory: https://www.bis.org/publ/work155.pdf
-"""
+﻿# %% Auto-converted to VSCode Interactive format
+# Auto-extracted from markdown file
+# Source: granularity_adjustment.md
 
 import numpy as np
 import pandas as pd
@@ -16,6 +9,13 @@ from scipy.special import expit
 
 np.random.seed(42)
 
+
+# %% [markdown]
+# ## == Granularity Adjustment (pg) Calculation ==
+# 
+# Understanding and implementing key credit risk concepts.
+
+# %%
 print("=== Granularity Adjustment (pg) Calculation ===")
 
 # Create portfolios with varying concentration
@@ -273,7 +273,9 @@ print(f"pg = (1 - exp(-2×HHI)) / (2×HHI)")
 print(f"pg captures finite portfolio effects not in granular models")
 print(f"Regulatory capital = Base capital + pg × exposure")
 
-if __name__ == "__main__":
-    print("\n" + "="*70)
-    print("Granularity Adjustment Analysis Complete")
-    print("="*70)
+
+
+# %% [markdown]
+# ## Summary
+# 
+# This analysis demonstrates important credit risk methodologies.

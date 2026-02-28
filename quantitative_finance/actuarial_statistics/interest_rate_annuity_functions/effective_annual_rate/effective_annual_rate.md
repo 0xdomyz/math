@@ -1,335 +1,114 @@
-# Effective Annual Rate
+﻿# Effective Annual Rate
 
-## 1. Concept Skeleton
-**Definition:** Annual interest rate i reflecting compounding effect; (1+i) = growth factor per year; standard actuarial discount rate  
-**Purpose:** Standardize interest rates for comparison, price financial instruments, calculate present/future values, annuity valuation  
-**Prerequisites:** Compound interest, time value of money, discount factor, present value concepts
+## Concept Skeleton
+**Definition:** Effective Annual Rate is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Rate Type | Effective Annual (i) | Nominal Rate (i^(m)) | Force of Interest (δ) |
-|-----------|----------------------|---------------------|----------------------|
-| **Compounding** | Once per year | m times per year | Continuous |
-| **Formula** | (1+i) = principal growth | i^(m)/m per period | δ = ln(1+i) |
-| **Use** | APY, annuity pricing | Mortgage, bonds | Theoretical, stochastic models |
-| **Conversion** | i = (1 + i^(m)/m)^m - 1 | i^(m) = m[(1+i)^{1/m} - 1] | i = e^δ - 1 |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-Bank savings i = 0.03 (3% effective annual): $1,000 grows to $1,030 in one year; standard for long-term contracts
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Confusing nominal 6% semi-annual with 6% effective: Actual effective = (1 + 0.06/2)² - 1 = 6.09%, not 6%
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-Very high inflation (i = 0.50 annually): Real return = (1 + 0.50)/(1 + inflation) - 1; nominal vs real distinction critical
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Effective Annual Rate | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Effective Annual Rate Structure:
-├─ Definition & Relationships:
-│   ├─ (1+i) = growth multiplier after 1 year
-│   ├─ i = (1 + i^(m)/m)^m - 1  [convert from nominal]
-│   ├─ i = e^δ - 1  [convert from force of interest]
-│   ├─ v = 1/(1+i)  [discount factor]
-│   └─ v^n = 1/(1+i)^n  [present value of $1 in n years]
-├─ Accumulation & Discounting:
-│   ├─ Future Value: FV = PV · (1+i)^n
-│   ├─ Present Value: PV = FV · v^n = FV/(1+i)^n
-│   ├─ Annuity Present Value: PV = PMT · aₙ̄| = PMT · [1 - v^n]/i
-│   └─ Annuity Future Value: FV = PMT · sₙ̄| = PMT · [(1+i)^n - 1]/i
-├─ Period-to-Period Relationships:
-│   ├─ 1-year ahead: (1+i)
-│   ├─ 2-year ahead: (1+i)²
-│   ├─ Mid-period: (1+i)^{1/m} for m periods per year
-│   └─ Fractional: (1+i)^t for t ∈ [0,1] years
-├─ Comparison Across Rates:
-│   ├─ 5% effective = 4.88% nominal semi-annual
-│   ├─ 5% effective = 4.88% nominal quarterly = 4.88% nominal monthly
-│   ├─ 5% effective ≈ 4.879% force of interest
-│   └─ Ranking: i^(∞) < δ < i (force continuous always between nominal and effective)
-└─ Actuarial Applications:
-    ├─ Annuity-certain: aₙ̄| = [1 - v^n]/i  (no mortality)
-    ├─ Life annuity: aₓ = ∑ₖ₌₀^∞ v^k · ₖpₓ  (discounted survival)
-    ├─ Bond pricing: Bond value = ∑ Coupon·v^t + Face·v^n
-    └─ Pension liability: PV = ∑ Benefit·v^t
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Effective Annual Rate.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-**Interaction:** Choose i → Calculate v, (1+i)^n → Discount all cash flows → Sum for present value
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Effective Annual Rate.
 
-## 5. Mini-Project
-Calculate effective rates, convert between formats, and price annuities:
-```python
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-# 1. EFFECTIVE RATE FUNDAMENTALS
-print("=" * 60)
-print("EFFECTIVE ANNUAL RATE CALCULATIONS")
-print("=" * 60)
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-i_effective = 0.05  # 5% effective annual rate
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-# Key derived values
-v = 1 / (1 + i_effective)  # Discount factor
-d = i_effective / (1 + i_effective)  # Discount rate (1 - v)
-delta = np.log(1 + i_effective)  # Force of interest
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-print(f"\nGiven: Effective annual rate i = {i_effective:.4f} ({i_effective*100:.2f}%)")
-print(f"Discount factor: v = 1/(1+i) = {v:.6f}")
-print(f"Discount rate: d = i/(1+i) = {d:.6f}")
-print(f"Force of interest: δ = ln(1+i) = {delta:.6f}")
-print(f"Relationship check: d = 1 - v = {1 - v:.6f} ✓")
-print()
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-# 2. ACCUMULATION & DISCOUNTING EXAMPLES
-print("=" * 60)
-print("ACCUMULATION AND DISCOUNTING")
-print("=" * 60)
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-principal = 1000  # $1,000 initial investment
-years = np.arange(0, 11)
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Effective Annual Rate outputs in pricing, reserving, and solvency workflows.
 
-# Future value: FV = PV * (1+i)^n
-future_values = principal * (1 + i_effective) ** years
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-# Present value: PV = FV / (1+i)^n
-future_amount = 1000
-present_values = future_amount * v ** years
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-accumulation_df = pd.DataFrame({
-    'Year': years,
-    'FV of $1000': future_values.round(2),
-    'PV of $1000': present_values.round(2),
-    'Growth Factor': ((1 + i_effective) ** years).round(6),
-    'Discount Factor': (v ** years).round(6)
-})
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print("\nAccumulation and Discounting:")
-print(accumulation_df.to_string(index=False))
-print()
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 3. CONVERT BETWEEN NOMINAL AND EFFECTIVE RATES
-print("=" * 60)
-print("CONVERSION: EFFECTIVE ↔ NOMINAL RATES")
-print("=" * 60)
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(f"\nStarting with effective rate i = {i_effective:.4f}")
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Calculate nominal rates for different compounding frequencies
-m_values = [1, 2, 4, 12, 365, np.inf]  # Annually, semi-annual, quarterly, monthly, daily, continuous
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-nominal_rates = []
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-for m in m_values:
-    if m == np.inf:
-        # Continuous: i = e^δ - 1, so δ = ln(1+i) = force of interest
-        delta_val = np.log(1 + i_effective)
-        nominal_rates.append(delta_val)
-    else:
-        # Nominal: i^(m) = m[(1+i)^(1/m) - 1]
-        i_nom = m * ((1 + i_effective) ** (1/m) - 1)
-        nominal_rates.append(i_nom)
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-conversion_df = pd.DataFrame({
-    'Compounding': ['Annual (m=1)', 'Semi-Annual (m=2)', 'Quarterly (m=4)', 
-                   'Monthly (m=12)', 'Daily (m=365)', 'Continuous'],
-    'Nominal Rate': [f"{r*100:.4f}%" for r in nominal_rates],
-    'Per-Period Rate': [f"{(r/m if m != np.inf else r)*100:.4f}%" if m != np.inf 
-                       else f"δ={r*100:.4f}%" for m, r in zip(m_values, nominal_rates)],
-    'Effective i': [f"{i_effective*100:.4f}%" for _ in m_values]
-})
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-print(conversion_df.to_string(index=False))
-print()
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Verify conversions back to effective
-print("Verification: Convert nominal rates back to effective")
-print("-" * 60)
-for m, i_nom in zip(m_values[:-1], nominal_rates[:-1]):
-    i_check = (1 + i_nom/m) ** m - 1
-    print(f"m={m:3d}: i^({m}) = {i_nom:.6f} → i = {i_check:.6f} (original: {i_effective:.6f}) ✓")
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Continuous
-delta_val = nominal_rates[-1]
-i_check_continuous = np.exp(delta_val) - 1
-print(f"Continuous: δ = {delta_val:.6f} → i = {i_check_continuous:.6f} (original: {i_effective:.6f}) ✓")
-print()
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# 4. ANNUITY-CERTAIN FUNCTIONS
-print("=" * 60)
-print("ANNUITY-CERTAIN FUNCTIONS (no mortality)")
-print("=" * 60)
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# aₙ̄| = [1 - v^n] / i (present value of annuity-immediate)
-# sₙ̄| = [(1+i)^n - 1] / i (future value of annuity-immediate)
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-n_periods = np.array([1, 5, 10, 20, 30])
-payment = 1000  # $1,000 per year
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-annuity_data = []
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-for n in n_periods:
-    # Present value
-    an_imm = (1 - v**n) / i_effective  # Annuity-immediate
-    aend_pv = payment * an_imm
-    
-    # Annuity-due (payments at start of period): ä = a * (1+i)
-    aDn = an_imm * (1 + i_effective)
-    astart_pv = payment * aDn
-    
-    # Future value
-    sn_imm = ((1 + i_effective)**n - 1) / i_effective
-    aend_fv = payment * sn_imm
-    
-    # Annuity-due future value
-    sDn = sn_imm * (1 + i_effective)
-    astart_fv = payment * sDn
-    
-    annuity_data.append({
-        'n': n,
-        'aₙ̄| (imm)': an_imm,
-        'äₙ̄| (due)': aDn,
-        'PV (imm) $': aend_pv,
-        'PV (due) $': astart_pv,
-        'sₙ̄| (imm)': sn_imm,
-        'FV (imm) $': aend_fv,
-        'FV (due) $': astart_fv
-    })
+Operational detail for Effective Annual Rate: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-annuity_df = pd.DataFrame(annuity_data)
-
-print(f"\nPayment = ${payment}/period, i = {i_effective:.4f}")
-print("\nPresent Value of Annuities:")
-print(annuity_df[['n', 'aₙ̄| (imm)', 'äₙ̄| (due)', 'PV (imm) $', 'PV (due) $']].to_string(index=False))
-print("\nFuture Value of Annuities:")
-print(annuity_df[['n', 'sₙ̄| (imm)', 'FV (imm) $', 'FV (due) $']].to_string(index=False))
-print()
-
-# 5. TERM STRUCTURE (multi-year rates)
-print("=" * 60)
-print("TERM STRUCTURE: RATES FOR VARIOUS TIME HORIZONS")
-print("=" * 60)
-
-# Assume flat yield curve at 5%
-times = np.arange(0, 11)
-spot_rates = np.full_like(times, i_effective, dtype=float)
-discount_factors = (1 / (1 + i_effective)) ** times
-present_values_unit = 1 / ((1 + i_effective) ** times)
-
-term_structure = pd.DataFrame({
-    'Year': times,
-    'Spot Rate': [f"{r*100:.2f}%" for r in spot_rates],
-    'Discount Factor': [f"{d:.6f}" for d in discount_factors],
-    'PV of $1': [f"${v:.4f}" for v in present_values_unit]
-})
-
-print("\nFlat yield curve (all rates = 5%):")
-print(term_structure.to_string(index=False))
-print()
-
-# 6. VISUALIZATION
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-
-# Plot 1: Accumulation growth
-ax = axes[0, 0]
-years_detailed = np.linspace(0, 20, 100)
-principal_growth = 1000 * (1 + i_effective) ** years_detailed
-
-ax.plot(years_detailed, principal_growth, linewidth=2.5, color='darkblue', label=f'i = {i_effective*100:.1f}%')
-ax.fill_between(years_detailed, 1000, principal_growth, alpha=0.2, color='blue')
-
-# Add comparison with other rates
-for i_alt in [0.02, 0.04, 0.06]:
-    if i_alt != i_effective:
-        growth_alt = 1000 * (1 + i_alt) ** years_detailed
-        ax.plot(years_detailed, growth_alt, linewidth=2, alpha=0.6, 
-               label=f'i = {i_alt*100:.1f}%', linestyle='--')
-
-ax.set_xlabel('Years', fontsize=11)
-ax.set_ylabel('Value ($)', fontsize=11)
-ax.set_title('Accumulation: Growth of $1,000 at Different Rates', fontsize=12, fontweight='bold')
-ax.legend(fontsize=10)
-ax.grid(alpha=0.3)
-
-# Plot 2: Discount factors
-ax = axes[0, 1]
-for i_comp in [0.02, 0.05, 0.08]:
-    v_comp = 1 / (1 + i_comp)
-    discounts = v_comp ** years_detailed
-    ax.plot(years_detailed, discounts, linewidth=2.5, 
-           label=f'i = {i_comp*100:.1f}%', marker='o' if i_comp == i_effective else None,
-           markersize=3, alpha=0.7)
-
-ax.set_xlabel('Years', fontsize=11)
-ax.set_ylabel('Discount Factor v^n', fontsize=11)
-ax.set_title('Discount Factors: Effect of Interest Rate', fontsize=12, fontweight='bold')
-ax.legend(fontsize=10)
-ax.grid(alpha=0.3)
-
-# Plot 3: Annuity present values
-ax = axes[1, 0]
-n_range = np.arange(1, 41)
-an_values = (1 - (v ** n_range)) / i_effective
-pv_annuity = 1000 * an_values
-
-ax.plot(n_range, pv_annuity, linewidth=2.5, color='darkgreen', marker='o', 
-       markersize=4, alpha=0.7, label='Annuity-immediate (aₙ̄|)')
-ax.plot(n_range, pv_annuity * (1 + i_effective), linewidth=2.5, 
-       color='coral', marker='s', markersize=4, alpha=0.7, linestyle='--',
-       label='Annuity-due (äₙ̄|)')
-
-ax.set_xlabel('Number of Periods (n)', fontsize=11)
-ax.set_ylabel('Present Value of $1,000/period', fontsize=11)
-ax.set_title('Annuity Present Values: Immediate vs Due', fontsize=12, fontweight='bold')
-ax.legend(fontsize=10)
-ax.grid(alpha=0.3)
-
-# Plot 4: Conversion factors
-ax = axes[1, 1]
-compoundings = ['Annual', 'Semi-Anl', 'Quarterly', 'Monthly', 'Daily', 'Continuous']
-nominal_pcts = [r * 100 for r in nominal_rates]
-
-colors = plt.cm.viridis(np.linspace(0, 1, len(nominal_pcts)))
-bars = ax.bar(compoundings, nominal_pcts, color=colors, edgecolor='black', linewidth=1.5)
-
-# Add horizontal line for effective rate
-ax.axhline(i_effective * 100, color='red', linestyle='--', linewidth=2, 
-          label=f'Effective i = {i_effective*100:.2f}%')
-
-ax.set_ylabel('Rate (%)', fontsize=11)
-ax.set_title('Nominal Rates: Conversion from Effective i = 5%', fontsize=12, fontweight='bold')
-ax.legend(fontsize=10)
-ax.grid(alpha=0.3, axis='y')
-
-# Add value labels
-for bar, rate in zip(bars, nominal_pcts):
-    height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2., height,
-           f'{rate:.3f}%', ha='center', va='bottom', fontsize=9)
-
-plt.tight_layout()
-plt.savefig('effective_annual_rate_analysis.png', dpi=300, bbox_inches='tight')
-plt.show()
-
-print("=" * 60)
-print("Analysis complete. Chart saved as 'effective_annual_rate_analysis.png'")
-print("=" * 60)
-```
-
-## 6. Challenge Round
-When effective rates mislead:
-- **Inflation illusion**: Nominal 3% effective with 4% inflation → real return = -0.96%
-- **Compounding frequency switching**: Bond pays semi-annual but annuity priced with annual i; must convert to common base
-- **Forecasting rates**: Current 2% rate may rise to 5% mid-contract; static i assumes stable environment
-- **Negative rates**: Central bank policy (ECB, SNB) creates v > 1, breaking standard formulas; requires re-derivation
-- **Redemption yield vs coupon**: Bond selling at discount requires iteration to find effective annual yield
-
-## 7. Key References
-- [Bowers et al., Actuarial Mathematics (Chapter 1)](https://www.soa.org/) - Fundamental rate relationships
-- [Yield Curve Mathematics (Wikipedia)](https://en.wikipedia.org/wiki/Yield_curve) - Term structure concepts
-- [Society of Actuaries Exam FM](https://www.soa.org/education/exam-req/edu-exam-fm-detail.aspx) - Practice problems
-
----
-**Status:** Foundational rate concept | **Complements:** Nominal Rate, Force of Interest, Discount Factor, Annuity Functions

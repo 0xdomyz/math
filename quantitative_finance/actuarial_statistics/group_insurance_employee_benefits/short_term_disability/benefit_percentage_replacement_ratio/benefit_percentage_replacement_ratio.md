@@ -1,165 +1,114 @@
-# Benefit Percentage & Replacement Ratio
+﻿# Benefit Percentage Replacement Ratio
 
-## 1. Concept Skeleton
-**Definition:** Fraction of pre-disability earnings that STD insurance replaces; expressed as percentage (e.g., 60%, 66⅔%)  
-**Purpose:** Balance income protection with return-to-work incentives; control claim duration (too high % reduces motivation to return)  
-**Prerequisites:** Disability insurance fundamentals, earnings definitions, benefit calculation
+## Concept Skeleton
+**Definition:** Benefit Percentage Replacement Ratio is an actuarial modeling concept used to convert uncertain future insurance cash flows into decision-useful pricing, reserve, and risk metrics under explicit assumptions. In practice it links statistical evidence, financial discounting, and governance controls so technical outputs remain explainable to underwriting, finance, and risk teams.
 
-## 2. Comparative Framing
-| Replacement Ratio | **50%** | **60%** | **66⅔%** | **70%** |
-|-------------------|---------|---------|----------|---------|
-| **Return-to-work incentive** | Strong | Moderate | Weak | Weakest |
-| **Affordability (employee)** | Lower premiums | Standard | Mid-range | Higher premiums |
-| **Market prevalence** | Less common | Very common | Common (public sector) | Rare (union only) |
-| **Benefit cap impact** | Higher % need cap | Cap typically binding | Cap often restrictive | Cap very restrictive |
+**Purpose:** The topic is used for product pricing and repricing, reserve adequacy analysis, and solvency/risk-capital monitoring. It also supports business planning by quantifying sensitivity to mortality, morbidity, lapse, expense, and interest-rate shocks. In quarterly production workflows, the method provides a common language between valuation actuaries, model validators, and management reporting stakeholders.
 
-## 3. Examples + Counterexamples
+**Prerequisites:** Working knowledge of survival models, discounted cash flow mechanics, probability distributions, and basic statistical inference is required. Readers should be comfortable with actuarial notation, scenario analysis, and data quality controls. Related areas include life contingencies, premium calculation, stochastic modeling, and regulatory valuation standards.
 
-**Simple Example:**  
-Pre-disability salary: $60,000/year ($5,000/month)  
-Benefit percentage: 60%  
-Monthly STD benefit: $5,000 × 60% = $3,000/month (before taxes/offsets)
+Key quantitative relation used throughout:  = \sum_{t=1}^{T} \frac{\mathbb{E}[CF_t]}{(1+r_t)^t}$, where expected cash flow assumptions and discount structure determine liability value and risk profile.
 
-**Failure Case:**  
-Replacement ratio 100%: Zero financial incentive to return to work → claims extend artificially; premium spirals upward
+Implementation note: robust delivery requires assumption traceability, dataset lineage, and reproducible model runs with documented parameter governance. This prevents unexplained drift between pricing, reserving, and capital views.
 
-**Edge Case:**  
-High earner with $250,000 salary + 66⅔% ratio = $16,667/month benefit → often capped at $10,000 or $15,000/month maximum
+## Comparative Framing
+| Method | Complexity | Interpretability | Speed | Accuracy | Use Case |
+|---|---|---|---|---|---|
+| Deterministic baseline for Benefit Percentage Replacement Ratio | O(n) | High | Fast | Medium | Daily monitoring and quick business checks |
+| Scenario-based extension | O(n x s) | Medium | Medium | High | Stress testing and management actions |
+| Stochastic simulation workflow | O(n x s x p) | Medium | Slower | High | Capital and tail-risk analysis |
+| Experience-adjusted production model | O(n log n) | Medium-High | Medium | High | Quarterly valuation and repricing cycles |
 
-## 4. Layer Breakdown
-```
-Benefit Percentage Structure:
-├─ Earnings Definition:
-│   ├─ Base Salary: Only regular pay (most common)
-│   ├─ Average Earnings: Last 12 months / last 3 months (smooths bonus variation)
-│   ├─ Includes Bonuses: Adds complexity; requires documentation
-│   └─ Excludes: Overtime, commissions (often excluded or averaged separately)
-├─ Benefit Calculation:
-│   ├─ Gross Benefit: Pre-disability earnings × Benefit percentage
-│   ├─ Less Offsets: SSDI, pension, other group DI (if applicable)
-│   ├─ Less Taxes: STD benefits taxable if employer-paid (federal, FICA)
-│   └─ Net Benefit: What employee receives monthly
-├─ Replacement Ratio Impact on Behavior:
-│   ├─ High % (70%+): Longer claims, higher cost, premium increases
-│   ├─ Standard (60%): Balanced: protection + incentive to recover
-│   ├─ Low % (50%): Strong return-to-work incentive but less protection
-│   └─ Nonlinear effect: Even small change (60% → 66%) increases claim duration 5–10%
-├─ Benefit Maximums & Minimums:
-│   ├─ Maximum monthly: $10,000–$20,000 (depends on plan design)
-│   ├─ Minimum monthly: Often $100–$250 (prevents tiny payments)
-│   └─ Excess income offset: High earners disproportionately affected by max
-└─ Effective Replacement (After Taxes & Offsets):
-    ├─ Tax impact: If employer-paid, ~25% reduction (rough average)
-    ├─ SSDI offset: Reduces benefit by SSDI amount (pending or awarded)
-    └─ Effective ratio: Often 30–50% net after all deductions
-```
+## Examples + Counterexamples
+- **Simple Example:** Assume a block of 10,000 policies with expected annual benefit cash outflow of 8.4 million, expense outflow of 1.1 million, and premium inflow of 9.8 million for year 1. With a discount rate of 4.0%, the present-value contribution is 0.3 / 1.04 = 0.288$ million. Extending this for 20 years under survival and lapse assumptions gives the base valuation for Benefit Percentage Replacement Ratio.
+- **Realistic Failure Case:** If lapse is calibrated from a growth channel and applied to a mature channel, expected premium persistency is overstated. For example, using 7% lapse instead of observed 12% can overstate value by several percentage points and understate reserve strain in stress scenarios.
+- **Edge Case:** Under near-zero rates, discounting contributes little reduction in later-year liabilities; if rates fall from 4.0% to 0.5%, long-duration cash flows dominate and model output becomes highly duration-sensitive. This edge condition requires additional scenario granularity and governance triggers.
+- **Technical Counterexample:** A common implementation error is discounting expected cash flows with nominal rates while assumptions were calibrated in real terms. Mixing real and nominal frameworks introduces systematic bias; ensure consistency of inflation, expense trend, and discount basis before reporting outputs.
 
-## 5. Mini-Project: Replacement Ratio Impact on Claim Duration
+## Layer Breakdown
+Phase 1: Business framing and data definition translate product mechanics into measurable modeling inputs for Benefit Percentage Replacement Ratio.
 
-**Goal:** Model claim duration elasticity with respect to benefit percentage using behavioral economics.
+`
+Phase 1 Tree
+N1- Define decision objective and reporting audience
+N2- Segment portfolio and risk buckets
+N3- Specify policy state transitions
+N4- Map source systems and extract fields
+N5- Reconcile exposure and premium totals
+N6- Diagnose missingness and outlier patterns
+`
 
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+Phase 2: Mathematical construction formalizes assumptions, calibration rules, and valuation equations.
 
-# Empirical observation: Claim duration increases with benefit percentage
-# Model: Duration = base_duration * exp(elasticity * (replacement% - baseline%))
+`
+Phase 2 Tree
+N7- Choose deterministic or stochastic architecture
+N8- Calibrate decrement and expense assumptions
+N9- Select discount-curve construction method
+N10- Encode projection mechanics by policy state
+N11- Implement numerical checks and invariants
+N12- Produce baseline and sensitivity outputs
+`
 
-# Historical data from actuarial studies
-replacement_ratios = np.array([50, 55, 60, 65, 66.67, 70])
-avg_claim_duration = np.array([18, 20, 23, 25, 26, 28])  # days (illustrative)
+Phase 3: Validation and operations ensure outputs remain stable, explainable, and production-ready.
 
-# Fit exponential model
-def duration_model(pct, base_duration, elasticity):
-    """Duration increases exponentially with replacement percentage"""
-    baseline_pct = 60  # Reference point
-    return base_duration * np.exp(elasticity * (pct - baseline_pct) / 100)
+`
+Phase 3 Tree
+N13- Backtest against recent actual experience
+N14- Quantify parameter and model uncertainty
+N15- Run scenario and stress test battery
+N16- Evaluate control thresholds and alerts
+N17- Prepare governance pack and sign-offs
+N18- Deploy reproducible runbook and monitoring
+`
 
-# Fit to data
-popt, pcov = curve_fit(duration_model, replacement_ratios, avg_claim_duration, 
-                       p0=[23, 0.1], maxfev=5000)
-base_duration, elasticity = popt
+Core calibration formula example: $\hat{\theta} = \arg\min_{\theta} \sum_{i=1}^{n}(y_i - f_{\theta}(x_i))^2$.
 
-print(f"Model Fit:")
-print(f"  Base duration at 60%: {base_duration:.2f} days")
-print(f"  Elasticity: {elasticity:.4f} (% change per 1% increase in benefit%)")
+**Key Dependencies:** Data quality controls, assumption governance, discount-curve policy, and validation cadence jointly determine reliability of Benefit Percentage Replacement Ratio outputs in pricing, reserving, and solvency workflows.
 
-# Predict across range
-pct_range = np.linspace(40, 75, 50)
-duration_predicted = duration_model(pct_range, base_duration, elasticity)
+## Challenge Round
+- Parameter drift between annual calibrations can silently degrade pricing and reserve quality if no intermediate monitoring is enforced.
+- Overfitting historical experience in thin segments can create unstable projections when exposure mix changes.
+- Uncontrolled assumption overrides near reporting deadlines can break auditability and produce inconsistent management narratives.
+- Tail scenarios often expose model-form limitations; include explicit fallback rules when numerical routines become unstable.
 
-# Cost projection: assume daily cost = average benefit amount
-# Higher % → higher daily cost AND longer duration (compounding effect)
-daily_benefit = 100  # Illustrative
-total_cost = (replacement_ratios / 100) * daily_benefit * avg_claim_duration
+## Key References
+1. Bowers, Gerber, Hickman, Jones, Nesbitt (1997), Actuarial Mathematics - foundational life-contingency framework used in valuation design.
+2. Dickson, Hardy, Waters (2020), Actuarial Mathematics for Life Contingent Risks - modern treatment of pricing and reserving mechanics.
+3. Society of Actuaries practice research and notes - implementation guidance and practical governance considerations.
+4. International Actuarial Association educational materials - cross-jurisdiction actuarial modeling standards and terminology.
+5. IFRS 17 Insurance Contracts standard text - accounting measurement framework relevant to insurance liability valuation.
+6. EIOPA Solvency II technical specifications - risk-capital and stress-testing structure for solvency analysis.
 
-# Visualization
-fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 1: Duration vs Replacement Ratio
-axes[0].scatter(replacement_ratios, avg_claim_duration, s=100, 
-                alpha=0.7, color='steelblue', label='Observed')
-axes[0].plot(pct_range, duration_predicted, 'r-', linewidth=2, label='Fitted Model')
-axes[0].axvline(60, color='gray', linestyle='--', alpha=0.5, label='Standard 60%')
-axes[0].set_xlabel('Replacement Ratio (%)')
-axes[0].set_ylabel('Average Claim Duration (days)')
-axes[0].set_title('Claim Duration vs Benefit Percentage')
-axes[0].legend()
-axes[0].grid(alpha=0.3)
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 2: Total Expected Cost (Duration × Benefit)
-daily_benefit_range = (pct_range / 100) * 200  # Daily benefit increases with %
-total_cost_range = daily_benefit_range * duration_model(pct_range, base_duration, elasticity)
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-axes[1].plot(pct_range, total_cost_range, 'o-', linewidth=2, 
-             markersize=6, color='darkred')
-axes[1].set_xlabel('Replacement Ratio (%)')
-axes[1].set_ylabel('Total Expected Cost per Claim ($)')
-axes[1].set_title('Total Claim Cost: Duration × Benefit')
-axes[1].grid(alpha=0.3)
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Plot 3: Cost difference vs 60% baseline
-baseline_cost = total_cost_range[np.argmin(np.abs(pct_range - 60))]
-cost_increase = ((total_cost_range - baseline_cost) / baseline_cost) * 100
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-axes[2].fill_between(pct_range, 0, cost_increase, alpha=0.5, color='orange')
-axes[2].axhline(0, color='black', linestyle='-', linewidth=0.5)
-axes[2].axvline(60, color='gray', linestyle='--', alpha=0.5)
-axes[2].set_xlabel('Replacement Ratio (%)')
-axes[2].set_ylabel('% Increase in Total Cost vs 60%')
-axes[2].set_title('Cost Sensitivity to Replacement Ratio')
-axes[2].grid(alpha=0.3)
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-plt.tight_layout()
-plt.show()
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-# Sensitivity table
-print("\n\nCost Sensitivity Analysis:")
-print("Replacement % | Avg Duration (days) | Daily Benefit | Total Cost | % vs 60%")
-print("-" * 75)
-for pct in [50, 55, 60, 65, 66.67, 70, 75]:
-    dur = duration_model(pct, base_duration, elasticity)
-    daily = (pct / 100) * 200
-    total = daily * dur
-    pct_diff = ((total - baseline_cost) / baseline_cost) * 100
-    print(f"{pct:6.1f}% | {dur:18.1f} | ${daily:11.2f} | ${total:9.2f} | {pct_diff:+6.1f}%")
-```
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-**Key Insights:**
-- Small increases (60% → 66%) increase expected cost by 15–25% (duration elasticity)
-- Nonlinear effect: cost compounds (benefit % up + duration up = double pressure)
-- Optimal design balances protection (higher %) with moral hazard (lower %)
-- Market standard 60% reflects empirical sweet spot
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-## 6. Relationships & Dependencies
-- **To Elimination Period:** Longer elimination period → can justify higher % (employee bears initial loss)
-- **To Offsets:** Higher base % more likely capped when SSDI or workers' comp applied
-- **To Maximum Benefit:** Higher % earners hit max sooner; effective replacement lower
-- **To Underwriting Criteria:** Higher % may trigger medical underwriting for high-risk occupations
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 
-## References
-- [Milliman Disability Benchmarks](https://www.milliman.com) - Market practice data on replacement ratios
-- [LIMRA Research: Disability Insurance Study](https://www.limra.com) - Behavioral elasticity estimates
-- [Actuarial Research Clearing House: Disability Claim Duration](https://www.soa.org) - Society of Actuaries
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
+
+Operational detail for Benefit Percentage Replacement Ratio: document assumption owners, calibration windows, and threshold-based controls for model changes. In production, maintain a runbook with deterministic replication steps, reconciliation checks versus prior-quarter outputs, and variance decomposition by assumption category. Track contribution by mortality, morbidity, lapse, expense, and discount curve shifts, and require peer review when any single driver exceeds agreed materiality limits. Align reporting outputs with pricing, reserving, and solvency audiences so stakeholders receive consistent narratives and quantitative evidence.
 

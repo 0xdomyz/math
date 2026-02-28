@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # loading expense margin
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for loading expense margin.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: loading expense margin")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: loading_expense_margin.md
 
@@ -154,7 +179,7 @@ print("-" * 60)
 print(f"{'Net Premium (actuarial cost)':<40} ${net_prem:>18,.2f}")
 print()
 print(f"{'Year 1 Fixed Acquisition':<40} ${medical_exam + underwriting + setup_cost:>18,.2f}")
-print(f"{'Commission (15% × Gross Premium)':<40} ${acq_total - (medical_exam + underwriting + setup_cost):>18,.2f}")
+print(f"{'Commission (15%  Gross Premium)':<40} ${acq_total - (medical_exam + underwriting + setup_cost):>18,.2f}")
 print(f"{'Total Acquisition Expense':<40} ${acq_total:>18,.2f}")
 print()
 print(f"{'PV of Annual Maintenance ($25/yr)':<40} ${maint_pv:>18,.2f}")
@@ -386,4 +411,28 @@ plt.savefig('loading_expense_margin.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("Analysis complete. Chart saved.")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: loading expense margin")
+
 

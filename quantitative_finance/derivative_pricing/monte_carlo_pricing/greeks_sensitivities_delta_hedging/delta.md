@@ -1,12 +1,11 @@
-# Delta
+﻿# Delta
 
-## 1. Concept Skeleton
+## Concept Skeleton
 **Definition:** The rate of change of option price with respect to underlying asset price; mathematically Δ = ∂C/∂S, representing the hedge ratio for delta-neutral replication.  
 **Purpose:** Quantify directional risk exposure, determine stock position needed to hedge option portfolio, replicate option value through continuous stock trading, manage market-neutral strategies  
 **Prerequisites:** Option pricing, partial derivatives, hedging strategies, portfolio dynamics, risk-neutral valuation
 
-## 2. Comparative Framing
-
+## Comparative Framing
 | Greek | Delta (Δ) | Gamma (Γ) | Vega (ν) | Theta (θ) |
 |-------|-----------|-----------|----------|-----------|
 | **Definition** | ∂C/∂S (price change) | ∂²C/∂S² (delta change) | ∂C/∂σ (vol change) | ∂C/∂t (time decay) |
@@ -16,8 +15,7 @@
 | **Hedging Goal** | Delta-neutral: Δ_portfolio = 0 | Rehedge when Δ moves | Hedge vol exposure separately | Exploit time decay |
 | **Rebalancing Frequency** | Daily to intraday | Weekly | Monthly | Continuous |
 
-## 3. Examples + Counterexamples
-
+## Examples + Counterexamples
 **Simple Example: Delta Hedging a Short Call**  
 Sell call: K=100, S₀=100, Δ=0.60. Obligated to hedge. Action: buy 60 shares (replicate delta exposure). If S → 101: call price rises $0.60 (approximately), short call loses $0.60, long 60 shares gain $60 = breaks even on delta (ignoring gamma). Repeat daily as delta changes.
 
@@ -27,8 +25,7 @@ Delta hedge assumes linear relationship. Reality: S → 101, call Δ increases (
 **Edge Case: Deep ITM Call**  
 S = 150, K = 100: Δ ≈ 1 (behaves like stock). Hedge: be short stock (delta-neutral). If S drops to 140: Δ → 0.95 (small change). Gamma very low (delta insensitive to moves). Rehedging needed rarely. Contrast: ATM (S=K): Δ=0.5, gamma peak, delta swings ±0.10 on 1% move.
 
-## 4. Layer Breakdown
-
+## Layer Breakdown
 ```
 Delta Framework:
 ├─ Definition & Interpretation:
@@ -85,8 +82,7 @@ Delta Framework:
 
 **Interaction:** Delta changes with S (non-linearly due to gamma); requires rehedging. Frequency depends on gamma magnitude and transaction costs.
 
-## 5. Mini-Project
-
+## Challenge Round
 Implement delta hedging a short call position; simulate P&L, gamma loss, rehedging frequency:
 
 ```python
@@ -341,8 +337,7 @@ print("\nPlot saved: delta_hedging_simulation.png")
 - **P&L Distribution:** Wider for less frequent rehedging (more gamma risk); mean P&L reflects theta vs gamma tradeoff
 - **Gamma Loss:** Loss magnitude increases with stock moves; drives rehedging necessity
 
-## 6. Challenge Round
-
+## Challenge Round
 **Q1: Why is delta always between 0 and 1 for calls, and between -1 and 0 for puts?**  
 A: Delta measures hedge ratio needed to replicate the option. For calls: buying 1 call is like owning fraction Δ of stock (since call price moves Δ dollars per stock dollar). Δ ∈ [0, 1] because call value cannot exceed stock value (max payoff S_T) and cannot be negative. For puts: owning 1 put is like being short Δ shares (price moves inversely), hence Δ ∈ [-1, 0]. Boundary: deep ITM call Δ → 1 (acts like owning stock); deep OTM call Δ → 0 (expires worthless, no replication needed).
 
@@ -361,8 +356,7 @@ A: Forward price F = S e^{(r-q)T} includes dividend yield q. Higher q lowers for
 **Q6: A delta-neutral portfolio is hedged. So it should have zero P&L, correct? If not, what explains any profit or loss?**  
 A: Incorrect. Delta-neutral eliminates directional risk, but leaves residual Greeks unhedged. P&L sources: (1) **Gamma P&L**: ≈ 0.5 × Γ × (ΔS)². If short options (Γ < 0), large stock moves hurt. If long options (Γ > 0), large moves help. (2) **Vega P&L**: ≈ ν × Δσ. Vol changes (unhedged) affect portfolio. (3) **Theta P&L**: ≈ θ × Δt. Time decay (positive for short options, negative for long). (4) **Rho P&L**: ≈ ρ × Δr. Rate changes affect discount factors. Example: short call + delta hedge, assume vol constant & no rate change. P&L = θ × Δt - 0.5 × Γ × (realized_var - implied_var) × T. If realized vol < implied vol, theta gain exceeds gamma loss → profit.
 
-## 7. Key References
-
+## Key References
 - [Wikipedia: Greeks (Finance)](https://en.wikipedia.org/wiki/Greeks_(finance)) — All Greeks, definitions, sensitivities
 - [Wikipedia: Delta (Finance)](https://en.wikipedia.org/wiki/Delta_(finance)) — Hedge ratio, probability interpretation
 - Hull: *Options, Futures & Derivatives* (Chapter 19) — Greeks, hedging strategies, dynamic replication

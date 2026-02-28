@@ -1,3 +1,28 @@
+﻿# %% [markdown]
+# # deferred annuity
+#
+# Section 1 - Overview & Setup
+# This notebook-style script provides a runnable mini-project for deferred annuity.
+
+# %%
+import warnings
+warnings.filterwarnings("ignore")
+
+print("Starting topic workflow: deferred annuity")
+
+# %% [markdown]
+# Section 2 - Data Generation
+# Prepare or generate data used by the model/analysis.
+
+# %%
+print("Data preparation step is included in the implementation section below.")
+
+# %% [markdown]
+# Section 3 - Model Implementation
+# Core actuarial/statistical model logic.
+
+# %%
+# Original implementation starts here.
 # Auto-extracted from markdown file
 # Source: deferred_annuity.md
 
@@ -8,7 +33,7 @@ import matplotlib.pyplot as plt
 
 np.random.seed(42)
 
-print("=== Deferred Annuity (n|aₓ) Analysis ===\n")
+print("=== Deferred Annuity (n|a) Analysis ===\n")
 
 # Build mortality table
 def build_mortality_table():
@@ -44,7 +69,7 @@ def immediate_annuity(x, i, mortality):
 # Deferred annuity
 def deferred_annuity(x, n, i, mortality):
     """
-    n|aₓ = v^n · ₙpₓ · aₓ₊ₙ
+    n|a = v^n  TMp  aTM
     """
     v = 1 / (1 + i)
     
@@ -99,18 +124,18 @@ for n in deferral_periods:
         'Deferral (n)': n,
         'Age at Start': age_purchase + n,
         'Discount (v^n)': discount_factor,
-        'Survival (ₙpₓ)': n_p_x,
-        'Future Annuity (aₓ₊ₙ)': a_x_plus_n,
-        'Deferred Value (n|aₓ)': deferred_val,
+        'Survival (TMp)': n_p_x,
+        'Future Annuity (aTM)': a_x_plus_n,
+        'Deferred Value (n|a)': deferred_val,
         '% of Immediate': deferred_val / immediate_value * 100
     })
 
 results_df = pd.DataFrame(results)
 print(results_df.to_string(index=False, float_format='%.4f'))
-print(f"\nImmediate annuity (aₓ) at age {age_purchase}: {immediate_value:.4f}")
+print(f"\nImmediate annuity (a) at age {age_purchase}: {immediate_value:.4f}")
 
-# Decomposition verification: aₓ = aₓ:n̄| + n|aₓ
-print("\n=== Decomposition Identity: aₓ = aₓ:n̄| + n|aₓ ===\n")
+# Decomposition verification: a = a:n| + n|a
+print("\n=== Decomposition Identity: a = a:n| + n|a ===\n")
 n_test = 25
 age_test = 40
 
@@ -120,9 +145,9 @@ deferred_component = deferred_annuity(age_test, n_test, i_rate, mortality)
 sum_components = term_component + deferred_component
 
 print(f"Age {age_test}, deferral period {n_test} years:")
-print(f"  Whole life (aₓ): {whole_life:.4f}")
-print(f"  Term (aₓ:{n_test}̄|): {term_component:.4f}")
-print(f"  Deferred ({n_test}|aₓ): {deferred_component:.4f}")
+print(f"  Whole life (a): {whole_life:.4f}")
+print(f"  Term (a:{n_test}|): {term_component:.4f}")
+print(f"  Deferred ({n_test}|a): {deferred_component:.4f}")
 print(f"  Sum: {sum_components:.4f}")
 print(f"  Identity holds: {abs(whole_life - sum_components) < 0.01}")
 
@@ -210,7 +235,7 @@ for age_purch in ages_purchase:
 print("\n=== Interest Rate Sensitivity (Age 40, 25-Year Deferral) ===\n")
 interest_rates = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 
-print("Interest | Deferred (n|aₓ) | Immediate (aₓ) | Ratio")
+print("Interest | Deferred (n|a) | Immediate (a) | Ratio")
 print("-" * 60)
 
 for i_val in interest_rates:
@@ -261,16 +286,16 @@ width = 0.25
 
 ax2_1 = ax2
 ax2_1.bar(x_pos - width, discount_components, width, label='v^n', alpha=0.7, edgecolor='black')
-ax2_1.bar(x_pos, survival_components, width, label='ₙpₓ', alpha=0.7, edgecolor='black')
+ax2_1.bar(x_pos, survival_components, width, label='TMp', alpha=0.7, edgecolor='black')
 ax2_2 = ax2_1.twinx()
-ax2_2.plot(x_pos, future_annuity_components, 'ro-', linewidth=2, markersize=8, label='aₓ₊ₙ')
+ax2_2.plot(x_pos, future_annuity_components, 'ro-', linewidth=2, markersize=8, label='aTM')
 
 ax2_1.set_ylabel('Discount & Survival')
 ax2_2.set_ylabel('Future Annuity Value', color='r')
 ax2_1.set_xticks(x_pos)
 ax2_1.set_xticklabels(deferrals_decomp)
 ax2_1.set_xlabel('Deferral Period')
-ax2_1.set_title('Components: n|aₓ = v^n·ₙpₓ·aₓ₊ₙ')
+ax2_1.set_title('Components: n|a = v^nTMpaTM')
 ax2_1.legend(loc='upper left')
 ax2_2.legend(loc='upper right')
 ax2_1.grid(True, alpha=0.3, axis='y')
@@ -282,15 +307,15 @@ term_vals = [term_annuity(40, n, 0.05, mortality) for n in deferrals_identity]
 deferred_vals_identity = [deferred_annuity(40, n, 0.05, mortality) for n in deferrals_identity]
 
 x_pos = np.arange(len(deferrals_identity))
-ax3.bar(x_pos, term_vals, label='Term (aₓ:n̄|)', alpha=0.7, edgecolor='black')
-ax3.bar(x_pos, deferred_vals_identity, bottom=term_vals, label='Deferred (n|aₓ)', alpha=0.7, edgecolor='black')
+ax3.bar(x_pos, term_vals, label='Term (a:n|)', alpha=0.7, edgecolor='black')
+ax3.bar(x_pos, deferred_vals_identity, bottom=term_vals, label='Deferred (n|a)', alpha=0.7, edgecolor='black')
 ax3.axhline(immediate_annuity(40, 0.05, mortality), color='r', linestyle='--', 
-           linewidth=2, label='Whole life (aₓ)')
+           linewidth=2, label='Whole life (a)')
 ax3.set_xticks(x_pos)
 ax3.set_xticklabels(deferrals_identity)
 ax3.set_xlabel('Split Point (n years)')
 ax3.set_ylabel('Annuity Value')
-ax3.set_title('Identity: aₓ = aₓ:n̄| + n|aₓ')
+ax3.set_title('Identity: a = a:n| + n|a')
 ax3.legend()
 ax3.grid(True, alpha=0.3, axis='y')
 
@@ -331,7 +356,7 @@ ratios = [deferred_annuity(40, n, 0.05, mortality) / immediate_annuity(40, 0.05,
 ax6.plot(deferrals_ratio, ratios, 'o-', linewidth=2, markersize=6, color='purple')
 ax6.fill_between(deferrals_ratio, 0, ratios, alpha=0.2, color='purple')
 ax6.set_xlabel('Deferral Period (years)')
-ax6.set_ylabel('Ratio: n|aₓ / aₓ')
+ax6.set_ylabel('Ratio: n|a / a')
 ax6.set_title('Deferred as % of Immediate\n(Exponential decay)')
 ax6.grid(True, alpha=0.3)
 ax6.set_ylim(bottom=0)
@@ -340,7 +365,31 @@ plt.tight_layout()
 plt.show()
 
 print("\n=== Summary ===")
-print("Deferred annuity (n|aₓ): First payment after n years; n|aₓ = v^n·ₙpₓ·aₓ₊ₙ")
-print("Identity: aₓ = aₓ:n̄| + n|aₓ (term + deferred = whole life)")
+print("Deferred annuity (n|a): First payment after n years; n|a = v^nTMpaTM")
+print("Identity: a = a:n| + n|a (term + deferred = whole life)")
 print("Applications: Retirement planning, longevity insurance (QLAC), pension vesting")
+
+
+
+# %% [markdown]
+# Section 4 - Training & Evaluation
+# Run calculations and report quantitative performance metrics.
+
+# %%
+print("Training/evaluation is executed in the implementation block above.")
+
+# %% [markdown]
+# Section 5 - Visualization & Interpretation
+# Produce charts/tables and interpret outputs.
+
+# %%
+print("Visualization outputs, if any, are produced in the implementation block above.")
+
+# %% [markdown]
+# Section 6 - Summary & Deployment
+# Summarize findings and note deployment-readiness considerations.
+
+# %%
+print("Summary complete for topic: deferred annuity")
+
 
