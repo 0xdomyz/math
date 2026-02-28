@@ -33,11 +33,13 @@ Include these sections **in order**:
    - **Edge Case**: Boundary conditions, extreme parameter values, or data corner cases
    - **Technical Counterexample**: Address a common misconception or typical implementation mistake
 
-5. **Layer Breakdown** (detailed ASCII tree with 15–30 nodes)
-   - Show hierarchical structure, architectural layers, and interconnections
+5. **Layer Breakdown** (detailed ASCII tree with 15–30 nodes organized into 3-4 phases)
+   - Structure around lifecycle phases with 1-2 sentence narrative per phase (e.g., "Data → Model → Validation" or "Business → Technical → Operations")
+   - Each phase uses a clean 2-level ASCII tree (avoid deep nesting beyond 2-3 levels)
    - Include key formulas using KaTeX-style math (e.g., $PD = 1/(1+e^{-z})$)
    - Span mathematical foundations, implementation steps, validation components, and data requirements
-   - Make dependencies and data flow explicit
+   - Make dependencies and data flow explicit in separate "Key Dependencies" paragraph after trees
+   - Target 8-12 nodes per phase for cognitive digestibility
 
 6. **Challenge Round** (3–5 common pitfalls)
    - Real-world obstacles and failure modes
@@ -55,7 +57,27 @@ Include these sections **in order**:
 
 ### Python Template
 
-1. vscode interactive Python file.
-2. End to End Mini-project with generated or public data. 
-3. Have clear sections with markdown cells explaining each step of the process.
-4. Include data generation, model implementation, evaluation, and visualization, where applicable.
+Create a **VSCode Interactive Python file** (`.py` format compatible with VS Code Python extension):
+
+1. **Format Structure**:
+   - Use `# %%` markers to define code cells
+   - Use `# %% [markdown]` markers to define markdown cells with explanations
+   - Each logical section (data generation, model building, evaluation, visualization) should be a separate cell
+   - Markdown cells should explain what the following code cell does and why
+
+2. **Content Structure**:
+   - **Section 1 - Overview & Setup**: Markdown cell + imports and configuration
+   - **Section 2 - Data Generation**: Markdown explaining data + code cell generating/loading data
+   - **Section 3 - Model Implementation**: Markdown explaining approach + code cell implementing model
+   - **Section 4 - Training & Evaluation**: Markdown explaining metrics + code cell training and evaluating
+   - **Section 5 - Visualization & Interpretation**: Markdown explaining visualizations + code cell creating plots
+   - **Section 6 - Summary & Deployment**: Markdown cell with key insights and deployment readiness
+
+3. **Requirements**:
+   - End-to-end mini-project with generated or public data
+   - All code must be runnable and self-contained
+   - Include data generation, model implementation, evaluation, and visualization
+   - Add markdown cells between code cells explaining each step
+   - Total execution time: 2-5 minutes on standard machine
+   - Include clear output/print statements showing results at each step
+
